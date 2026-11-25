@@ -133,16 +133,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 <div class="c9l2-hoja" id="c9l2-hoja" aria-live="polite"></div>
 <div class="readout texto" id="c9l2-out" aria-live="polite"></div></div><div class="prose"><p>Una historia no es una licencia para elegir solo los datos que convienen. Si T08 y T09 crecen, se dice, aunque complique el titular: precisamente eso es lo que convierte «el Sur cae» en «T07 cae». Si hubiera una explicación alternativa que no se pudo descartar, también va en la historia, como verás en la última sección.</p></div></section>
-<section><h2>Reportes reproducibles con cuadernos y Quarto</h2><div class="analogia"><b>Imagínalo así</b><p>Una receta escrita en un cuaderno de cocina se puede repetir: otro cocinero, otro día, con los mismos ingredientes, obtiene el mismo plato. Un plato que salió bien «a ojo» no se repite nunca igual. Un reporte armado copiando cifras de un análisis a una presentación es un plato a ojo.</p></div><div class="prose"><p>El PDF de 23 páginas tenía otro problema, menos visible. Para armar la versión del lunes, Mariana copió a mano doce cifras del cuaderno a un documento. Al mes siguiente, Lorena pidió el mismo análisis con noviembre: había que rehacer las doce cifras a mano, y en la primera versión dos quedaron con el valor de octubre sin que nadie lo notara. Cualquier cifra copiada a mano es una cifra que puede quedar vieja.</p><p>Un <b>reporte reproducible</b> (<i>reproducible report</i>) resuelve eso juntando en un solo archivo el texto y el código que calcula cada cifra. Al generarlo, el código corre de arriba abajo y escribe los números en el texto. Si los datos cambian, se vuelve a generar y todo se actualiza, incluso el párrafo. Hay dos formas comunes en Python:</p><ul><li>Un <b>cuaderno</b> (<i>notebook</i>) de Jupyter (<code>.ipynb</code>): celdas de código y de texto, con sus resultados guardados. Es cómodo para explorar, pero mezcla el orden en que se ejecutaron las celdas con el orden en que se leen: una celda corrida dos veces o fuera de orden deja resultados que nadie puede repetir. Antes de entregarlo, se reinicia y se ejecuta todo desde cero.</li><li><b>Quarto</b>, un sistema de publicación de código abierto: un archivo <code>.qmd</code> es texto en Markdown con bloques de código. El comando <code>quarto render</code> ejecuta los bloques con Jupyter y produce HTML, PDF o Word. También convierte un <code>.ipynb</code> directamente.</li></ul><p>La pieza que convierte un reporte en una herramienta mensual es el <b>parámetro</b> (<i>parameter</i>): una variable, como la región o el período, que se cambia al generar el reporte sin tocar el código. En Quarto se marca una celda con la etiqueta <code>parameters</code>:</p><div class="code-copia"><pre><code>---
-title: "Ventas por región"
-format: html
-jupyter: python3
----
-
-Reporte generado con los datos de limpio/.
-
-#| tags: [parameters]
-region = "Sur"</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>En el archivo real, la línea <code>#| tags: [parameters]</code> y la de <code>region</code> van dentro de un bloque de código de Python (abierto con tres acentos graves y <code>{python}</code>, y cerrado con otros tres). Al generar, el valor se cambia desde la terminal, sin abrir el archivo: <code>quarto render reporte.qmd -P region:Norte</code>. La documentación de Quarto explica los parámetros con detalle; el principio es que un mismo archivo produce el reporte de las cuatro regiones.</p></div><figure class="fig fig-esquema" id="09-diagrama-3"><div class="lienzo"><svg viewBox="0 0 920 400" style="min-width:700px" role="img" aria-label="Un reporte reproducible: los datos limpios fijos y el documento con texto, código y parámetros entran a quarto render, que ejecuta el código, corre los controles y produce HTML, PDF o Word; cada mes se repite el mismo comando con datos nuevos y si un control falla el reporte no sale">
+<section><h2>Reportes reproducibles con cuadernos y Quarto</h2><div class="analogia"><b>Imagínalo así</b><p>Una receta escrita en un cuaderno de cocina se puede repetir: otro cocinero, otro día, con los mismos ingredientes, obtiene el mismo plato. Un plato que salió bien «a ojo» no se repite nunca igual. Un reporte armado copiando cifras de un análisis a una presentación es un plato a ojo.</p></div><div class="prose"><p>El PDF de 23 páginas tenía otro problema, menos visible. Para armar la versión del lunes, Mariana copió a mano doce cifras del cuaderno a un documento. Al mes siguiente, Lorena pidió el mismo análisis con noviembre: había que rehacer las doce cifras a mano, y en la primera versión dos quedaron con el valor de octubre sin que nadie lo notara. Cualquier cifra copiada a mano es una cifra que puede quedar vieja.</p><p>Un <b>reporte reproducible</b> (<i>reproducible report</i>) resuelve eso juntando en un solo archivo el texto y el código que calcula cada cifra. Al generarlo, el código corre de arriba abajo y escribe los números en el texto. Si los datos cambian, se vuelve a generar y todo se actualiza, incluso el párrafo. Hay dos formas comunes en Python:</p><ul><li>Un <b>cuaderno</b> (<i>notebook</i>) de Jupyter (<code>.ipynb</code>): celdas de código y de texto, con sus resultados guardados. Es cómodo para explorar, pero mezcla el orden en que se ejecutaron las celdas con el orden en que se leen: una celda corrida dos veces o fuera de orden deja resultados que nadie puede repetir. Antes de entregarlo, se reinicia y se ejecuta todo desde cero.</li><li><b>Quarto</b>, un sistema de publicación de código abierto: un archivo <code>.qmd</code> es texto en Markdown con bloques de código. El comando <code>quarto render</code> ejecuta los bloques con Jupyter y produce HTML, PDF o Word. También convierte un <code>.ipynb</code> directamente.</li></ul><p>La pieza que convierte un reporte en una herramienta mensual es el <b>parámetro</b> (<i>parameter</i>): una variable, como la región o el período, que se cambia al generar el reporte sin tocar el código. En Quarto se marca una celda con la etiqueta <code>parameters</code>:</p><div class="code-copia code-lineas"><pre><code><span class="ln">---</span>
+<span class="ln">title: "Ventas por región"</span>
+<span class="ln">format: html</span>
+<span class="ln">jupyter: python3</span>
+<span class="ln">---</span>
+<span class="ln"></span>
+<span class="ln">Reporte generado con los datos de limpio/.</span>
+<span class="ln"></span>
+<span class="ln">#| tags: [parameters]</span>
+<span class="ln">region = "Sur"</span></code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>En el archivo real, la línea <code>#| tags: [parameters]</code> y la de <code>region</code> van dentro de un bloque de código de Python (abierto con tres acentos graves y <code>{python}</code>, y cerrado con otros tres). Al generar, el valor se cambia desde la terminal, sin abrir el archivo: <code>quarto render reporte.qmd -P region:Norte</code>. La documentación de Quarto explica los parámetros con detalle; el principio es que un mismo archivo produce el reporte de las cuatro regiones.</p></div><figure class="fig fig-esquema" id="09-diagrama-3"><div class="lienzo"><svg viewBox="0 0 920 400" style="min-width:700px" role="img" aria-label="Un reporte reproducible: los datos limpios fijos y el documento con texto, código y parámetros entran a quarto render, que ejecuta el código, corre los controles y produce HTML, PDF o Word; cada mes se repite el mismo comando con datos nuevos y si un control falla el reporte no sale">
 <defs>
 <marker id="c9d3-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
 </defs>
@@ -226,97 +226,97 @@ region = "Sur"</code></pre><button type="button" class="copiar copiar-todo">Copi
 <p class="c9l3-est" id="c9l3-est" aria-live="polite">Python sin cargar · mientras tanto ves el resultado guardado</p>
 <pre class="c9l3-sal" id="c9l3-sal" hidden></pre>
 <div class="c9l3-tab" id="c9l3-tab"></div>
-<div class="readout texto" id="c9l3-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Genera el reporte del Sur con un script y repítelo para otra región</h3></div><p>Vas a escribir un reporte reproducible en Python puro: lee <code>limpio/</code>, calcula la tabla por tienda, se comprueba solo, dibuja las ventas semanales y escribe un HTML con un título que afirma. Trabaja en <code>~/datos-cadena</code>, con el entorno del capítulo 02 y la carpeta <code>limpio/</code> del capítulo 03. Instala matplotlib si no lo hiciste en el capítulo 06.</p><p>Guarda esto como <code>reporte.py</code>:</p><div class="code-copia"><pre><code>"""Reporte de ventas por región, reproducible: lee limpio/, se comprueba solo y escribe un HTML.
-
-Uso: python reporte.py --region Sur   (o Norte, Centro, Oriente)
-"""
-import argparse
-import base64
-import hashlib
-import io
-from datetime import datetime
-from pathlib import Path
-
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import pandas as pd
-
-ACTUAL = ("2026-08-01", "2026-11-01")     # agosto a octubre de 2026
-ANTERIOR = ("2025-08-01", "2025-11-01")   # el mismo período, un año antes
-
-
-def es(x, d=0):
-    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
-
-p = argparse.ArgumentParser()
-p.add_argument("--region", default="Sur", choices=["Norte", "Centro", "Sur", "Oriente"])
-REGION = p.parse_args().region
-
-ventas = pd.read_parquet("limpio/ventas.parquet")
-tiendas = pd.read_parquet("limpio/tiendas.parquet")
-v = ventas.merge(tiendas, on="tienda_id", how="left", validate="many_to_one")
-v = v[v["region"] == REGION]
-
-
-def periodo(desde, hasta):
-    return v[(v["fecha_hora"] &gt;= desde) &amp; (v["fecha_hora"] &lt; hasta)]
-
-
-a, b = periodo(*ANTERIOR), periodo(*ACTUAL)
-tabla = pd.DataFrame({"anterior": a.groupby("nombre")["total"].sum(),
-                      "actual": b.groupby("nombre")["total"].sum()})
-tabla["diferencia"] = tabla["actual"] - tabla["anterior"]
-tabla["variacion_%"] = (tabla["actual"] / tabla["anterior"] - 1) * 100
-tabla = tabla.sort_values("diferencia").round(2)
-
-# Controles: si uno falla, el reporte no se escribe
-assert abs(tabla["actual"].sum() - b["total"].sum()) &lt; 0.01, "la tabla no suma lo mismo que la región"
-meses = len(pd.period_range(*ACTUAL, freq="M")) - 1
-assert b["fecha_hora"].dt.to_period("M").nunique() == meses, "falta algún mes en el período"
-assert tabla["anterior"].notna().all(), "una tienda no tiene dato del año anterior"
-
-var = (tabla["actual"].sum() / tabla["anterior"].sum() - 1) * 100
-clave = tabla["diferencia"].abs().idxmax()
-titulo = (f"El {REGION} {'cae' if var &lt; 0 else 'crece'} {es(abs(var), 1)} % y "
-          f"{clave} explica la mayor parte del cambio")
-
-# Gráfico: ventas semanales de la región, 2025 y 2026
-fig, ax = plt.subplots(figsize=(7, 3))
-for desde, hasta, anio, estilo in [(*ANTERIOR, 2025, "--"), (*ACTUAL, 2026, "-")]:
-    s = periodo(desde, hasta).set_index("fecha_hora")["total"].resample("W-SUN").sum().iloc[1:-1]
-    ax.plot(range(len(s)), s.values, estilo, label=str(anio))
-ax.set_ylim(bottom=0)
-ax.set_xlabel("semana del período")
-ax.set_ylabel("US$")
-ax.legend(frameon=False)
-ax.spines[["top", "right"]].set_visible(False)
-buf = io.BytesIO()
-fig.savefig(buf, format="png", dpi=110, bbox_inches="tight")
-png = base64.b64encode(buf.getvalue()).decode()
-
-huella = hashlib.sha256(Path("limpio/ventas.parquet").read_bytes()).hexdigest()[:12]
-filas = "".join(f"&lt;tr&gt;&lt;td&gt;{n}&lt;/td&gt;&lt;td&gt;{es(r.anterior, 2)}&lt;/td&gt;&lt;td&gt;{es(r.actual, 2)}&lt;/td&gt;"
-                f"&lt;td&gt;{es(r.diferencia, 2)}&lt;/td&gt;&lt;td&gt;{es(r['variacion_%'], 1)} %&lt;/td&gt;&lt;/tr&gt;"
-                for n, r in tabla.iterrows())
-html = f"""&lt;!doctype html&gt;&lt;html lang="es"&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;{titulo}&lt;/title&gt;
-&lt;body style="font-family:sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem"&gt;
-&lt;h1 style="font-size:1.4rem"&gt;{titulo}&lt;/h1&gt;
-&lt;p&gt;El {REGION} vendió &lt;b&gt;US$ {es(tabla['actual'].sum(), 2)}&lt;/b&gt; de agosto a octubre de 2026,
-un {es(abs(var), 1)} % {'menos' if var &lt; 0 else 'más'} que en el mismo período de 2025.
-La tienda que más pesa en el cambio es {clave}
-({es(tabla.loc[clave, 'diferencia'], 2)} US$, {es(tabla.loc[clave, 'variacion_%'], 1)} %).&lt;/p&gt;
-&lt;img alt="Ventas semanales de la región en 2025 y 2026" src="data:image/png;base64,{png}" style="max-width:100%"&gt;
-&lt;table border="1" cellpadding="4" style="border-collapse:collapse"&gt;
-&lt;tr&gt;&lt;th&gt;Tienda&lt;/th&gt;&lt;th&gt;ago-oct 2025&lt;/th&gt;&lt;th&gt;ago-oct 2026&lt;/th&gt;&lt;th&gt;Diferencia&lt;/th&gt;&lt;th&gt;Variación&lt;/th&gt;&lt;/tr&gt;{filas}&lt;/table&gt;
-&lt;p style="color:#666;font-size:.85rem"&gt;Ventas = suma de cantidad × precio del detalle, sin impuestos.
-Datos: limpio/ventas.parquet (huella {huella}). Generado el {datetime.now():%Y-%m-%d %H:%M} con reporte.py.&lt;/p&gt;
-&lt;/body&gt;&lt;/html&gt;"""
-salida = Path(f"reporte-{REGION.lower()}.html")
-salida.write_text(html, encoding="utf-8")
-print(titulo)
-print(f"Escrito {salida}, huella de los datos {huella}")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps"><li><span>Activa el entorno, instala matplotlib si hace falta y genera el reporte del Sur:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install matplotlib</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python reporte.py --region Sur</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install matplotlib</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python3 reporte.py --region Sur</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Abre <code>reporte-sur.html</code> en el navegador. Lee solo el título y la primera frase: ¿sabrías qué pasa sin mirar el gráfico?</span></li><li><span>Genera el del Norte con <code>--region Norte</code> y compara los dos títulos. Ninguna palabra del título está escrita a mano.</span></li><li><span>Rompe un control a propósito: cambia <code>ACTUAL</code> a <code>("2026-08-01", "2026-12-01")</code> y vuelve a correrlo. Después déjalo como estaba.</span></li><li><span>Opcional, con Quarto (se instala desde quarto.org, no con pip): pasa el mismo código a un <code>reporte.qmd</code> con una celda <code>parameters</code> y genera <code>quarto render reporte.qmd -P region:Norte</code>.</span></li></ol><p><b>Qué observar:</b> el Sur da «El Sur cae 23,2 % y Sur Puerto explica la mayor parte del cambio» y el Norte, «El Norte crece 14,2 % y Norte Mirador explica la mayor parte del cambio»: el mismo script escribe dos conclusiones distintas porque cada palabra sale de los datos. Con el período hasta diciembre, el script se detiene con <code>AssertionError: falta algún mes en el período</code> y no escribe nada: no hay datos de noviembre. La huella al pie identifica la versión exacta de los datos; si alguien vuelve a correr la limpieza y algo cambia, la huella cambia y se nota qué reporte es más nuevo.</p></div></section>
+<div class="readout texto" id="c9l3-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Genera el reporte del Sur con un script y repítelo para otra región</h3></div><p>Vas a escribir un reporte reproducible en Python puro: lee <code>limpio/</code>, calcula la tabla por tienda, se comprueba solo, dibuja las ventas semanales y escribe un HTML con un título que afirma. Trabaja en <code>~/datos-cadena</code>, con el entorno del capítulo 02 y la carpeta <code>limpio/</code> del capítulo 03. Instala matplotlib si no lo hiciste en el capítulo 06.</p><p>Guarda esto como <code>reporte.py</code>:</p><div class="code-copia code-lineas"><pre><code><span class="ln">"""Reporte de ventas por región, reproducible: lee limpio/, se comprueba solo y escribe un HTML.</span>
+<span class="ln"></span>
+<span class="ln">Uso: python reporte.py --region Sur   (o Norte, Centro, Oriente)</span>
+<span class="ln">"""</span>
+<span class="ln">import argparse</span>
+<span class="ln">import base64</span>
+<span class="ln">import hashlib</span>
+<span class="ln">import io</span>
+<span class="ln">from datetime import datetime</span>
+<span class="ln">from pathlib import Path</span>
+<span class="ln"></span>
+<span class="ln">import matplotlib</span>
+<span class="ln">matplotlib.use("Agg")</span>
+<span class="ln">import matplotlib.pyplot as plt</span>
+<span class="ln">import pandas as pd</span>
+<span class="ln"></span>
+<span class="ln">ACTUAL = ("2026-08-01", "2026-11-01")     # agosto a octubre de 2026</span>
+<span class="ln">ANTERIOR = ("2025-08-01", "2025-11-01")   # el mismo período, un año antes</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def es(x, d=0):</span>
+<span class="ln">    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">p = argparse.ArgumentParser()</span>
+<span class="ln">p.add_argument("--region", default="Sur", choices=["Norte", "Centro", "Sur", "Oriente"])</span>
+<span class="ln">REGION = p.parse_args().region</span>
+<span class="ln"></span>
+<span class="ln">ventas = pd.read_parquet("limpio/ventas.parquet")</span>
+<span class="ln">tiendas = pd.read_parquet("limpio/tiendas.parquet")</span>
+<span class="ln">v = ventas.merge(tiendas, on="tienda_id", how="left", validate="many_to_one")</span>
+<span class="ln">v = v[v["region"] == REGION]</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def periodo(desde, hasta):</span>
+<span class="ln">    return v[(v["fecha_hora"] &gt;= desde) &amp; (v["fecha_hora"] &lt; hasta)]</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">a, b = periodo(*ANTERIOR), periodo(*ACTUAL)</span>
+<span class="ln">tabla = pd.DataFrame({"anterior": a.groupby("nombre")["total"].sum(),</span>
+<span class="ln">                      "actual": b.groupby("nombre")["total"].sum()})</span>
+<span class="ln">tabla["diferencia"] = tabla["actual"] - tabla["anterior"]</span>
+<span class="ln">tabla["variacion_%"] = (tabla["actual"] / tabla["anterior"] - 1) * 100</span>
+<span class="ln">tabla = tabla.sort_values("diferencia").round(2)</span>
+<span class="ln"></span>
+<span class="ln"># Controles: si uno falla, el reporte no se escribe</span>
+<span class="ln">assert abs(tabla["actual"].sum() - b["total"].sum()) &lt; 0.01, "la tabla no suma lo mismo que la región"</span>
+<span class="ln">meses = len(pd.period_range(*ACTUAL, freq="M")) - 1</span>
+<span class="ln">assert b["fecha_hora"].dt.to_period("M").nunique() == meses, "falta algún mes en el período"</span>
+<span class="ln">assert tabla["anterior"].notna().all(), "una tienda no tiene dato del año anterior"</span>
+<span class="ln"></span>
+<span class="ln">var = (tabla["actual"].sum() / tabla["anterior"].sum() - 1) * 100</span>
+<span class="ln">clave = tabla["diferencia"].abs().idxmax()</span>
+<span class="ln">titulo = (f"El {REGION} {'cae' if var &lt; 0 else 'crece'} {es(abs(var), 1)} % y "</span>
+<span class="ln">          f"{clave} explica la mayor parte del cambio")</span>
+<span class="ln"></span>
+<span class="ln"># Gráfico: ventas semanales de la región, 2025 y 2026</span>
+<span class="ln">fig, ax = plt.subplots(figsize=(7, 3))</span>
+<span class="ln">for desde, hasta, anio, estilo in [(*ANTERIOR, 2025, "--"), (*ACTUAL, 2026, "-")]:</span>
+<span class="ln">    s = periodo(desde, hasta).set_index("fecha_hora")["total"].resample("W-SUN").sum().iloc[1:-1]</span>
+<span class="ln">    ax.plot(range(len(s)), s.values, estilo, label=str(anio))</span>
+<span class="ln">ax.set_ylim(bottom=0)</span>
+<span class="ln">ax.set_xlabel("semana del período")</span>
+<span class="ln">ax.set_ylabel("US$")</span>
+<span class="ln">ax.legend(frameon=False)</span>
+<span class="ln">ax.spines[["top", "right"]].set_visible(False)</span>
+<span class="ln">buf = io.BytesIO()</span>
+<span class="ln">fig.savefig(buf, format="png", dpi=110, bbox_inches="tight")</span>
+<span class="ln">png = base64.b64encode(buf.getvalue()).decode()</span>
+<span class="ln"></span>
+<span class="ln">huella = hashlib.sha256(Path("limpio/ventas.parquet").read_bytes()).hexdigest()[:12]</span>
+<span class="ln">filas = "".join(f"&lt;tr&gt;&lt;td&gt;{n}&lt;/td&gt;&lt;td&gt;{es(r.anterior, 2)}&lt;/td&gt;&lt;td&gt;{es(r.actual, 2)}&lt;/td&gt;"</span>
+<span class="ln">                f"&lt;td&gt;{es(r.diferencia, 2)}&lt;/td&gt;&lt;td&gt;{es(r['variacion_%'], 1)} %&lt;/td&gt;&lt;/tr&gt;"</span>
+<span class="ln">                for n, r in tabla.iterrows())</span>
+<span class="ln">html = f"""&lt;!doctype html&gt;&lt;html lang="es"&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;{titulo}&lt;/title&gt;</span>
+<span class="ln">&lt;body style="font-family:sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem"&gt;</span>
+<span class="ln">&lt;h1 style="font-size:1.4rem"&gt;{titulo}&lt;/h1&gt;</span>
+<span class="ln">&lt;p&gt;El {REGION} vendió &lt;b&gt;US$ {es(tabla['actual'].sum(), 2)}&lt;/b&gt; de agosto a octubre de 2026,</span>
+<span class="ln">un {es(abs(var), 1)} % {'menos' if var &lt; 0 else 'más'} que en el mismo período de 2025.</span>
+<span class="ln">La tienda que más pesa en el cambio es {clave}</span>
+<span class="ln">({es(tabla.loc[clave, 'diferencia'], 2)} US$, {es(tabla.loc[clave, 'variacion_%'], 1)} %).&lt;/p&gt;</span>
+<span class="ln">&lt;img alt="Ventas semanales de la región en 2025 y 2026" src="data:image/png;base64,{png}" style="max-width:100%"&gt;</span>
+<span class="ln">&lt;table border="1" cellpadding="4" style="border-collapse:collapse"&gt;</span>
+<span class="ln">&lt;tr&gt;&lt;th&gt;Tienda&lt;/th&gt;&lt;th&gt;ago-oct 2025&lt;/th&gt;&lt;th&gt;ago-oct 2026&lt;/th&gt;&lt;th&gt;Diferencia&lt;/th&gt;&lt;th&gt;Variación&lt;/th&gt;&lt;/tr&gt;{filas}&lt;/table&gt;</span>
+<span class="ln">&lt;p style="color:#666;font-size:.85rem"&gt;Ventas = suma de cantidad × precio del detalle, sin impuestos.</span>
+<span class="ln">Datos: limpio/ventas.parquet (huella {huella}). Generado el {datetime.now():%Y-%m-%d %H:%M} con reporte.py.&lt;/p&gt;</span>
+<span class="ln">&lt;/body&gt;&lt;/html&gt;"""</span>
+<span class="ln">salida = Path(f"reporte-{REGION.lower()}.html")</span>
+<span class="ln">salida.write_text(html, encoding="utf-8")</span>
+<span class="ln">print(titulo)</span>
+<span class="ln">print(f"Escrito {salida}, huella de los datos {huella}")</span></code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps"><li><span>Activa el entorno, instala matplotlib si hace falta y genera el reporte del Sur:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install matplotlib</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python reporte.py --region Sur</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install matplotlib</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python3 reporte.py --region Sur</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Abre <code>reporte-sur.html</code> en el navegador. Lee solo el título y la primera frase: ¿sabrías qué pasa sin mirar el gráfico?</span></li><li><span>Genera el del Norte con <code>--region Norte</code> y compara los dos títulos. Ninguna palabra del título está escrita a mano.</span></li><li><span>Rompe un control a propósito: cambia <code>ACTUAL</code> a <code>("2026-08-01", "2026-12-01")</code> y vuelve a correrlo. Después déjalo como estaba.</span></li><li><span>Opcional, con Quarto (se instala desde quarto.org, no con pip): pasa el mismo código a un <code>reporte.qmd</code> con una celda <code>parameters</code> y genera <code>quarto render reporte.qmd -P region:Norte</code>.</span></li></ol><p><b>Qué observar:</b> el Sur da «El Sur cae 23,2 % y Sur Puerto explica la mayor parte del cambio» y el Norte, «El Norte crece 14,2 % y Norte Mirador explica la mayor parte del cambio»: el mismo script escribe dos conclusiones distintas porque cada palabra sale de los datos. Con el período hasta diciembre, el script se detiene con <code>AssertionError: falta algún mes en el período</code> y no escribe nada: no hay datos de noviembre. La huella al pie identifica la versión exacta de los datos; si alguien vuelve a correr la limpieza y algo cambia, la huella cambia y se nota qué reporte es más nuevo.</p></div></section>
 <section><h2>Tableros: qué poner, en qué orden y qué dejar afuera</h2><div class="analogia"><b>Imagínalo así</b><p>El tablero de un auto tiene pocas cosas: velocidad, combustible, temperatura y unas luces que solo se encienden si algo anda mal. No muestra la presión de cada inyector, aunque el auto la mida. Quien diseñó ese tablero decidió qué necesita saber un conductor mientras maneja, y dejó lo demás para el mecánico.</p></div><div class="prose"><p>Un reporte cuenta una historia una vez. Un <b>tablero</b> (<i>dashboard</i>) responde la misma pregunta cada semana: es una página que se actualiza sola y que alguien mira para saber si tiene que actuar. Lorena quería uno para no tener que pedir otro análisis el mes siguiente.</p><p>La tentación es poner todo lo que se puede calcular. El primer borrador de Mariana tenía catorce gráficos: ventas por tienda, por medio de pago, por hora, por categoría, ventas acumuladas desde 2025, porcentaje de tickets anónimos. Cada uno era correcto y entre todos escondían lo único que importaba. Para decidir qué entra se pregunta por cada elemento: ¿cambia lo que Lorena va a hacer? Si no, se va.</p><p>Algunas reglas que funcionan:</p><ul><li><b>Pocos indicadores, cada uno con su comparación.</b> Un <b>indicador clave</b> (<i>KPI, key performance indicator</i>) es una cifra que se sigue en el tiempo porque mide algo que importa para una decisión. Tres a cinco por tablero. Y cada uno con una referencia: «US$ 72.907,69» no dice nada; «US$ 72.907,69, −23,2 % interanual» dice que hay un problema. La comparación es interanual, como se acordó en el capítulo 01, por la estacionalidad.</li><li><b>Sin métricas de vanidad.</b> Una <b>métrica de vanidad</b> (<i>vanity metric</i>) es una cifra que siempre se ve bien y no lleva a ninguna decisión: las ventas acumuladas desde 2025 solo pueden crecer.</li><li><b>Una idea por gráfico</b>, con el gráfico que corresponde a la pregunta (capítulo 06): una línea para cuándo, barras para dónde.</li><li><b>Orden de lectura.</b> Se lee de arriba abajo y de izquierda a derecha. Lo más importante va arriba a la izquierda; el detalle, abajo y a pedido.</li><li><b>Fecha de los datos y definiciones a la vista.</b> «Datos al 31 de octubre de 2026» evita que alguien decida con cifras viejas sin saberlo. Y «ventas = suma del detalle, sin impuestos» evita que dos gerentes discutan con números distintos que miden cosas distintas.</li></ul></div><figure class="fig fig-esquema" id="09-diagrama-4"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:680px" role="img" aria-label="Anatomía del tablero de Lorena: arriba el título que afirma, la fecha de los datos y los filtros; una fila de tres indicadores con su comparación interanual; debajo, a la izquierda la tendencia mensual del Sur y a la derecha la variación por tienda; abajo la tabla de detalle y el pie con definiciones y fuente; los números marcan el orden de lectura">
 <rect x="20" y="20" width="600" height="430" rx="12" class="caja"/>
 <rect x="36" y="34" width="568" height="44" rx="6" class="d-casa"/>
@@ -412,50 +412,50 @@ print(f"Escrito {salida}, huella de los datos {huella}")</code></pre><button typ
   <div class="c9l1-grid" id="c9l1-grid"></div>
 </div>
 <div class="readout texto" id="c9l1-out" aria-live="polite"></div></div><div class="caso"><b>Un caso real</b><p><b>El tablero que nadie miraba.</b> Una cadena minorista de la región tenía un tablero corporativo con más de cuarenta indicadores, actualizado cada noche. El equipo de datos revisó los registros de uso del sistema y encontró que la mayoría de las visitas duraban menos de un minuto y que casi nadie usaba los filtros. Las preguntas reales seguían llegando por correo. Lo reemplazaron por tableros pequeños, uno por decisión, cada uno con un dueño que respondía por sus cifras. Medir cuánto se usa un tablero es parte de diseñarlo: un tablero sin visitas es un costo, no una herramienta.</p></div></section>
-<section><h2>Herramientas del mercado: Power BI, Looker Studio, Metabase y Streamlit</h2><div class="analogia"><b>Imagínalo así</b><p>Para hacer una mesa puedes comprar una armada, comprar las piezas y armarla con un manual, o cortar la madera tú mismo. La armada es rápida y se parece a todas; la que cortas tú queda exactamente como la quieres, pero necesitas herramientas y tiempo. Ninguna es mejor: depende de quién la va a usar y por cuánto tiempo.</p></div><div class="prose"><p>Las herramientas de <b>inteligencia de negocios</b> (<i>BI, business intelligence</i>) se conectan a los datos, guardan las definiciones de las métricas y publican tableros para que otros los usen sin programar. Cuatro ejemplos del mercado, muy distintos entre sí (descritos a noviembre de 2026; cambian rápido):</p><div class="tbl"><table><thead><tr><th>Herramienta</th><th>Cómo se arma</th><th>Dónde corre</th><th>Lo que la distingue</th></tr></thead><tbody><tr><td><b>Power BI</b> (Microsoft)</td><td>Con clics en una aplicación de escritorio; las métricas, en el lenguaje DAX</td><td>Se publica en el servicio en la nube de Microsoft</td><td>Muy extendida en empresas que ya usan sus productos; modelo de datos y permisos detallados</td></tr><tr><td><b>Looker Studio</b> (Google)</td><td>Con clics, en el navegador</td><td>En la nube de Google; se entra con una cuenta</td><td>Rápido para empezar y con muchos conectores; menos control sobre el modelo de datos</td></tr><tr><td><b>Metabase</b></td><td>Preguntas con clics o en SQL</td><td>De código abierto: en un servidor propio, o en su servicio en la nube</td><td>Pensada para que cualquier área haga sus propias preguntas sobre la base de datos</td></tr><tr><td><b>Streamlit</b></td><td>Un script de Python</td><td>De código abierto: en el equipo, en un servidor o en servicios en la nube</td><td>El tablero es código: se versiona en git, se prueba y puede usar cualquier biblioteca de Python</td></tr></tbody></table></div><p>Hay muchas más: Tableau, Apache Superset, Grafana (pensada para monitorear sistemas), Dash de Plotly o Evidence (tableros escritos en Markdown y SQL). La elección depende menos de la herramienta que de tres preguntas: quién va a mantener el tablero (un área de negocio con clics o un equipo con código), dónde están los datos y quién puede verlos, y dónde vive la definición de cada métrica.</p><p>La última pregunta es la más importante. Si «ventas» se define dentro de un tablero de Power BI, otra vez en una consulta de Metabase y otra en un script, tarde o temprano darán cifras distintas. Una <b>capa semántica</b> (<i>semantic layer</i>) guarda la definición una sola vez (ventas es la suma de cantidad por precio del detalle, sin impuestos; la dueña es Lorena) y todas las herramientas la usan. Cómo se construye esa capa en una plataforma de datos está en <a href="https://aaramirez.github.io/ingenieria-de-datos/temario.html" target="_blank" rel="noopener">Ingeniería de datos</a>. En Almacenes Ejemplo, la definición vive en <code>limpieza.py</code> y en un glosario de una página.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Levanta el tablero mínimo de Lorena con Streamlit</h3></div><p>Vas a convertir el tablero de la sección anterior en una página que corre en tu equipo: tres indicadores con su comparación interanual, la tendencia mensual y la variación por tienda, con un selector de región. Trabaja en <code>~/datos-cadena</code>, con el entorno activo y la carpeta <code>limpio/</code>.</p><p>Guarda esto como <code>tablero.py</code>:</p><div class="code-copia"><pre><code>"""Tablero mínimo de ventas por región con Streamlit. Uso: streamlit run tablero.py"""
-import pandas as pd
-import streamlit as st
-
-
-def es(x, d=0):
-    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
-
-@st.cache_data
-def cargar():
-    v = pd.read_parquet("limpio/ventas.parquet")
-    t = pd.read_parquet("limpio/tiendas.parquet")
-    v = v.merge(t, on="tienda_id", how="left", validate="many_to_one")
-    v["mes"] = v["fecha_hora"].dt.to_period("M").dt.to_timestamp()
-    return v
-
-
-v = cargar()
-region = st.sidebar.selectbox("Región", ["Sur", "Norte", "Centro", "Oriente"])
-r = v[v["region"] == region]
-a = r[(r["fecha_hora"] &gt;= "2025-08-01") &amp; (r["fecha_hora"] &lt; "2025-11-01")]
-b = r[(r["fecha_hora"] &gt;= "2026-08-01") &amp; (r["fecha_hora"] &lt; "2026-11-01")]
-var = (b["total"].sum() / a["total"].sum() - 1) * 100
-
-st.title(f"{region}: ventas {'−' if var &lt; 0 else '+'}{es(abs(var), 1)} % interanual (ago-oct)")
-st.caption("Datos al 31 de octubre de 2026 · ventas = suma del detalle · fuente: limpio/")
-
-c1, c2, c3 = st.columns(3)
-c1.metric("Ventas ago-oct 2026", f"US$ {es(b['total'].sum())}", f"{es(var, 1)} %")
-c2.metric("Tickets", es(len(b)), f"{es((len(b) / len(a) - 1) * 100, 1)} %")
-tp_a, tp_b = a["total"].mean(), b["total"].mean()
-c3.metric("Ticket promedio", f"US$ {es(tp_b, 2)}", f"{es((tp_b / tp_a - 1) * 100, 1)} %")
-
-st.subheader("Ventas mensuales")
-st.line_chart(r.groupby("mes")["total"].sum())
-
-st.subheader("Variación por tienda, ago-oct")
-por_tienda = pd.DataFrame({"2025": a.groupby("nombre")["total"].sum(),
-                           "2026": b.groupby("nombre")["total"].sum()})
-por_tienda["variación %"] = ((por_tienda["2026"] / por_tienda["2025"] - 1) * 100).round(1)
-st.bar_chart(por_tienda["variación %"], horizontal=True)
-with st.expander("Ver el detalle"):
-    st.dataframe(por_tienda.round(2))</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps"><li><span>Instala Streamlit y levanta el tablero. Se abre solo en el navegador, en <code>http://localhost:8501</code>:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install streamlit</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>streamlit run tablero.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install streamlit</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>streamlit run tablero.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Cambia la región en el selector de la izquierda y mira cómo cambian el título y los tres indicadores.</span></li><li><span>Con el tablero abierto, edita <code>tablero.py</code>: cambia el título del gráfico mensual por uno que afirme algo. Guarda y pulsa «Rerun» en la página.</span></li><li><span>Cuando termines, vuelve a la terminal y detén el servidor con Ctrl+C.</span></li></ol><p><b>Qué observar:</b> en el Sur, el título dice «Sur: ventas −23,2 % interanual (ago-oct)» y los indicadores muestran US$ 72.908, 5.117 tickets (−17,9 %) y un ticket promedio de US$ 14,25 (−6,4 %): caen tanto las visitas como el tamaño de la compra, una pista que el capítulo 10 sigue. En el Norte todo sube. El gráfico mensual muestra el pico de diciembre y la caída de agosto de 2026 sin que nadie los marque: Streamlit no pone anotaciones solo, y por eso el paso 3 importa. El tablero es un archivo de 44 líneas que se puede guardar en git y revisar como cualquier código; el precio es que alguien que no programa no puede cambiarlo.</p></div></section>
+<section><h2>Herramientas del mercado: Power BI, Looker Studio, Metabase y Streamlit</h2><div class="analogia"><b>Imagínalo así</b><p>Para hacer una mesa puedes comprar una armada, comprar las piezas y armarla con un manual, o cortar la madera tú mismo. La armada es rápida y se parece a todas; la que cortas tú queda exactamente como la quieres, pero necesitas herramientas y tiempo. Ninguna es mejor: depende de quién la va a usar y por cuánto tiempo.</p></div><div class="prose"><p>Las herramientas de <b>inteligencia de negocios</b> (<i>BI, business intelligence</i>) se conectan a los datos, guardan las definiciones de las métricas y publican tableros para que otros los usen sin programar. Cuatro ejemplos del mercado, muy distintos entre sí (descritos a noviembre de 2026; cambian rápido):</p><div class="tbl"><table><thead><tr><th>Herramienta</th><th>Cómo se arma</th><th>Dónde corre</th><th>Lo que la distingue</th></tr></thead><tbody><tr><td><b>Power BI</b> (Microsoft)</td><td>Con clics en una aplicación de escritorio; las métricas, en el lenguaje DAX</td><td>Se publica en el servicio en la nube de Microsoft</td><td>Muy extendida en empresas que ya usan sus productos; modelo de datos y permisos detallados</td></tr><tr><td><b>Looker Studio</b> (Google)</td><td>Con clics, en el navegador</td><td>En la nube de Google; se entra con una cuenta</td><td>Rápido para empezar y con muchos conectores; menos control sobre el modelo de datos</td></tr><tr><td><b>Metabase</b></td><td>Preguntas con clics o en SQL</td><td>De código abierto: en un servidor propio, o en su servicio en la nube</td><td>Pensada para que cualquier área haga sus propias preguntas sobre la base de datos</td></tr><tr><td><b>Streamlit</b></td><td>Un script de Python</td><td>De código abierto: en el equipo, en un servidor o en servicios en la nube</td><td>El tablero es código: se versiona en git, se prueba y puede usar cualquier biblioteca de Python</td></tr></tbody></table></div><p>Hay muchas más: Tableau, Apache Superset, Grafana (pensada para monitorear sistemas), Dash de Plotly o Evidence (tableros escritos en Markdown y SQL). La elección depende menos de la herramienta que de tres preguntas: quién va a mantener el tablero (un área de negocio con clics o un equipo con código), dónde están los datos y quién puede verlos, y dónde vive la definición de cada métrica.</p><p>La última pregunta es la más importante. Si «ventas» se define dentro de un tablero de Power BI, otra vez en una consulta de Metabase y otra en un script, tarde o temprano darán cifras distintas. Una <b>capa semántica</b> (<i>semantic layer</i>) guarda la definición una sola vez (ventas es la suma de cantidad por precio del detalle, sin impuestos; la dueña es Lorena) y todas las herramientas la usan. Cómo se construye esa capa en una plataforma de datos está en <a href="https://aaramirez.github.io/ingenieria-de-datos/temario.html" target="_blank" rel="noopener">Ingeniería de datos</a>. En Almacenes Ejemplo, la definición vive en <code>limpieza.py</code> y en un glosario de una página.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Levanta el tablero mínimo de Lorena con Streamlit</h3></div><p>Vas a convertir el tablero de la sección anterior en una página que corre en tu equipo: tres indicadores con su comparación interanual, la tendencia mensual y la variación por tienda, con un selector de región. Trabaja en <code>~/datos-cadena</code>, con el entorno activo y la carpeta <code>limpio/</code>.</p><p>Guarda esto como <code>tablero.py</code>:</p><div class="code-copia code-lineas"><pre><code><span class="ln">"""Tablero mínimo de ventas por región con Streamlit. Uso: streamlit run tablero.py"""</span>
+<span class="ln">import pandas as pd</span>
+<span class="ln">import streamlit as st</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def es(x, d=0):</span>
+<span class="ln">    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">@st.cache_data</span>
+<span class="ln">def cargar():</span>
+<span class="ln">    v = pd.read_parquet("limpio/ventas.parquet")</span>
+<span class="ln">    t = pd.read_parquet("limpio/tiendas.parquet")</span>
+<span class="ln">    v = v.merge(t, on="tienda_id", how="left", validate="many_to_one")</span>
+<span class="ln">    v["mes"] = v["fecha_hora"].dt.to_period("M").dt.to_timestamp()</span>
+<span class="ln">    return v</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">v = cargar()</span>
+<span class="ln">region = st.sidebar.selectbox("Región", ["Sur", "Norte", "Centro", "Oriente"])</span>
+<span class="ln">r = v[v["region"] == region]</span>
+<span class="ln">a = r[(r["fecha_hora"] &gt;= "2025-08-01") &amp; (r["fecha_hora"] &lt; "2025-11-01")]</span>
+<span class="ln">b = r[(r["fecha_hora"] &gt;= "2026-08-01") &amp; (r["fecha_hora"] &lt; "2026-11-01")]</span>
+<span class="ln">var = (b["total"].sum() / a["total"].sum() - 1) * 100</span>
+<span class="ln"></span>
+<span class="ln">st.title(f"{region}: ventas {'−' if var &lt; 0 else '+'}{es(abs(var), 1)} % interanual (ago-oct)")</span>
+<span class="ln">st.caption("Datos al 31 de octubre de 2026 · ventas = suma del detalle · fuente: limpio/")</span>
+<span class="ln"></span>
+<span class="ln">c1, c2, c3 = st.columns(3)</span>
+<span class="ln">c1.metric("Ventas ago-oct 2026", f"US$ {es(b['total'].sum())}", f"{es(var, 1)} %")</span>
+<span class="ln">c2.metric("Tickets", es(len(b)), f"{es((len(b) / len(a) - 1) * 100, 1)} %")</span>
+<span class="ln">tp_a, tp_b = a["total"].mean(), b["total"].mean()</span>
+<span class="ln">c3.metric("Ticket promedio", f"US$ {es(tp_b, 2)}", f"{es((tp_b / tp_a - 1) * 100, 1)} %")</span>
+<span class="ln"></span>
+<span class="ln">st.subheader("Ventas mensuales")</span>
+<span class="ln">st.line_chart(r.groupby("mes")["total"].sum())</span>
+<span class="ln"></span>
+<span class="ln">st.subheader("Variación por tienda, ago-oct")</span>
+<span class="ln">por_tienda = pd.DataFrame({"2025": a.groupby("nombre")["total"].sum(),</span>
+<span class="ln">                           "2026": b.groupby("nombre")["total"].sum()})</span>
+<span class="ln">por_tienda["variación %"] = ((por_tienda["2026"] / por_tienda["2025"] - 1) * 100).round(1)</span>
+<span class="ln">st.bar_chart(por_tienda["variación %"], horizontal=True)</span>
+<span class="ln">with st.expander("Ver el detalle"):</span>
+<span class="ln">    st.dataframe(por_tienda.round(2))</span></code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps"><li><span>Instala Streamlit y levanta el tablero. Se abre solo en el navegador, en <code>http://localhost:8501</code>:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install streamlit</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>streamlit run tablero.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install streamlit</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>streamlit run tablero.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Cambia la región en el selector de la izquierda y mira cómo cambian el título y los tres indicadores.</span></li><li><span>Con el tablero abierto, edita <code>tablero.py</code>: cambia el título del gráfico mensual por uno que afirme algo. Guarda y pulsa «Rerun» en la página.</span></li><li><span>Cuando termines, vuelve a la terminal y detén el servidor con Ctrl+C.</span></li></ol><p><b>Qué observar:</b> en el Sur, el título dice «Sur: ventas −23,2 % interanual (ago-oct)» y los indicadores muestran US$ 72.908, 5.117 tickets (−17,9 %) y un ticket promedio de US$ 14,25 (−6,4 %): caen tanto las visitas como el tamaño de la compra, una pista que el capítulo 10 sigue. En el Norte todo sube. El gráfico mensual muestra el pico de diciembre y la caída de agosto de 2026 sin que nadie los marque: Streamlit no pone anotaciones solo, y por eso el paso 3 importa. El tablero es un archivo de 44 líneas que se puede guardar en git y revisar como cualquier código; el precio es que alguien que no programa no puede cambiarlo.</p></div></section>
 <section><h2>Decir la incertidumbre sin perder al lector</h2><div class="analogia"><b>Imagínalo así</b><p>El pronóstico del tiempo no dice «mañana llueve». Dice «70 % de probabilidad de lluvia». Nadie se confunde, nadie deja de salir de su casa por eso, y todos llevan paraguas. Dar la incertidumbre de forma clara no paraliza a nadie: ayuda a decidir cuánto preparar.</p></div><div class="prose"><p>Todo lo que Mariana sabe del Sur tiene distinto grado de certeza, y el error común es decirlo todo con el mismo tono. Hay cosas medidas: el Sur vendió US$ 72.907,69 de agosto a octubre, 23,2 % menos que un año antes. Eso no es una opinión ni una estimación; es una suma de tickets, y se dice sin rodeos. Hay cosas probables: que la causa sea el cierre del estacionamiento. Y hay cosas posibles: que un convenio con otro estacionamiento recupere las ventas.</p></div><figure class="fig fig-esquema" id="09-diagrama-5"><div class="lienzo"><svg viewBox="0 0 900 330" style="min-width:680px" role="img" aria-label="Una escala de certeza, de lo medido a lo que hay que probar: que el Sur cae y que la caída está en T07 son hechos medidos; que la causa es el cierre del estacionamiento es probable; que un convenio de estacionamiento recupere las ventas es posible y hay que probarlo; cada afirmación lleva la palabra que le corresponde y lo que la respalda">
 <text x="20" y="26" class="t t-xs t-b t-m">DE LO MEDIDO A LO QUE HAY QUE PROBAR</text>
 <rect x="20" y="44" width="860" height="18" rx="9" class="caja"/>

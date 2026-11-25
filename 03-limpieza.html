@@ -257,95 +257,95 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </div>
 <div class="c3l1-total" id="c3l1-total"></div>
-<div class="readout texto" id="c3l1-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Escribe el script de limpieza de la cadena y revisa su registro</h3></div><p>Vas a limpiar los ocho archivos de una vez, guardar el resultado en <code>limpio/</code> y leer el registro. Necesitas los datos del capítulo 01 y el entorno del capítulo 02 activado. Los capítulos siguientes parten de <code>limpio/</code>.</p><ol class="steps"><li><span>Guarda este script como <code>limpieza.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia"><pre><code>"""Limpia los archivos de Almacenes Ejemplo: lee crudo/, escribe limpio/ y deja un registro.
-
-Nunca modifica crudo/. Cada paso anota cuántas filas y cuánto suma el total antes y
-después, para que cualquiera pueda revisar qué decisión movió cada cifra.
-"""
-from pathlib import Path
-
-import pandas as pd
-
-CARPETA = Path.home() / "datos-cadena"
-CRUDO, LIMPIO = CARPETA / "crudo", CARPETA / "limpio"
-LIMPIO.mkdir(exist_ok=True)
-registro = []
-
-
-def anotar(paso, antes, despues, nota):
-    registro.append({"paso": paso, "filas_antes": len(antes), "filas_despues": len(despues),
-                     "suma_antes": round(antes["total"].sum(), 2), "suma_despues": round(despues["total"].sum(), 2),
-                     "nota": nota})
-    print(f"{paso:&lt;34} {len(antes):&gt;8,} -&gt; {len(despues):&gt;8,} filas   "
-          f"suma {antes['total'].sum():&gt;14,.2f} -&gt; {despues['total'].sum():&gt;14,.2f}")
-
-
-# 1. Leer los tres archivos de ventas, cada uno con su formato
-nuevo = pd.read_csv(CRUDO / "ventas.csv")
-oriente = pd.read_csv(CRUDO / "ventas_oriente.csv", sep=";", decimal=",")
-reenvio = pd.read_csv(CRUDO / "ventas_T09_reenvio.csv")
-nuevo["fecha_hora"] = pd.to_datetime(nuevo["fecha_hora"], format="%Y-%m-%d %H:%M")
-reenvio["fecha_hora"] = pd.to_datetime(reenvio["fecha_hora"], format="%Y-%m-%d %H:%M")
-oriente["fecha_hora"] = pd.to_datetime(oriente["fecha_hora"], format="%d/%m/%Y %H:%M")
-v = pd.concat([nuevo, oriente], ignore_index=True)
-anotar("1. ventas.csv + Oriente", nuevo, v, "Oriente leído con sep=';', decimal=',' y fecha día/mes/año")
-antes, v = v, pd.concat([v, reenvio], ignore_index=True)
-anotar("2. + reenvío de T09", antes, v, "123 tickets de T09 del 8 al 16 de septiembre de 2026")
-
-# 3. Duplicados exactos: la misma fila dos veces
-antes, v = v, v.drop_duplicates()
-anotar("3. quitar duplicados exactos", antes, v, "lotes reenviados por las cajas de T02 y T05")
-assert v["ticket_id"].is_unique, "quedan tickets repetidos con datos distintos: revisar a mano"
-
-# 4 y 5. El total se valida contra el detalle (que viene de otro sistema)
-detalle = pd.read_csv(CRUDO / "detalle.csv")
-suma_detalle = (detalle["cantidad"] * detalle["precio_unitario"]).groupby(detalle["ticket_id"]).sum().round(2)
-v["total_detalle"] = v["ticket_id"].map(suma_detalle)
-x100 = (v["total"] - v["total_detalle"] * 100).abs() &lt; 0.05
-antes = v.copy()
-v.loc[x100, "total"] = v.loc[x100, "total_detalle"]
-anotar("4. corregir totales ×100", antes, v, f"{x100.sum()} totales con el punto decimal perdido")
-vacio = v["total"].isna()
-antes = v.copy()
-v.loc[vacio, "total"] = v.loc[vacio, "total_detalle"]
-anotar("5. rellenar totales vacíos", antes, v, f"{vacio.sum()} totales vacíos, recuperados del detalle")
-v["total_corregido"] = x100 | vacio
-assert (v["total"] - v["total_detalle"]).abs().max() &lt; 0.01, "hay totales que no cuadran con el detalle"
-
-# 6. Medio de pago: una sola forma de escribir cada valor (el total no cambia)
-antes = v.copy()
-v["medio_pago"] = v["medio_pago"].str.strip().str.lower().replace({"transf.": "transferencia"})
-anotar("6. normalizar medio de pago", antes, v,
-       f"{antes['medio_pago'].nunique()} formas distintas -&gt; {v['medio_pago'].nunique()} valores")
-
-v = (v.drop(columns="total_detalle")
-      .astype({"ticket_id": "Int64", "cliente_id": "Int64"})
-      .sort_values("ticket_id"))
-v.to_parquet(LIMPIO / "ventas.parquet", index=False)
-
-# Clientes: duplicados exactos fuera; fecha centinela 1900-01-01 -&gt; vacío; posibles duplicados marcados
-c = pd.read_csv(CRUDO / "clientes.csv")
-filas = len(c)
-c = c.drop_duplicates()
-c["fecha_nacimiento"] = pd.to_datetime(c["fecha_nacimiento"].replace("1900-01-01", None), format="%Y-%m-%d")
-c["fecha_alta"] = pd.to_datetime(c["fecha_alta"], format="%Y-%m-%d")
-c["posible_duplicado"] = c["email"].str.lower().duplicated() &amp; c["email"].notna()
-c.to_parquet(LIMPIO / "clientes.parquet", index=False)
-print(f"clientes: {filas:,} -&gt; {len(c):,} filas; {c['posible_duplicado'].sum()} posibles duplicados marcados")
-
-# Productos, tiendas, detalle y reseñas
-p = pd.read_csv(CRUDO / "productos.csv")
-p["categoria"] = p["categoria"].str.strip().replace({"Lacteos": "Lácteos", "bebidas": "Bebidas"})
-p.to_parquet(LIMPIO / "productos.parquet", index=False)
-pd.read_csv(CRUDO / "tiendas.csv").to_parquet(LIMPIO / "tiendas.parquet", index=False)
-detalle.to_parquet(LIMPIO / "detalle.parquet", index=False)
-r = pd.read_csv(CRUDO / "resenas.csv")
-r = r.drop_duplicates().astype({"cliente_id": "Int64", "estrellas": "Int64"})
-r["fecha_hora"] = pd.to_datetime(r["fecha_hora"], format="%Y-%m-%d %H:%M")
-r.to_parquet(LIMPIO / "resenas.parquet", index=False)
-
-pd.DataFrame(registro).to_csv(LIMPIO / "registro_limpieza.csv", index=False)
-print(f"\nListo: {len(v):,} tickets, ventas totales {v['total'].sum():,.2f}. Registro en {LIMPIO}")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python limpieza.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 limpieza.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Abre <code>limpio/registro_limpieza.csv</code> con una hoja de cálculo o con <code>pd.read_csv</code> y lee la columna <code>nota</code>.</span></li><li><span>Haz una prueba: comenta con <code>#</code> las líneas del paso 3 (quitar duplicados) y vuelve a correr el script. ¿Qué pasa?</span></li></ol><p><b>Qué observar:</b> el script muestra seis pasos. La suma sube de US$ 2.462.025,03 a US$ 3.031.671,84 al sumar el Oriente, baja US$ 729,79 al quitar los 46 duplicados, baja US$ 18.137,79 al corregir los 12 totales ×100 y sube US$ 13.105,29 al recuperar los 835 vacíos, hasta US$ 3.027.430,10, la misma cifra que da el detalle. Clientes pasa de 6.040 a 6.015 filas con 15 posibles duplicados marcados. Si comentas el paso 3, el script se detiene en el <code>assert</code> con el mensaje «quedan tickets repetidos»: la verificación hizo su trabajo. Vuelve a dejar el paso como estaba y córrelo otra vez.</p></div><div class="ml"><b>En la práctica</b><p><b>La respuesta a Lorena.</b> Mariana le mandó a Lorena el registro de limpieza en lugar de una explicación larga. La diferencia con la cifra de Beatriz estaba en tres renglones: el archivo del Oriente que no se había sumado, los dos lotes repetidos y los doce totales ×100. Lorena pidió una sola cosa más: que el registro se guarde junto con cada informe, para que la próxima vez la pregunta se responda sola.</p></div></section>
+<div class="readout texto" id="c3l1-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Escribe el script de limpieza de la cadena y revisa su registro</h3></div><p>Vas a limpiar los ocho archivos de una vez, guardar el resultado en <code>limpio/</code> y leer el registro. Necesitas los datos del capítulo 01 y el entorno del capítulo 02 activado. Los capítulos siguientes parten de <code>limpio/</code>.</p><ol class="steps"><li><span>Guarda este script como <code>limpieza.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia code-lineas"><pre><code><span class="ln">"""Limpia los archivos de Almacenes Ejemplo: lee crudo/, escribe limpio/ y deja un registro.</span>
+<span class="ln"></span>
+<span class="ln">Nunca modifica crudo/. Cada paso anota cuántas filas y cuánto suma el total antes y</span>
+<span class="ln">después, para que cualquiera pueda revisar qué decisión movió cada cifra.</span>
+<span class="ln">"""</span>
+<span class="ln">from pathlib import Path</span>
+<span class="ln"></span>
+<span class="ln">import pandas as pd</span>
+<span class="ln"></span>
+<span class="ln">CARPETA = Path.home() / "datos-cadena"</span>
+<span class="ln">CRUDO, LIMPIO = CARPETA / "crudo", CARPETA / "limpio"</span>
+<span class="ln">LIMPIO.mkdir(exist_ok=True)</span>
+<span class="ln">registro = []</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def anotar(paso, antes, despues, nota):</span>
+<span class="ln">    registro.append({"paso": paso, "filas_antes": len(antes), "filas_despues": len(despues),</span>
+<span class="ln">                     "suma_antes": round(antes["total"].sum(), 2), "suma_despues": round(despues["total"].sum(), 2),</span>
+<span class="ln">                     "nota": nota})</span>
+<span class="ln">    print(f"{paso:&lt;34} {len(antes):&gt;8,} -&gt; {len(despues):&gt;8,} filas   "</span>
+<span class="ln">          f"suma {antes['total'].sum():&gt;14,.2f} -&gt; {despues['total'].sum():&gt;14,.2f}")</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln"># 1. Leer los tres archivos de ventas, cada uno con su formato</span>
+<span class="ln">nuevo = pd.read_csv(CRUDO / "ventas.csv")</span>
+<span class="ln">oriente = pd.read_csv(CRUDO / "ventas_oriente.csv", sep=";", decimal=",")</span>
+<span class="ln">reenvio = pd.read_csv(CRUDO / "ventas_T09_reenvio.csv")</span>
+<span class="ln">nuevo["fecha_hora"] = pd.to_datetime(nuevo["fecha_hora"], format="%Y-%m-%d %H:%M")</span>
+<span class="ln">reenvio["fecha_hora"] = pd.to_datetime(reenvio["fecha_hora"], format="%Y-%m-%d %H:%M")</span>
+<span class="ln">oriente["fecha_hora"] = pd.to_datetime(oriente["fecha_hora"], format="%d/%m/%Y %H:%M")</span>
+<span class="ln">v = pd.concat([nuevo, oriente], ignore_index=True)</span>
+<span class="ln">anotar("1. ventas.csv + Oriente", nuevo, v, "Oriente leído con sep=';', decimal=',' y fecha día/mes/año")</span>
+<span class="ln">antes, v = v, pd.concat([v, reenvio], ignore_index=True)</span>
+<span class="ln">anotar("2. + reenvío de T09", antes, v, "123 tickets de T09 del 8 al 16 de septiembre de 2026")</span>
+<span class="ln"></span>
+<span class="ln"># 3. Duplicados exactos: la misma fila dos veces</span>
+<span class="ln">antes, v = v, v.drop_duplicates()</span>
+<span class="ln">anotar("3. quitar duplicados exactos", antes, v, "lotes reenviados por las cajas de T02 y T05")</span>
+<span class="ln">assert v["ticket_id"].is_unique, "quedan tickets repetidos con datos distintos: revisar a mano"</span>
+<span class="ln"></span>
+<span class="ln"># 4 y 5. El total se valida contra el detalle (que viene de otro sistema)</span>
+<span class="ln">detalle = pd.read_csv(CRUDO / "detalle.csv")</span>
+<span class="ln">suma_detalle = (detalle["cantidad"] * detalle["precio_unitario"]).groupby(detalle["ticket_id"]).sum().round(2)</span>
+<span class="ln">v["total_detalle"] = v["ticket_id"].map(suma_detalle)</span>
+<span class="ln">x100 = (v["total"] - v["total_detalle"] * 100).abs() &lt; 0.05</span>
+<span class="ln">antes = v.copy()</span>
+<span class="ln">v.loc[x100, "total"] = v.loc[x100, "total_detalle"]</span>
+<span class="ln">anotar("4. corregir totales ×100", antes, v, f"{x100.sum()} totales con el punto decimal perdido")</span>
+<span class="ln">vacio = v["total"].isna()</span>
+<span class="ln">antes = v.copy()</span>
+<span class="ln">v.loc[vacio, "total"] = v.loc[vacio, "total_detalle"]</span>
+<span class="ln">anotar("5. rellenar totales vacíos", antes, v, f"{vacio.sum()} totales vacíos, recuperados del detalle")</span>
+<span class="ln">v["total_corregido"] = x100 | vacio</span>
+<span class="ln">assert (v["total"] - v["total_detalle"]).abs().max() &lt; 0.01, "hay totales que no cuadran con el detalle"</span>
+<span class="ln"></span>
+<span class="ln"># 6. Medio de pago: una sola forma de escribir cada valor (el total no cambia)</span>
+<span class="ln">antes = v.copy()</span>
+<span class="ln">v["medio_pago"] = v["medio_pago"].str.strip().str.lower().replace({"transf.": "transferencia"})</span>
+<span class="ln">anotar("6. normalizar medio de pago", antes, v,</span>
+<span class="ln">       f"{antes['medio_pago'].nunique()} formas distintas -&gt; {v['medio_pago'].nunique()} valores")</span>
+<span class="ln"></span>
+<span class="ln">v = (v.drop(columns="total_detalle")</span>
+<span class="ln">      .astype({"ticket_id": "Int64", "cliente_id": "Int64"})</span>
+<span class="ln">      .sort_values("ticket_id"))</span>
+<span class="ln">v.to_parquet(LIMPIO / "ventas.parquet", index=False)</span>
+<span class="ln"></span>
+<span class="ln"># Clientes: duplicados exactos fuera; fecha centinela 1900-01-01 -&gt; vacío; posibles duplicados marcados</span>
+<span class="ln">c = pd.read_csv(CRUDO / "clientes.csv")</span>
+<span class="ln">filas = len(c)</span>
+<span class="ln">c = c.drop_duplicates()</span>
+<span class="ln">c["fecha_nacimiento"] = pd.to_datetime(c["fecha_nacimiento"].replace("1900-01-01", None), format="%Y-%m-%d")</span>
+<span class="ln">c["fecha_alta"] = pd.to_datetime(c["fecha_alta"], format="%Y-%m-%d")</span>
+<span class="ln">c["posible_duplicado"] = c["email"].str.lower().duplicated() &amp; c["email"].notna()</span>
+<span class="ln">c.to_parquet(LIMPIO / "clientes.parquet", index=False)</span>
+<span class="ln">print(f"clientes: {filas:,} -&gt; {len(c):,} filas; {c['posible_duplicado'].sum()} posibles duplicados marcados")</span>
+<span class="ln"></span>
+<span class="ln"># Productos, tiendas, detalle y reseñas</span>
+<span class="ln">p = pd.read_csv(CRUDO / "productos.csv")</span>
+<span class="ln">p["categoria"] = p["categoria"].str.strip().replace({"Lacteos": "Lácteos", "bebidas": "Bebidas"})</span>
+<span class="ln">p.to_parquet(LIMPIO / "productos.parquet", index=False)</span>
+<span class="ln">pd.read_csv(CRUDO / "tiendas.csv").to_parquet(LIMPIO / "tiendas.parquet", index=False)</span>
+<span class="ln">detalle.to_parquet(LIMPIO / "detalle.parquet", index=False)</span>
+<span class="ln">r = pd.read_csv(CRUDO / "resenas.csv")</span>
+<span class="ln">r = r.drop_duplicates().astype({"cliente_id": "Int64", "estrellas": "Int64"})</span>
+<span class="ln">r["fecha_hora"] = pd.to_datetime(r["fecha_hora"], format="%Y-%m-%d %H:%M")</span>
+<span class="ln">r.to_parquet(LIMPIO / "resenas.parquet", index=False)</span>
+<span class="ln"></span>
+<span class="ln">pd.DataFrame(registro).to_csv(LIMPIO / "registro_limpieza.csv", index=False)</span>
+<span class="ln">print(f"\nListo: {len(v):,} tickets, ventas totales {v['total'].sum():,.2f}. Registro en {LIMPIO}")</span></code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python limpieza.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 limpieza.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Abre <code>limpio/registro_limpieza.csv</code> con una hoja de cálculo o con <code>pd.read_csv</code> y lee la columna <code>nota</code>.</span></li><li><span>Haz una prueba: comenta con <code>#</code> las líneas del paso 3 (quitar duplicados) y vuelve a correr el script. ¿Qué pasa?</span></li></ol><p><b>Qué observar:</b> el script muestra seis pasos. La suma sube de US$ 2.462.025,03 a US$ 3.031.671,84 al sumar el Oriente, baja US$ 729,79 al quitar los 46 duplicados, baja US$ 18.137,79 al corregir los 12 totales ×100 y sube US$ 13.105,29 al recuperar los 835 vacíos, hasta US$ 3.027.430,10, la misma cifra que da el detalle. Clientes pasa de 6.040 a 6.015 filas con 15 posibles duplicados marcados. Si comentas el paso 3, el script se detiene en el <code>assert</code> con el mensaje «quedan tickets repetidos»: la verificación hizo su trabajo. Vuelve a dejar el paso como estaba y córrelo otra vez.</p></div><div class="ml"><b>En la práctica</b><p><b>La respuesta a Lorena.</b> Mariana le mandó a Lorena el registro de limpieza en lugar de una explicación larga. La diferencia con la cifra de Beatriz estaba en tres renglones: el archivo del Oriente que no se había sumado, los dos lotes repetidos y los doce totales ×100. Lorena pidió una sola cosa más: que el registro se guarde junto con cada informe, para que la próxima vez la pregunta se responda sola.</p></div></section>
 <section><h2>La idea clave</h2><div class="prose"><p>Los datos ordenados tienen una variable por columna y una observación por fila. Limpiar es detectar y decidir: convertir tipos (fechas, números con coma, categorías mal escritas), entender por qué falta un valor antes de tratarlo (recuperar, dejar vacío, imputar o marcar), quitar duplicados exactos y marcar los aproximados, y distinguir un atípico que es error de uno que es hallazgo. Cada decisión va en código, los datos crudos no se tocan y un registro dice cuánto movió cada paso las cifras.</p></div></section>
 <section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué la planilla de Hernán, con una columna por mes, no cumple las reglas de los datos ordenados?</summary><p>Porque el mes es una variable y está repartido en los nombres de las columnas. Ordenada tendría una columna <code>mes</code> y una fila por tienda y mes.</p></details><details><summary>¿Qué tienen en común <code>tarjeta</code>, <code>Tarjeta</code> y <code>tarjeta </code> (con espacio), y cómo se unifican?</summary><p>Son el mismo valor escrito distinto. Se unifican quitando espacios (<code>str.strip()</code>), pasando a minúsculas (<code>str.lower()</code>) y reemplazando abreviaturas con un diccionario.</p></details><details><summary>El 38 % de los tickets no tiene <code>cliente_id</code>. ¿Hay que imputarlo?</summary><p>No: no es un faltante sino una compra sin tarjeta del Club. Imputarlo sería inventar socios.</p></details><details><summary>¿Por qué rellenar 785 edades con la media cambia el análisis aunque la media no se mueva?</summary><p>Porque crea un pico artificial en ese valor y reduce la desviación estándar: los datos parecen más parejos de lo que son.</p></details><details><summary>Un total es exactamente cien veces la suma de las líneas de su ticket. ¿Es un atípico que hay que conservar?</summary><p>No: es un error de digitación (se perdió el punto decimal). Se corrige con la suma del detalle. Los atípicos cuyo detalle cuadra, en cambio, se conservan.</p></details><details><summary>¿Para qué sirve el <code>assert</code> que comprueba que cada <code>ticket_id</code> sea único después de quitar duplicados?</summary><p>Para que el script se detenga si llega un problema nuevo (dos filas con el mismo ticket y datos distintos) en lugar de producir cifras equivocadas en silencio.</p></details></div></section>
 <section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es la imputación múltiple y por qué se considera mejor que rellenar una sola vez con la media?<small>Pista: busca «multiple imputation by chained equations» (MICE).</small></li><li>¿Qué otras medidas de similitud de texto existen además de la distancia de Levenshtein, como Jaro-Winkler, y cuándo conviene cada una?<small>Pista: busca «string similarity metrics».</small></li><li>¿Qué es la normalización Unicode (NFC y NFD) y por qué «José» puede escribirse de dos formas que se ven iguales?</li><li>¿Qué es el bosque de aislamiento (<i>isolation forest</i>) y en qué se diferencia de la regla del rango intercuartílico para detectar atípicos?</li><li>¿Qué herramientas existen para escribir reglas de calidad de datos como pruebas automáticas?<small>Pista: busca «Great Expectations», «Pandera» y «Soda».</small></li></ol></div></section>

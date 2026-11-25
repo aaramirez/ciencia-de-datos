@@ -356,367 +356,367 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <text x="248" y="346" class="t t-s t-mono">tienda_id</text>
 <text x="350" y="388" class="t t-s t-m">se une por tienda y, a veces,</text>
 <text x="350" y="402" class="t t-s t-m">por socio (cliente_id)</text>
-</svg></div><figcaption><b>Los archivos de la cadena y cómo se relacionan.</b> Cada caja es un archivo, con sus columnas principales. Las líneas unen las columnas que se repiten entre archivos, que son las llaves para unirlos: <code>ticket_id</code> une cada ticket con sus líneas de detalle, <code>cliente_id</code> con el socio, <code>tienda_id</code> con la tienda y <code>producto_id</code> con el producto. Los tres archivos de ventas (en ámbar) tienen las mismas columnas en dos formatos distintos. La tabla de reseñas se une por tienda y, a veces, por socio.</figcaption></figure><div class="prose"><p>Los archivos salen de un <b>generador de datos sintéticos</b> (<i>synthetic data generator</i>): un programa que fabrica datos realistas pero inventados a partir de una <b>semilla</b> (<i>random seed</i>), un número que fija la secuencia de azar. La misma semilla produce siempre los mismos datos, así que tus cifras serán idénticas a las del curso.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Crea los datos de Almacenes Ejemplo</h3></div><p>Vas a guardar el generador del curso y crear los ocho archivos de la cadena. Solo necesitas Python 3.10 o más reciente: no hay que instalar nada más. Crea primero la carpeta de trabajo del curso:</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>mkdir $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>mkdir -p ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Guarda este script como <code>generar_cadena.py</code> en la carpeta <code>datos-cadena</code>. Es el generador de todo el curso. No hace falta entenderlo ahora; si lo lees, vas a encontrar pistas de las historias que esconden los datos.</span></li></ol><div class="code-copia"><pre><code>"""Datos sintéticos de Almacenes Ejemplo para el curso «Ciencia de datos».
-
-Crea los archivos que las 12 tiendas de la cadena mandan cada mes a la oficina
-central: ventas (un ticket por fila), detalle (una línea por producto), clientes
-del programa de puntos, productos, tiendas y reseñas, del 1 de enero de 2025 al
-31 de octubre de 2026. Todo es inventado y sale de una semilla: la misma semilla
-da siempre los mismos datos. Los archivos vienen sucios a propósito, como los de
-verdad: el curso aprende a limpiarlos.
-
-Uso:
-  python generar_cadena.py                 crea los archivos en ~/datos-cadena/crudo
-  python generar_cadena.py --semilla 7     otros datos, la misma historia
-  python generar_cadena.py --carpeta RUTA  otra carpeta
-Solo usa la biblioteca estándar de Python 3.10 o más reciente.
-"""
-import argparse
-import bisect
-import csv
-import datetime as dt
-import random
-from itertools import accumulate
-from pathlib import Path
-
-INICIO, FIN = dt.date(2025, 1, 1), dt.date(2026, 10, 31)
-OBRAS = dt.date(2026, 8, 3)                               # cierran el estacionamiento de T07
-SIN_ARCHIVO = (dt.date(2026, 9, 8), dt.date(2026, 9, 16))  # T09 no cargó sus ventas
-REENVIOS = [("T05", dt.date(2026, 3, 2)), ("T02", dt.date(2025, 11, 17))]  # lotes repetidos
-
-#         id     nombre               región     formato   m²   tickets por día
-TIENDAS = [("T01", "Norte Mirador",      "Norte",   "grande", 1800, 37),
-           ("T02", "Norte Estación",     "Norte",   "grande", 1500, 32),
-           ("T03", "Norte Los Pinos",    "Norte",   "express", 300, 14),
-           ("T04", "Centro Plaza Mayor", "Centro",  "grande", 2000, 40),
-           ("T05", "Centro Alameda",     "Centro",  "express", 350, 15),
-           ("T06", "Centro Universidad", "Centro",  "express", 280, 17),
-           ("T07", "Sur Puerto",         "Sur",     "grande", 1700, 35),
-           ("T08", "Sur Las Colinas",    "Sur",     "express", 320, 14),
-           ("T09", "Sur Mercado Viejo",  "Sur",     "express", 300, 13),
-           ("T10", "Oriente Río Claro",  "Oriente", "grande", 1600, 30),
-           ("T11", "Oriente La Loma",    "Oriente", "express", 300, 12),
-           ("T12", "Oriente Nuevo Sol",  "Oriente", "express", 260, 11)]
-
-#             id  nombre                  categoría             precio 2025
-PRODUCTOS = [(1, "Pan de molde", "Panadería", 2.40), (2, "Pan francés (bolsa)", "Panadería", 1.80),
-             (3, "Galletas de avena", "Panadería", 2.10), (4, "Leche entera 1 L", "Lácteos", 1.25),
-             (5, "Mantequilla 250 g", "Lácteos", 2.90), (6, "Queso fresco 500 g", "Lácteos", 4.60),
-             (7, "Yogur natural 1 L", "Lácteos", 2.70), (8, "Queso rallado 100 g", "Lácteos", 2.20),
-             (9, "Huevos (docena)", "Despensa", 3.10), (10, "Café molido 250 g", "Despensa", 4.80),
-             (11, "Arroz 1 kg", "Despensa", 1.60), (12, "Pasta larga 500 g", "Despensa", 1.30),
-             (13, "Salsa de tomate", "Despensa", 1.90), (14, "Aceite 1 L", "Despensa", 3.80),
-             (15, "Azúcar 1 kg", "Despensa", 1.40), (16, "Atún en lata", "Despensa", 1.70),
-             (17, "Agua 2 L", "Bebidas", 0.90), (18, "Gaseosa 2 L", "Bebidas", 2.10),
-             (19, "Jugo de naranja 1 L", "Bebidas", 2.30), (20, "Cerveza (six pack)", "Bebidas", 6.90),
-             (21, "Vino tinto", "Bebidas", 8.50), (22, "Papas fritas 150 g", "Snacks", 1.90),
-             (23, "Chocolate en barra", "Snacks", 1.50), (24, "Maní salado", "Snacks", 1.60),
-             (25, "Carne para asar 1 kg", "Carnes", 9.80), (26, "Pollo entero", "Carnes", 6.40),
-             (27, "Chorizo (paquete)", "Carnes", 4.30), (28, "Carbón 3 kg", "Hogar", 4.20),
-             (29, "Detergente 1 kg", "Limpieza", 4.50), (30, "Cloro 1 L", "Limpieza", 1.30),
-             (31, "Esponjas (pack)", "Limpieza", 1.60), (32, "Papel higiénico (4)", "Limpieza", 3.20),
-             (33, "Lavaplatos", "Limpieza", 2.10), (34, "Pañales (paquete)", "Bebé", 12.90),
-             (35, "Toallitas húmedas", "Bebé", 3.40), (36, "Shampoo", "Cuidado personal", 4.10),
-             (37, "Jabón de baño (3)", "Cuidado personal", 2.60), (38, "Pasta dental", "Cuidado personal", 2.30),
-             (39, "Manzanas 1 kg", "Frutas y verduras", 2.20), (40, "Bananos 1 kg", "Frutas y verduras", 1.10),
-             (41, "Tomates 1 kg", "Frutas y verduras", 1.70), (42, "Cebollas 1 kg", "Frutas y verduras", 1.30),
-             (43, "Papas 2 kg", "Frutas y verduras", 2.40), (44, "Limones 1 kg", "Frutas y verduras", 1.50),
-             (45, "Lechuga", "Frutas y verduras", 0.95), (46, "Helado 1 L", "Congelados", 4.90),
-             (47, "Pizza congelada", "Congelados", 5.60), (48, "Comida para perro 2 kg", "Mascotas", 7.80)]
-
-# Misiones de compra: (peso, [(producto, probabilidad de llevarlo)]). Dan las reglas de asociación.
-MISIONES = [(30, [(1, .40), (2, .35), (4, .70), (10, .30), (5, .30), (9, .25), (6, .15), (7, .12)]),
-            (12, [(12, .95), (13, .75), (8, .45), (21, .12), (41, .15)]),
-            (10, [(25, .85), (27, .35), (28, .60), (20, .70), (22, .40), (18, .30), (2, .20), (44, .25)]),
-            (12, [(29, .60), (30, .40), (31, .30), (32, .45), (33, .35)]),
-            (16, [(18, .50), (22, .50), (23, .35), (24, .15), (3, .20), (46, .10)]),
-            (4,  [(34, .95), (35, .70), (4, .30)]),
-            (14, [(39, .35), (40, .45), (41, .40), (42, .35), (43, .30), (44, .15), (45, .20)]),
-            (8,  [(11, .50), (14, .35), (15, .35), (16, .30), (9, .15), (17, .30)]),
-            (4,  [(36, .45), (37, .45), (38, .50)]),
-            (3,  [(47, .70), (46, .45), (18, .40)]),
-            (3,  [(48, .95), (17, .20)])]
-CUM_MISION = list(accumulate(m[0] for m in MISIONES))
-CUM_GRANDE, CUM_EXPRESS = (40, 82, 100), (92, 100, 100)
-HORAS = range(8, 22)
-CUM_HORA = list(accumulate([3, 5, 7, 8, 9, 8, 6, 6, 7, 9, 10, 9, 7, 4]))
-CANON = ["tarjeta", "efectivo", "transferencia"]
-MEDIO_TIENDA = {"T04": str.capitalize, "T08": str.upper}  # cajas que escriben distinto
-NOMBRES = ["Gloria", "Ernesto", "Rosa", "Fabián", "Marisol", "Héctor", "Liliana", "Óscar", "Pilar",
-           "Ricardo", "Yolanda", "Germán", "Teresa", "Alfredo", "Beatriz", "Mauricio", "Adriana",
-           "Rafael", "Susana", "Jorge", "Verónica", "Arturo", "Claudia", "Wilson", "Norma",
-           "Fernando", "Silvia", "Javier", "Miriam", "César", "Lucero", "Ignacio"]
-APELLIDOS = ["Méndez", "Castillo", "Romero", "Suárez", "Acosta", "Benítez", "Cabrera", "Delgado",
-             "Escobar", "Figueroa", "Guzmán", "Herrera", "Jiménez", "Lara", "Molina", "Núñez",
-             "Ortega", "Pineda", "Quiroga", "Ramos", "Sandoval", "Toledo", "Valencia", "Zapata"]
-# Reseñas: fragmentos que se combinan
-BIEN = ["la atención fue muy amable", "los precios están bien", "las frutas estaban frescas",
-        "la tienda está limpia y ordenada", "encontré todo lo que buscaba", "las cajas fueron rápidas",
-        "buena variedad de productos", "el personal ayuda a buscar", "las ofertas valen la pena"]
-MAL = ["la fila de la caja era eterna", "los precios subieron mucho", "las frutas estaban golpeadas",
-       "faltaban productos básicos", "solo había una caja abierta", "el pan no estaba fresco",
-       "el personal no sabía dónde estaba nada", "la tienda estaba desordenada"]
-OBRA = ["no hay dónde estacionar por las obras", "cerraron el estacionamiento por las obras de la avenida",
-        "con las obras es imposible llegar en carro", "las obras de la avenida tapan la entrada",
-        "ya no vengo en carro: sin estacionamiento no se puede"]
-IRONIA = ["Excelente servicio: solo 40 minutos en la fila. Volveré cuando tenga el día libre.",
-          "Me encanta que las frutas vengan ya golpeadas, así no tengo que hacerlo yo.",
-          "Genial, otra vez sin leche. Muy buena estrategia para que uno camine más.",
-          "Qué maravilla pagar más por lo mismo. Gracias por la sorpresa de cada semana.",
-          "Felicito al cajero por su paciencia infinita para no abrir otra caja.",
-          "Buenísimo que el pan de ayer lo vendan como de hoy. Ahorro de tiempo."]
-
-
-def ts(m):
-    return m.strftime("%Y-%m-%d %H:%M")
-
-
-def dia_factor(d):
-    semana = [0.92, 0.90, 0.93, 0.97, 1.10, 1.35, 1.15][d.weekday()]
-    mes = [0.90, 0.88, 0.95, 0.97, 1.03, 0.98, 1.00, 1.00, 0.97, 1.00, 1.05, 1.38][d.month - 1]
-    quincena = 1.10 if d.day in (15, 16, 30, 31, 1) else 1.0
-    crecimiento = 1 + 0.05 * (d - INICIO).days / 365
-    return semana * mes * quincena * crecimiento
-
-
-def armar_canasta(rng, formato, region, precio):
-    """Devuelve una lista de (producto_id, cantidad, precio_unitario)."""
-    n_mis = rng.choices([1, 2, 3], cum_weights=CUM_GRANDE if formato == "grande" else CUM_EXPRESS)[0]
-    elegidos = {}
-    for _ in range(n_mis):
-        items = rng.choices(MISIONES, cum_weights=CUM_MISION)[0][1]
-        for pid, p in items:
-            if rng.random() &lt; p:
-                elegidos[pid] = elegidos.get(pid, 0) + 1
-    for _ in range(rng.choices([0, 1, 2], cum_weights=(70, 95, 100))[0]):  # compras sueltas
-        pid = rng.randint(1, len(PRODUCTOS))
-        elegidos[pid] = elegidos.get(pid, 0) + 1
-    if not elegidos:
-        elegidos[rng.choice([2, 4, 17, 18, 22])] = 1
-    extra = 0.28 if region == "Sur" else 0.22  # en el Sur llevan un poco más de cada cosa
-    lineas = []
-    for pid in sorted(elegidos):
-        cant = elegidos[pid] + (1 if rng.random() &lt; extra else 0) + (1 if rng.random() &lt; extra / 3 else 0)
-        lineas.append((pid, cant, precio[pid]))
-    return lineas
-
-
-def generar(carpeta, semilla):
-    rng = random.Random(semilla)
-    crudo = carpeta / "crudo"
-    crudo.mkdir(parents=True, exist_ok=True)
-    precio25 = {p[0]: p[3] for p in PRODUCTOS}
-    precio26 = {k: round(v * 1.06, 2) for k, v in precio25.items()}  # lista de precios de 2026
-    info = {t[0]: t for t in TIENDAS}
-
-    # Clientes del programa de puntos «Club Ejemplo»
-    clientes, pool = [], {t[0]: ([], []) for t in TIENDAS}
-    tid_peso = [t[5] for t in TIENDAS]
-    for cid in range(1001, 7001):
-        nombre = f"{rng.choice(NOMBRES)} {rng.choice(APELLIDOS)}"
-        tienda = rng.choices(TIENDAS, weights=tid_peso)[0][0]
-        if rng.random() &lt; 0.7:
-            alta = dt.date(2021, 1, 1) + dt.timedelta(days=rng.randrange(1461))
-        else:
-            alta = INICIO + dt.timedelta(days=rng.randrange((FIN - INICIO).days))
-        if cid == 2077:  # Gloria Méndez: la clienta que se sigue en el curso
-            nombre, tienda, alta = "Gloria Méndez", "T07", dt.date(2022, 5, 9)
-        nac = dt.date(1950, 1, 1) + dt.timedelta(days=rng.randrange(365 * 55))
-        falta = 0.20 if info[tienda][3] == "express" else 0.09  # faltan más en las express
-        nac_txt = "" if rng.random() &lt; falta and cid != 2077 else nac.isoformat()
-        usuario = nombre.lower().replace(" ", ".").translate(str.maketrans("áéíóúñ", "aeioun"))
-        email = "" if rng.random() &lt; 0.03 and cid != 2077 else f"{usuario}{cid}@ejemplo.com"
-        peso = min(8.0, 0.05 + rng.paretovariate(1.6))  # unos pocos compran mucho
-        if cid == 2077:
-            peso = 14.0
-        clientes.append([cid, nombre, email, nac_txt, tienda, alta.isoformat()])
-        pool[tienda][0].append((cid, alta))
-        pool[tienda][1].append(peso)
-    acum = {t: list(accumulate(p[1])) for t, p in pool.items()}
-
-    # Ventas día por día; cada ticket guarda su canasta (las líneas del detalle)
-    ventas = []
-    dia = INICIO
-    while dia &lt;= FIN:
-        precio = precio25 if dia.year == 2025 else precio26
-        f = dia_factor(dia)
-        del_dia = []
-        for tid, _, region, formato, _, base in TIENDAS:
-            n = max(1, round(base * f * rng.uniform(0.85, 1.15)))
-            for _ in range(n):
-                h = rng.choices(HORAS, cum_weights=CUM_HORA)[0]
-                momento = dt.datetime.combine(dia, dt.time(h, rng.randrange(60)))
-                canasta = armar_canasta(rng, formato, region, precio)
-                cliente = ""
-                if rng.random() &lt; 0.62:
-                    gente, cum = pool[tid][0], acum[tid]
-                    for _ in range(4):
-                        cid, alta = gente[bisect.bisect_left(cum, rng.random() * cum[-1])]
-                        if alta &lt;= dia and not (cid == 2077 and dia &gt;= dt.date(2026, 8, 1)):
-                            cliente = cid
-                            break
-                if tid == "T07" and dia &gt;= OBRAS:  # sin estacionamiento: se van las compras grandes
-                    unidades = sum(c for _, c, _ in canasta)
-                    if rng.random() &lt; (0.62 if unidades &gt;= 7 else 0.22):
-                        continue
-                medio = rng.choices(CANON, cum_weights=(52, 90, 100))[0]
-                del_dia.append([momento, tid, cliente, medio, canasta])
-        del_dia.sort(key=lambda v: (v[0], v[1]))
-        for momento, tid, cliente, medio, canasta in del_dia:
-            ventas.append([100001 + len(ventas), momento, tid, cliente, medio, None, canasta])
-        dia += dt.timedelta(days=1)
-
-    # Compras grandes de verdad (eventos y empresas): atípicas pero correctas
-    grandes = rng.sample([v for v in ventas if v[2] in ("T01", "T04", "T07", "T10")
-                          and v[1].date() &lt; OBRAS], 6)
-    pedido_evento = [(18, 40), (22, 36), (17, 60), (20, 12), (24, 30), (23, 40)]
-    for v in grandes:
-        precio = precio25 if v[1].year == 2025 else precio26
-        ya = {pid for pid, _, _ in v[6]}
-        v[6] += [(pid, c, precio[pid]) for pid, c in pedido_evento[:rng.randint(3, 6)] if pid not in ya]
-    for v in ventas:
-        v[5] = round(sum(c * p for _, c, p in v[6]), 2)
-    detalle = [[v[0], i, pid, c, p] for v in ventas for i, (pid, c, p) in enumerate(v[6], 1)]
-
-    # ---- Suciedad a propósito ----
-    ids_grandes = {g[0] for g in grandes}
-    validos = [v for v in ventas if v[0] not in ids_grandes]
-    # 1. Total multiplicado por 100 (se perdió el punto decimal al digitar)
-    errores = rng.sample([v for v in validos if v[2] not in ("T10", "T11", "T12")], 12)
-    for v in errores:
-        v[5] = round(v[5] * 100, 2)
-    # 2. Totales y medios de pago vacíos
-    for v in ventas:
-        if rng.random() &lt; 0.004:
-            v[5] = None
-        if rng.random() &lt; 0.002:
-            v[4] = None
-    # 3. Clientes que no existen (se digitó un número de más)
-    malos = rng.sample([v for v in ventas if v[3] != ""], 20)
-    for v in malos:
-        v[3] = int(f"{v[3]}{rng.randrange(10)}")
-    # 4. Cada caja escribe el medio de pago a su manera; a veces con espacio al final
-    for v in ventas:
-        if v[4] is None:
-            continue
-        if v[2] in MEDIO_TIENDA:
-            v[4] = MEDIO_TIENDA[v[2]](v[4])
-        if v[2] == "T06" and v[4] == "transferencia":
-            v[4] = "transf."
-        if rng.random() &lt; 0.005:
-            v[4] = v[4] + " "
-
-    # Archivos de ventas: T01-T09 con el sistema nuevo, T10-T12 (Oriente) con el viejo
-    def fila_nueva(v):
-        return [v[0], ts(v[1]), v[2], v[3], v[4] or "", "" if v[5] is None else f"{v[5]:.2f}"]
-
-    def fila_vieja(v):
-        total = "" if v[5] is None else f"{v[5]:.2f}".replace(".", ",")
-        return [v[0], v[1].strftime("%d/%m/%Y %H:%M"), v[2], v[3], v[4] or "", total]
-
-    cab = ["ticket_id", "fecha_hora", "tienda_id", "cliente_id", "medio_pago", "total"]
-    nuevas, viejas, reenvio = [], [], []
-    for v in ventas:
-        if v[2] == "T09" and SIN_ARCHIVO[0] &lt;= v[1].date() &lt;= SIN_ARCHIVO[1]:
-            reenvio.append(fila_nueva(v))       # llega después, en otro archivo
-        elif v[2] in ("T10", "T11", "T12"):
-            viejas.append(fila_vieja(v))
-        else:
-            nuevas.append(fila_nueva(v))
-            if (v[2], v[1].date()) in REENVIOS:  # la caja mandó el lote dos veces
-                nuevas.append(fila_nueva(v))
-    escribir(crudo / "ventas.csv", cab, nuevas)
-    escribir(crudo / "ventas_oriente.csv", cab, viejas, sep=";")
-    escribir(crudo / "ventas_T09_reenvio.csv", cab, reenvio)
-    escribir(crudo / "detalle.csv", ["ticket_id", "linea", "producto_id", "cantidad", "precio_unitario"],
-             [[d[0], d[1], d[2], d[3], f"{d[4]:.2f}"] for d in detalle])
-
-    # Clientes: duplicados exactos, duplicados aproximados y fechas centinela
-    for c in rng.sample([c for c in clientes if c[3] and c[0] != 2077], 30):
-        c[3] = "1900-01-01"
-    salida = list(clientes)
-    for c in rng.sample(clientes, 25):            # la fila se exportó dos veces
-        salida.append(list(c))
-    sig = 7001
-    for c in rng.sample([c for c in clientes if c[2] and c[0] != 2077], 15):  # se inscribió dos veces
-        variante = rng.choice([c[1].upper(), c[1].translate(str.maketrans("áéíóú", "aeiou")),
-                               c[1].replace(" ", "  ")])
-        salida.append([sig, variante, c[2], c[3], c[4], c[5]])
-        sig += 1
-    salida.sort(key=lambda c: c[0])
-    escribir(crudo / "clientes.csv", ["cliente_id", "nombre", "email", "fecha_nacimiento", "tienda_id",
-                                      "fecha_alta"], salida)
-
-    cat_sucia = {5: "Lacteos", 8: "Lacteos", 19: "bebidas"}
-    escribir(crudo / "productos.csv", ["producto_id", "nombre", "categoria", "precio_lista_2025"],
-             [[p[0], p[1], cat_sucia.get(p[0], p[2]), f"{p[3]:.2f}"] for p in PRODUCTOS])
-    escribir(crudo / "tiendas.csv", ["tienda_id", "nombre", "region", "formato", "m2"],
-             [list(t[:5]) for t in TIENDAS])
-
-    # Reseñas
-    resenas, rid = [], 1
-    dia = INICIO
-    while dia &lt;= FIN:
-        for tid, _, region, formato, _, base in TIENDAS:
-            obra = tid == "T07" and dia &gt;= OBRAS
-            dia_gloria = tid == "T07" and dia == dt.date(2026, 8, 20)
-            if rng.random() &gt; base / (55 if obra else 160) and not dia_gloria:  # con obras, más quejas
-                continue
-            if obra and rng.random() &lt; 0.75:
-                estrellas, texto = rng.choice([1, 1, 2, 2, 3]), rng.choice(OBRA).capitalize() + "."
-                if rng.random() &lt; 0.5:
-                    texto += " " + rng.choice(BIEN + MAL).capitalize() + "."
-            elif rng.random() &lt; 0.035:
-                estrellas, texto = rng.choice([1, 1, 2]), rng.choice(IRONIA)
-            else:
-                estrellas = rng.choices([1, 2, 3, 4, 5], [6, 8, 16, 34, 36])[0]
-                buenas = rng.sample(BIEN, 2) if estrellas &gt;= 4 else rng.sample(BIEN, 1)
-                malas = rng.sample(MAL, 2) if estrellas &lt;= 2 else rng.sample(MAL, 1)
-                partes = buenas if estrellas &gt;= 4 else malas if estrellas &lt;= 2 else [buenas[0], malas[0]]
-                texto = ". ".join(p.capitalize() for p in partes) + "."
-                if estrellas == 3:
-                    texto = f"{partes[0].capitalize()}, pero {partes[1]}."
-            cliente = ""
-            if rng.random() &lt; 0.5:
-                cliente = rng.choice(pool[tid][0])[0]
-            if dia_gloria:  # la reseña de Gloria Méndez
-                cliente, estrellas = 2077, 1
-                texto = "Compro aquí hace años, pero cerraron el estacionamiento por las obras y ya no puedo venir."
-            elif cliente == 2077:
-                cliente = ""
-            hora = dt.datetime.combine(dia, dt.time(rng.randrange(8, 23), rng.randrange(60)))
-            resenas.append([rid, ts(hora), tid, cliente, estrellas, texto])
-            rid += 1
-        dia += dt.timedelta(days=1)
-    for r in rng.sample(resenas, 10):
-        r[4] = ""
-    salida = list(resenas)
-    for r in rng.sample(resenas, 18):                 # publicada dos veces
-        salida.append(list(r))
-    salida.sort(key=lambda r: r[0])
-    escribir(crudo / "resenas.csv", ["resena_id", "fecha_hora", "tienda_id", "cliente_id", "estrellas",
-                                     "texto"], salida)
-
-    print(f"Archivos en {crudo} (semilla {semilla})")
-    for nombre in ("ventas.csv", "ventas_oriente.csv", "ventas_T09_reenvio.csv", "detalle.csv",
-                   "clientes.csv", "productos.csv", "tiendas.csv", "resenas.csv"):
-        n = sum(1 for _ in open(crudo / nombre, encoding="utf-8")) - 1
-        print(f"  {nombre:&lt;26}{n:&gt;9,}".replace(",", "."))
-
-
-def escribir(ruta, cabecera, filas, sep=","):
-    with open(ruta, "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f, delimiter=sep)
-        w.writerow(cabecera)
-        w.writerows(filas)
-
-
-if __name__ == "__main__":
-    p = argparse.ArgumentParser(description="Datos sintéticos de Almacenes Ejemplo")
-    p.add_argument("--semilla", type=int, default=42)
-    p.add_argument("--carpeta", default=str(Path.home() / "datos-cadena"))
-    a = p.parse_args()
-    generar(Path(a.carpeta).expanduser(), a.semilla)</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Crea los datos:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python generar_cadena.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 generar_cadena.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Abre la carpeta <code>crudo</code> y mira las primeras líneas de <code>ventas.csv</code> y de <code>ventas_oriente.csv</code> con cualquier editor de texto (el Bloc de notas sirve). Compara cómo se escriben las fechas, los totales y los separadores.</span></li><li><span>Vuelve a correr el generador y comprueba que el número de filas es el mismo. Después prueba con <code>--semilla 7</code> y compara. Para terminar, corre otra vez el generador sin opciones, para volver a los datos del curso.</span></li></ol><p><b>Qué observar:</b> el programa tarda menos de un minuto y escribe ocho archivos en <code>datos-cadena/crudo</code>, con 158.690 filas en <code>ventas.csv</code> y 736.371 en <code>detalle.csv</code>. En <code>ventas.csv</code> la primera fila es <code>100003,2025-01-01 08:15,T01,,tarjeta,5.20</code>: fecha año-mes-día y punto decimal. En <code>ventas_oriente.csv</code> es <code>100001;01/01/2025 08:06;T11;;efectivo;3,20</code>: punto y coma entre columnas, fecha día/mes/año y coma decimal. Las dos comas seguidas son un socio vacío: una compra sin tarjeta del Club. Es el primer problema que resuelve el capítulo 02. Con la misma semilla todo se repite exacto; con la semilla 7 cambian las filas, pero no las historias que esconden.</p></div><div class="ml"><b>En la práctica</b><p><b>La pregunta queda firmada.</b> Lorena confirmó la página de Mariana con un cambio: además de la caída del Sur, quiere saber si se concentra en alguna tienda. Mariana agregó esa línea y anotó qué datos va a necesitar: los tres archivos de ventas, las tiendas y, si la caída se concentra en una tienda, las reseñas. El próximo paso es abrir esos archivos sin romperlos, y eso empieza en el capítulo 02.</p></div></section>
+</svg></div><figcaption><b>Los archivos de la cadena y cómo se relacionan.</b> Cada caja es un archivo, con sus columnas principales. Las líneas unen las columnas que se repiten entre archivos, que son las llaves para unirlos: <code>ticket_id</code> une cada ticket con sus líneas de detalle, <code>cliente_id</code> con el socio, <code>tienda_id</code> con la tienda y <code>producto_id</code> con el producto. Los tres archivos de ventas (en ámbar) tienen las mismas columnas en dos formatos distintos. La tabla de reseñas se une por tienda y, a veces, por socio.</figcaption></figure><div class="prose"><p>Los archivos salen de un <b>generador de datos sintéticos</b> (<i>synthetic data generator</i>): un programa que fabrica datos realistas pero inventados a partir de una <b>semilla</b> (<i>random seed</i>), un número que fija la secuencia de azar. La misma semilla produce siempre los mismos datos, así que tus cifras serán idénticas a las del curso.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Crea los datos de Almacenes Ejemplo</h3></div><p>Vas a guardar el generador del curso y crear los ocho archivos de la cadena. Solo necesitas Python 3.10 o más reciente: no hay que instalar nada más. Crea primero la carpeta de trabajo del curso:</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>mkdir $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>mkdir -p ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Guarda este script como <code>generar_cadena.py</code> en la carpeta <code>datos-cadena</code>. Es el generador de todo el curso. No hace falta entenderlo ahora; si lo lees, vas a encontrar pistas de las historias que esconden los datos.</span></li></ol><div class="code-copia code-lineas"><pre><code><span class="ln">"""Datos sintéticos de Almacenes Ejemplo para el curso «Ciencia de datos».</span>
+<span class="ln"></span>
+<span class="ln">Crea los archivos que las 12 tiendas de la cadena mandan cada mes a la oficina</span>
+<span class="ln">central: ventas (un ticket por fila), detalle (una línea por producto), clientes</span>
+<span class="ln">del programa de puntos, productos, tiendas y reseñas, del 1 de enero de 2025 al</span>
+<span class="ln">31 de octubre de 2026. Todo es inventado y sale de una semilla: la misma semilla</span>
+<span class="ln">da siempre los mismos datos. Los archivos vienen sucios a propósito, como los de</span>
+<span class="ln">verdad: el curso aprende a limpiarlos.</span>
+<span class="ln"></span>
+<span class="ln">Uso:</span>
+<span class="ln">  python generar_cadena.py                 crea los archivos en ~/datos-cadena/crudo</span>
+<span class="ln">  python generar_cadena.py --semilla 7     otros datos, la misma historia</span>
+<span class="ln">  python generar_cadena.py --carpeta RUTA  otra carpeta</span>
+<span class="ln">Solo usa la biblioteca estándar de Python 3.10 o más reciente.</span>
+<span class="ln">"""</span>
+<span class="ln">import argparse</span>
+<span class="ln">import bisect</span>
+<span class="ln">import csv</span>
+<span class="ln">import datetime as dt</span>
+<span class="ln">import random</span>
+<span class="ln">from itertools import accumulate</span>
+<span class="ln">from pathlib import Path</span>
+<span class="ln"></span>
+<span class="ln">INICIO, FIN = dt.date(2025, 1, 1), dt.date(2026, 10, 31)</span>
+<span class="ln">OBRAS = dt.date(2026, 8, 3)                               # cierran el estacionamiento de T07</span>
+<span class="ln">SIN_ARCHIVO = (dt.date(2026, 9, 8), dt.date(2026, 9, 16))  # T09 no cargó sus ventas</span>
+<span class="ln">REENVIOS = [("T05", dt.date(2026, 3, 2)), ("T02", dt.date(2025, 11, 17))]  # lotes repetidos</span>
+<span class="ln"></span>
+<span class="ln">#         id     nombre               región     formato   m²   tickets por día</span>
+<span class="ln">TIENDAS = [("T01", "Norte Mirador",      "Norte",   "grande", 1800, 37),</span>
+<span class="ln">           ("T02", "Norte Estación",     "Norte",   "grande", 1500, 32),</span>
+<span class="ln">           ("T03", "Norte Los Pinos",    "Norte",   "express", 300, 14),</span>
+<span class="ln">           ("T04", "Centro Plaza Mayor", "Centro",  "grande", 2000, 40),</span>
+<span class="ln">           ("T05", "Centro Alameda",     "Centro",  "express", 350, 15),</span>
+<span class="ln">           ("T06", "Centro Universidad", "Centro",  "express", 280, 17),</span>
+<span class="ln">           ("T07", "Sur Puerto",         "Sur",     "grande", 1700, 35),</span>
+<span class="ln">           ("T08", "Sur Las Colinas",    "Sur",     "express", 320, 14),</span>
+<span class="ln">           ("T09", "Sur Mercado Viejo",  "Sur",     "express", 300, 13),</span>
+<span class="ln">           ("T10", "Oriente Río Claro",  "Oriente", "grande", 1600, 30),</span>
+<span class="ln">           ("T11", "Oriente La Loma",    "Oriente", "express", 300, 12),</span>
+<span class="ln">           ("T12", "Oriente Nuevo Sol",  "Oriente", "express", 260, 11)]</span>
+<span class="ln"></span>
+<span class="ln">#             id  nombre                  categoría             precio 2025</span>
+<span class="ln">PRODUCTOS = [(1, "Pan de molde", "Panadería", 2.40), (2, "Pan francés (bolsa)", "Panadería", 1.80),</span>
+<span class="ln">             (3, "Galletas de avena", "Panadería", 2.10), (4, "Leche entera 1 L", "Lácteos", 1.25),</span>
+<span class="ln">             (5, "Mantequilla 250 g", "Lácteos", 2.90), (6, "Queso fresco 500 g", "Lácteos", 4.60),</span>
+<span class="ln">             (7, "Yogur natural 1 L", "Lácteos", 2.70), (8, "Queso rallado 100 g", "Lácteos", 2.20),</span>
+<span class="ln">             (9, "Huevos (docena)", "Despensa", 3.10), (10, "Café molido 250 g", "Despensa", 4.80),</span>
+<span class="ln">             (11, "Arroz 1 kg", "Despensa", 1.60), (12, "Pasta larga 500 g", "Despensa", 1.30),</span>
+<span class="ln">             (13, "Salsa de tomate", "Despensa", 1.90), (14, "Aceite 1 L", "Despensa", 3.80),</span>
+<span class="ln">             (15, "Azúcar 1 kg", "Despensa", 1.40), (16, "Atún en lata", "Despensa", 1.70),</span>
+<span class="ln">             (17, "Agua 2 L", "Bebidas", 0.90), (18, "Gaseosa 2 L", "Bebidas", 2.10),</span>
+<span class="ln">             (19, "Jugo de naranja 1 L", "Bebidas", 2.30), (20, "Cerveza (six pack)", "Bebidas", 6.90),</span>
+<span class="ln">             (21, "Vino tinto", "Bebidas", 8.50), (22, "Papas fritas 150 g", "Snacks", 1.90),</span>
+<span class="ln">             (23, "Chocolate en barra", "Snacks", 1.50), (24, "Maní salado", "Snacks", 1.60),</span>
+<span class="ln">             (25, "Carne para asar 1 kg", "Carnes", 9.80), (26, "Pollo entero", "Carnes", 6.40),</span>
+<span class="ln">             (27, "Chorizo (paquete)", "Carnes", 4.30), (28, "Carbón 3 kg", "Hogar", 4.20),</span>
+<span class="ln">             (29, "Detergente 1 kg", "Limpieza", 4.50), (30, "Cloro 1 L", "Limpieza", 1.30),</span>
+<span class="ln">             (31, "Esponjas (pack)", "Limpieza", 1.60), (32, "Papel higiénico (4)", "Limpieza", 3.20),</span>
+<span class="ln">             (33, "Lavaplatos", "Limpieza", 2.10), (34, "Pañales (paquete)", "Bebé", 12.90),</span>
+<span class="ln">             (35, "Toallitas húmedas", "Bebé", 3.40), (36, "Shampoo", "Cuidado personal", 4.10),</span>
+<span class="ln">             (37, "Jabón de baño (3)", "Cuidado personal", 2.60), (38, "Pasta dental", "Cuidado personal", 2.30),</span>
+<span class="ln">             (39, "Manzanas 1 kg", "Frutas y verduras", 2.20), (40, "Bananos 1 kg", "Frutas y verduras", 1.10),</span>
+<span class="ln">             (41, "Tomates 1 kg", "Frutas y verduras", 1.70), (42, "Cebollas 1 kg", "Frutas y verduras", 1.30),</span>
+<span class="ln">             (43, "Papas 2 kg", "Frutas y verduras", 2.40), (44, "Limones 1 kg", "Frutas y verduras", 1.50),</span>
+<span class="ln">             (45, "Lechuga", "Frutas y verduras", 0.95), (46, "Helado 1 L", "Congelados", 4.90),</span>
+<span class="ln">             (47, "Pizza congelada", "Congelados", 5.60), (48, "Comida para perro 2 kg", "Mascotas", 7.80)]</span>
+<span class="ln"></span>
+<span class="ln"># Misiones de compra: (peso, [(producto, probabilidad de llevarlo)]). Dan las reglas de asociación.</span>
+<span class="ln">MISIONES = [(30, [(1, .40), (2, .35), (4, .70), (10, .30), (5, .30), (9, .25), (6, .15), (7, .12)]),</span>
+<span class="ln">            (12, [(12, .95), (13, .75), (8, .45), (21, .12), (41, .15)]),</span>
+<span class="ln">            (10, [(25, .85), (27, .35), (28, .60), (20, .70), (22, .40), (18, .30), (2, .20), (44, .25)]),</span>
+<span class="ln">            (12, [(29, .60), (30, .40), (31, .30), (32, .45), (33, .35)]),</span>
+<span class="ln">            (16, [(18, .50), (22, .50), (23, .35), (24, .15), (3, .20), (46, .10)]),</span>
+<span class="ln">            (4,  [(34, .95), (35, .70), (4, .30)]),</span>
+<span class="ln">            (14, [(39, .35), (40, .45), (41, .40), (42, .35), (43, .30), (44, .15), (45, .20)]),</span>
+<span class="ln">            (8,  [(11, .50), (14, .35), (15, .35), (16, .30), (9, .15), (17, .30)]),</span>
+<span class="ln">            (4,  [(36, .45), (37, .45), (38, .50)]),</span>
+<span class="ln">            (3,  [(47, .70), (46, .45), (18, .40)]),</span>
+<span class="ln">            (3,  [(48, .95), (17, .20)])]</span>
+<span class="ln">CUM_MISION = list(accumulate(m[0] for m in MISIONES))</span>
+<span class="ln">CUM_GRANDE, CUM_EXPRESS = (40, 82, 100), (92, 100, 100)</span>
+<span class="ln">HORAS = range(8, 22)</span>
+<span class="ln">CUM_HORA = list(accumulate([3, 5, 7, 8, 9, 8, 6, 6, 7, 9, 10, 9, 7, 4]))</span>
+<span class="ln">CANON = ["tarjeta", "efectivo", "transferencia"]</span>
+<span class="ln">MEDIO_TIENDA = {"T04": str.capitalize, "T08": str.upper}  # cajas que escriben distinto</span>
+<span class="ln">NOMBRES = ["Gloria", "Ernesto", "Rosa", "Fabián", "Marisol", "Héctor", "Liliana", "Óscar", "Pilar",</span>
+<span class="ln">           "Ricardo", "Yolanda", "Germán", "Teresa", "Alfredo", "Beatriz", "Mauricio", "Adriana",</span>
+<span class="ln">           "Rafael", "Susana", "Jorge", "Verónica", "Arturo", "Claudia", "Wilson", "Norma",</span>
+<span class="ln">           "Fernando", "Silvia", "Javier", "Miriam", "César", "Lucero", "Ignacio"]</span>
+<span class="ln">APELLIDOS = ["Méndez", "Castillo", "Romero", "Suárez", "Acosta", "Benítez", "Cabrera", "Delgado",</span>
+<span class="ln">             "Escobar", "Figueroa", "Guzmán", "Herrera", "Jiménez", "Lara", "Molina", "Núñez",</span>
+<span class="ln">             "Ortega", "Pineda", "Quiroga", "Ramos", "Sandoval", "Toledo", "Valencia", "Zapata"]</span>
+<span class="ln"># Reseñas: fragmentos que se combinan</span>
+<span class="ln">BIEN = ["la atención fue muy amable", "los precios están bien", "las frutas estaban frescas",</span>
+<span class="ln">        "la tienda está limpia y ordenada", "encontré todo lo que buscaba", "las cajas fueron rápidas",</span>
+<span class="ln">        "buena variedad de productos", "el personal ayuda a buscar", "las ofertas valen la pena"]</span>
+<span class="ln">MAL = ["la fila de la caja era eterna", "los precios subieron mucho", "las frutas estaban golpeadas",</span>
+<span class="ln">       "faltaban productos básicos", "solo había una caja abierta", "el pan no estaba fresco",</span>
+<span class="ln">       "el personal no sabía dónde estaba nada", "la tienda estaba desordenada"]</span>
+<span class="ln">OBRA = ["no hay dónde estacionar por las obras", "cerraron el estacionamiento por las obras de la avenida",</span>
+<span class="ln">        "con las obras es imposible llegar en carro", "las obras de la avenida tapan la entrada",</span>
+<span class="ln">        "ya no vengo en carro: sin estacionamiento no se puede"]</span>
+<span class="ln">IRONIA = ["Excelente servicio: solo 40 minutos en la fila. Volveré cuando tenga el día libre.",</span>
+<span class="ln">          "Me encanta que las frutas vengan ya golpeadas, así no tengo que hacerlo yo.",</span>
+<span class="ln">          "Genial, otra vez sin leche. Muy buena estrategia para que uno camine más.",</span>
+<span class="ln">          "Qué maravilla pagar más por lo mismo. Gracias por la sorpresa de cada semana.",</span>
+<span class="ln">          "Felicito al cajero por su paciencia infinita para no abrir otra caja.",</span>
+<span class="ln">          "Buenísimo que el pan de ayer lo vendan como de hoy. Ahorro de tiempo."]</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def ts(m):</span>
+<span class="ln">    return m.strftime("%Y-%m-%d %H:%M")</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def dia_factor(d):</span>
+<span class="ln">    semana = [0.92, 0.90, 0.93, 0.97, 1.10, 1.35, 1.15][d.weekday()]</span>
+<span class="ln">    mes = [0.90, 0.88, 0.95, 0.97, 1.03, 0.98, 1.00, 1.00, 0.97, 1.00, 1.05, 1.38][d.month - 1]</span>
+<span class="ln">    quincena = 1.10 if d.day in (15, 16, 30, 31, 1) else 1.0</span>
+<span class="ln">    crecimiento = 1 + 0.05 * (d - INICIO).days / 365</span>
+<span class="ln">    return semana * mes * quincena * crecimiento</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def armar_canasta(rng, formato, region, precio):</span>
+<span class="ln">    """Devuelve una lista de (producto_id, cantidad, precio_unitario)."""</span>
+<span class="ln">    n_mis = rng.choices([1, 2, 3], cum_weights=CUM_GRANDE if formato == "grande" else CUM_EXPRESS)[0]</span>
+<span class="ln">    elegidos = {}</span>
+<span class="ln">    for _ in range(n_mis):</span>
+<span class="ln">        items = rng.choices(MISIONES, cum_weights=CUM_MISION)[0][1]</span>
+<span class="ln">        for pid, p in items:</span>
+<span class="ln">            if rng.random() &lt; p:</span>
+<span class="ln">                elegidos[pid] = elegidos.get(pid, 0) + 1</span>
+<span class="ln">    for _ in range(rng.choices([0, 1, 2], cum_weights=(70, 95, 100))[0]):  # compras sueltas</span>
+<span class="ln">        pid = rng.randint(1, len(PRODUCTOS))</span>
+<span class="ln">        elegidos[pid] = elegidos.get(pid, 0) + 1</span>
+<span class="ln">    if not elegidos:</span>
+<span class="ln">        elegidos[rng.choice([2, 4, 17, 18, 22])] = 1</span>
+<span class="ln">    extra = 0.28 if region == "Sur" else 0.22  # en el Sur llevan un poco más de cada cosa</span>
+<span class="ln">    lineas = []</span>
+<span class="ln">    for pid in sorted(elegidos):</span>
+<span class="ln">        cant = elegidos[pid] + (1 if rng.random() &lt; extra else 0) + (1 if rng.random() &lt; extra / 3 else 0)</span>
+<span class="ln">        lineas.append((pid, cant, precio[pid]))</span>
+<span class="ln">    return lineas</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def generar(carpeta, semilla):</span>
+<span class="ln">    rng = random.Random(semilla)</span>
+<span class="ln">    crudo = carpeta / "crudo"</span>
+<span class="ln">    crudo.mkdir(parents=True, exist_ok=True)</span>
+<span class="ln">    precio25 = {p[0]: p[3] for p in PRODUCTOS}</span>
+<span class="ln">    precio26 = {k: round(v * 1.06, 2) for k, v in precio25.items()}  # lista de precios de 2026</span>
+<span class="ln">    info = {t[0]: t for t in TIENDAS}</span>
+<span class="ln"></span>
+<span class="ln">    # Clientes del programa de puntos «Club Ejemplo»</span>
+<span class="ln">    clientes, pool = [], {t[0]: ([], []) for t in TIENDAS}</span>
+<span class="ln">    tid_peso = [t[5] for t in TIENDAS]</span>
+<span class="ln">    for cid in range(1001, 7001):</span>
+<span class="ln">        nombre = f"{rng.choice(NOMBRES)} {rng.choice(APELLIDOS)}"</span>
+<span class="ln">        tienda = rng.choices(TIENDAS, weights=tid_peso)[0][0]</span>
+<span class="ln">        if rng.random() &lt; 0.7:</span>
+<span class="ln">            alta = dt.date(2021, 1, 1) + dt.timedelta(days=rng.randrange(1461))</span>
+<span class="ln">        else:</span>
+<span class="ln">            alta = INICIO + dt.timedelta(days=rng.randrange((FIN - INICIO).days))</span>
+<span class="ln">        if cid == 2077:  # Gloria Méndez: la clienta que se sigue en el curso</span>
+<span class="ln">            nombre, tienda, alta = "Gloria Méndez", "T07", dt.date(2022, 5, 9)</span>
+<span class="ln">        nac = dt.date(1950, 1, 1) + dt.timedelta(days=rng.randrange(365 * 55))</span>
+<span class="ln">        falta = 0.20 if info[tienda][3] == "express" else 0.09  # faltan más en las express</span>
+<span class="ln">        nac_txt = "" if rng.random() &lt; falta and cid != 2077 else nac.isoformat()</span>
+<span class="ln">        usuario = nombre.lower().replace(" ", ".").translate(str.maketrans("áéíóúñ", "aeioun"))</span>
+<span class="ln">        email = "" if rng.random() &lt; 0.03 and cid != 2077 else f"{usuario}{cid}@ejemplo.com"</span>
+<span class="ln">        peso = min(8.0, 0.05 + rng.paretovariate(1.6))  # unos pocos compran mucho</span>
+<span class="ln">        if cid == 2077:</span>
+<span class="ln">            peso = 14.0</span>
+<span class="ln">        clientes.append([cid, nombre, email, nac_txt, tienda, alta.isoformat()])</span>
+<span class="ln">        pool[tienda][0].append((cid, alta))</span>
+<span class="ln">        pool[tienda][1].append(peso)</span>
+<span class="ln">    acum = {t: list(accumulate(p[1])) for t, p in pool.items()}</span>
+<span class="ln"></span>
+<span class="ln">    # Ventas día por día; cada ticket guarda su canasta (las líneas del detalle)</span>
+<span class="ln">    ventas = []</span>
+<span class="ln">    dia = INICIO</span>
+<span class="ln">    while dia &lt;= FIN:</span>
+<span class="ln">        precio = precio25 if dia.year == 2025 else precio26</span>
+<span class="ln">        f = dia_factor(dia)</span>
+<span class="ln">        del_dia = []</span>
+<span class="ln">        for tid, _, region, formato, _, base in TIENDAS:</span>
+<span class="ln">            n = max(1, round(base * f * rng.uniform(0.85, 1.15)))</span>
+<span class="ln">            for _ in range(n):</span>
+<span class="ln">                h = rng.choices(HORAS, cum_weights=CUM_HORA)[0]</span>
+<span class="ln">                momento = dt.datetime.combine(dia, dt.time(h, rng.randrange(60)))</span>
+<span class="ln">                canasta = armar_canasta(rng, formato, region, precio)</span>
+<span class="ln">                cliente = ""</span>
+<span class="ln">                if rng.random() &lt; 0.62:</span>
+<span class="ln">                    gente, cum = pool[tid][0], acum[tid]</span>
+<span class="ln">                    for _ in range(4):</span>
+<span class="ln">                        cid, alta = gente[bisect.bisect_left(cum, rng.random() * cum[-1])]</span>
+<span class="ln">                        if alta &lt;= dia and not (cid == 2077 and dia &gt;= dt.date(2026, 8, 1)):</span>
+<span class="ln">                            cliente = cid</span>
+<span class="ln">                            break</span>
+<span class="ln">                if tid == "T07" and dia &gt;= OBRAS:  # sin estacionamiento: se van las compras grandes</span>
+<span class="ln">                    unidades = sum(c for _, c, _ in canasta)</span>
+<span class="ln">                    if rng.random() &lt; (0.62 if unidades &gt;= 7 else 0.22):</span>
+<span class="ln">                        continue</span>
+<span class="ln">                medio = rng.choices(CANON, cum_weights=(52, 90, 100))[0]</span>
+<span class="ln">                del_dia.append([momento, tid, cliente, medio, canasta])</span>
+<span class="ln">        del_dia.sort(key=lambda v: (v[0], v[1]))</span>
+<span class="ln">        for momento, tid, cliente, medio, canasta in del_dia:</span>
+<span class="ln">            ventas.append([100001 + len(ventas), momento, tid, cliente, medio, None, canasta])</span>
+<span class="ln">        dia += dt.timedelta(days=1)</span>
+<span class="ln"></span>
+<span class="ln">    # Compras grandes de verdad (eventos y empresas): atípicas pero correctas</span>
+<span class="ln">    grandes = rng.sample([v for v in ventas if v[2] in ("T01", "T04", "T07", "T10")</span>
+<span class="ln">                          and v[1].date() &lt; OBRAS], 6)</span>
+<span class="ln">    pedido_evento = [(18, 40), (22, 36), (17, 60), (20, 12), (24, 30), (23, 40)]</span>
+<span class="ln">    for v in grandes:</span>
+<span class="ln">        precio = precio25 if v[1].year == 2025 else precio26</span>
+<span class="ln">        ya = {pid for pid, _, _ in v[6]}</span>
+<span class="ln">        v[6] += [(pid, c, precio[pid]) for pid, c in pedido_evento[:rng.randint(3, 6)] if pid not in ya]</span>
+<span class="ln">    for v in ventas:</span>
+<span class="ln">        v[5] = round(sum(c * p for _, c, p in v[6]), 2)</span>
+<span class="ln">    detalle = [[v[0], i, pid, c, p] for v in ventas for i, (pid, c, p) in enumerate(v[6], 1)]</span>
+<span class="ln"></span>
+<span class="ln">    # ---- Suciedad a propósito ----</span>
+<span class="ln">    ids_grandes = {g[0] for g in grandes}</span>
+<span class="ln">    validos = [v for v in ventas if v[0] not in ids_grandes]</span>
+<span class="ln">    # 1. Total multiplicado por 100 (se perdió el punto decimal al digitar)</span>
+<span class="ln">    errores = rng.sample([v for v in validos if v[2] not in ("T10", "T11", "T12")], 12)</span>
+<span class="ln">    for v in errores:</span>
+<span class="ln">        v[5] = round(v[5] * 100, 2)</span>
+<span class="ln">    # 2. Totales y medios de pago vacíos</span>
+<span class="ln">    for v in ventas:</span>
+<span class="ln">        if rng.random() &lt; 0.004:</span>
+<span class="ln">            v[5] = None</span>
+<span class="ln">        if rng.random() &lt; 0.002:</span>
+<span class="ln">            v[4] = None</span>
+<span class="ln">    # 3. Clientes que no existen (se digitó un número de más)</span>
+<span class="ln">    malos = rng.sample([v for v in ventas if v[3] != ""], 20)</span>
+<span class="ln">    for v in malos:</span>
+<span class="ln">        v[3] = int(f"{v[3]}{rng.randrange(10)}")</span>
+<span class="ln">    # 4. Cada caja escribe el medio de pago a su manera; a veces con espacio al final</span>
+<span class="ln">    for v in ventas:</span>
+<span class="ln">        if v[4] is None:</span>
+<span class="ln">            continue</span>
+<span class="ln">        if v[2] in MEDIO_TIENDA:</span>
+<span class="ln">            v[4] = MEDIO_TIENDA[v[2]](v[4])</span>
+<span class="ln">        if v[2] == "T06" and v[4] == "transferencia":</span>
+<span class="ln">            v[4] = "transf."</span>
+<span class="ln">        if rng.random() &lt; 0.005:</span>
+<span class="ln">            v[4] = v[4] + " "</span>
+<span class="ln"></span>
+<span class="ln">    # Archivos de ventas: T01-T09 con el sistema nuevo, T10-T12 (Oriente) con el viejo</span>
+<span class="ln">    def fila_nueva(v):</span>
+<span class="ln">        return [v[0], ts(v[1]), v[2], v[3], v[4] or "", "" if v[5] is None else f"{v[5]:.2f}"]</span>
+<span class="ln"></span>
+<span class="ln">    def fila_vieja(v):</span>
+<span class="ln">        total = "" if v[5] is None else f"{v[5]:.2f}".replace(".", ",")</span>
+<span class="ln">        return [v[0], v[1].strftime("%d/%m/%Y %H:%M"), v[2], v[3], v[4] or "", total]</span>
+<span class="ln"></span>
+<span class="ln">    cab = ["ticket_id", "fecha_hora", "tienda_id", "cliente_id", "medio_pago", "total"]</span>
+<span class="ln">    nuevas, viejas, reenvio = [], [], []</span>
+<span class="ln">    for v in ventas:</span>
+<span class="ln">        if v[2] == "T09" and SIN_ARCHIVO[0] &lt;= v[1].date() &lt;= SIN_ARCHIVO[1]:</span>
+<span class="ln">            reenvio.append(fila_nueva(v))       # llega después, en otro archivo</span>
+<span class="ln">        elif v[2] in ("T10", "T11", "T12"):</span>
+<span class="ln">            viejas.append(fila_vieja(v))</span>
+<span class="ln">        else:</span>
+<span class="ln">            nuevas.append(fila_nueva(v))</span>
+<span class="ln">            if (v[2], v[1].date()) in REENVIOS:  # la caja mandó el lote dos veces</span>
+<span class="ln">                nuevas.append(fila_nueva(v))</span>
+<span class="ln">    escribir(crudo / "ventas.csv", cab, nuevas)</span>
+<span class="ln">    escribir(crudo / "ventas_oriente.csv", cab, viejas, sep=";")</span>
+<span class="ln">    escribir(crudo / "ventas_T09_reenvio.csv", cab, reenvio)</span>
+<span class="ln">    escribir(crudo / "detalle.csv", ["ticket_id", "linea", "producto_id", "cantidad", "precio_unitario"],</span>
+<span class="ln">             [[d[0], d[1], d[2], d[3], f"{d[4]:.2f}"] for d in detalle])</span>
+<span class="ln"></span>
+<span class="ln">    # Clientes: duplicados exactos, duplicados aproximados y fechas centinela</span>
+<span class="ln">    for c in rng.sample([c for c in clientes if c[3] and c[0] != 2077], 30):</span>
+<span class="ln">        c[3] = "1900-01-01"</span>
+<span class="ln">    salida = list(clientes)</span>
+<span class="ln">    for c in rng.sample(clientes, 25):            # la fila se exportó dos veces</span>
+<span class="ln">        salida.append(list(c))</span>
+<span class="ln">    sig = 7001</span>
+<span class="ln">    for c in rng.sample([c for c in clientes if c[2] and c[0] != 2077], 15):  # se inscribió dos veces</span>
+<span class="ln">        variante = rng.choice([c[1].upper(), c[1].translate(str.maketrans("áéíóú", "aeiou")),</span>
+<span class="ln">                               c[1].replace(" ", "  ")])</span>
+<span class="ln">        salida.append([sig, variante, c[2], c[3], c[4], c[5]])</span>
+<span class="ln">        sig += 1</span>
+<span class="ln">    salida.sort(key=lambda c: c[0])</span>
+<span class="ln">    escribir(crudo / "clientes.csv", ["cliente_id", "nombre", "email", "fecha_nacimiento", "tienda_id",</span>
+<span class="ln">                                      "fecha_alta"], salida)</span>
+<span class="ln"></span>
+<span class="ln">    cat_sucia = {5: "Lacteos", 8: "Lacteos", 19: "bebidas"}</span>
+<span class="ln">    escribir(crudo / "productos.csv", ["producto_id", "nombre", "categoria", "precio_lista_2025"],</span>
+<span class="ln">             [[p[0], p[1], cat_sucia.get(p[0], p[2]), f"{p[3]:.2f}"] for p in PRODUCTOS])</span>
+<span class="ln">    escribir(crudo / "tiendas.csv", ["tienda_id", "nombre", "region", "formato", "m2"],</span>
+<span class="ln">             [list(t[:5]) for t in TIENDAS])</span>
+<span class="ln"></span>
+<span class="ln">    # Reseñas</span>
+<span class="ln">    resenas, rid = [], 1</span>
+<span class="ln">    dia = INICIO</span>
+<span class="ln">    while dia &lt;= FIN:</span>
+<span class="ln">        for tid, _, region, formato, _, base in TIENDAS:</span>
+<span class="ln">            obra = tid == "T07" and dia &gt;= OBRAS</span>
+<span class="ln">            dia_gloria = tid == "T07" and dia == dt.date(2026, 8, 20)</span>
+<span class="ln">            if rng.random() &gt; base / (55 if obra else 160) and not dia_gloria:  # con obras, más quejas</span>
+<span class="ln">                continue</span>
+<span class="ln">            if obra and rng.random() &lt; 0.75:</span>
+<span class="ln">                estrellas, texto = rng.choice([1, 1, 2, 2, 3]), rng.choice(OBRA).capitalize() + "."</span>
+<span class="ln">                if rng.random() &lt; 0.5:</span>
+<span class="ln">                    texto += " " + rng.choice(BIEN + MAL).capitalize() + "."</span>
+<span class="ln">            elif rng.random() &lt; 0.035:</span>
+<span class="ln">                estrellas, texto = rng.choice([1, 1, 2]), rng.choice(IRONIA)</span>
+<span class="ln">            else:</span>
+<span class="ln">                estrellas = rng.choices([1, 2, 3, 4, 5], [6, 8, 16, 34, 36])[0]</span>
+<span class="ln">                buenas = rng.sample(BIEN, 2) if estrellas &gt;= 4 else rng.sample(BIEN, 1)</span>
+<span class="ln">                malas = rng.sample(MAL, 2) if estrellas &lt;= 2 else rng.sample(MAL, 1)</span>
+<span class="ln">                partes = buenas if estrellas &gt;= 4 else malas if estrellas &lt;= 2 else [buenas[0], malas[0]]</span>
+<span class="ln">                texto = ". ".join(p.capitalize() for p in partes) + "."</span>
+<span class="ln">                if estrellas == 3:</span>
+<span class="ln">                    texto = f"{partes[0].capitalize()}, pero {partes[1]}."</span>
+<span class="ln">            cliente = ""</span>
+<span class="ln">            if rng.random() &lt; 0.5:</span>
+<span class="ln">                cliente = rng.choice(pool[tid][0])[0]</span>
+<span class="ln">            if dia_gloria:  # la reseña de Gloria Méndez</span>
+<span class="ln">                cliente, estrellas = 2077, 1</span>
+<span class="ln">                texto = "Compro aquí hace años, pero cerraron el estacionamiento por las obras y ya no puedo venir."</span>
+<span class="ln">            elif cliente == 2077:</span>
+<span class="ln">                cliente = ""</span>
+<span class="ln">            hora = dt.datetime.combine(dia, dt.time(rng.randrange(8, 23), rng.randrange(60)))</span>
+<span class="ln">            resenas.append([rid, ts(hora), tid, cliente, estrellas, texto])</span>
+<span class="ln">            rid += 1</span>
+<span class="ln">        dia += dt.timedelta(days=1)</span>
+<span class="ln">    for r in rng.sample(resenas, 10):</span>
+<span class="ln">        r[4] = ""</span>
+<span class="ln">    salida = list(resenas)</span>
+<span class="ln">    for r in rng.sample(resenas, 18):                 # publicada dos veces</span>
+<span class="ln">        salida.append(list(r))</span>
+<span class="ln">    salida.sort(key=lambda r: r[0])</span>
+<span class="ln">    escribir(crudo / "resenas.csv", ["resena_id", "fecha_hora", "tienda_id", "cliente_id", "estrellas",</span>
+<span class="ln">                                     "texto"], salida)</span>
+<span class="ln"></span>
+<span class="ln">    print(f"Archivos en {crudo} (semilla {semilla})")</span>
+<span class="ln">    for nombre in ("ventas.csv", "ventas_oriente.csv", "ventas_T09_reenvio.csv", "detalle.csv",</span>
+<span class="ln">                   "clientes.csv", "productos.csv", "tiendas.csv", "resenas.csv"):</span>
+<span class="ln">        n = sum(1 for _ in open(crudo / nombre, encoding="utf-8")) - 1</span>
+<span class="ln">        print(f"  {nombre:&lt;26}{n:&gt;9,}".replace(",", "."))</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def escribir(ruta, cabecera, filas, sep=","):</span>
+<span class="ln">    with open(ruta, "w", newline="", encoding="utf-8") as f:</span>
+<span class="ln">        w = csv.writer(f, delimiter=sep)</span>
+<span class="ln">        w.writerow(cabecera)</span>
+<span class="ln">        w.writerows(filas)</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">if __name__ == "__main__":</span>
+<span class="ln">    p = argparse.ArgumentParser(description="Datos sintéticos de Almacenes Ejemplo")</span>
+<span class="ln">    p.add_argument("--semilla", type=int, default=42)</span>
+<span class="ln">    p.add_argument("--carpeta", default=str(Path.home() / "datos-cadena"))</span>
+<span class="ln">    a = p.parse_args()</span>
+<span class="ln">    generar(Path(a.carpeta).expanduser(), a.semilla)</span></code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Crea los datos:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python generar_cadena.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 generar_cadena.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Abre la carpeta <code>crudo</code> y mira las primeras líneas de <code>ventas.csv</code> y de <code>ventas_oriente.csv</code> con cualquier editor de texto (el Bloc de notas sirve). Compara cómo se escriben las fechas, los totales y los separadores.</span></li><li><span>Vuelve a correr el generador y comprueba que el número de filas es el mismo. Después prueba con <code>--semilla 7</code> y compara. Para terminar, corre otra vez el generador sin opciones, para volver a los datos del curso.</span></li></ol><p><b>Qué observar:</b> el programa tarda menos de un minuto y escribe ocho archivos en <code>datos-cadena/crudo</code>, con 158.690 filas en <code>ventas.csv</code> y 736.371 en <code>detalle.csv</code>. En <code>ventas.csv</code> la primera fila es <code>100003,2025-01-01 08:15,T01,,tarjeta,5.20</code>: fecha año-mes-día y punto decimal. En <code>ventas_oriente.csv</code> es <code>100001;01/01/2025 08:06;T11;;efectivo;3,20</code>: punto y coma entre columnas, fecha día/mes/año y coma decimal. Las dos comas seguidas son un socio vacío: una compra sin tarjeta del Club. Es el primer problema que resuelve el capítulo 02. Con la misma semilla todo se repite exacto; con la semilla 7 cambian las filas, pero no las historias que esconden.</p></div><div class="ml"><b>En la práctica</b><p><b>La pregunta queda firmada.</b> Lorena confirmó la página de Mariana con un cambio: además de la caída del Sur, quiere saber si se concentra en alguna tienda. Mariana agregó esa línea y anotó qué datos va a necesitar: los tres archivos de ventas, las tiendas y, si la caída se concentra en una tienda, las reseñas. El próximo paso es abrir esos archivos sin romperlos, y eso empieza en el capítulo 02.</p></div></section>
 <section><h2>La idea clave</h2><div class="prose"><p>Un análisis empieza por la decisión que depende de él y por una pregunta medible: qué métrica, de quién, en qué período y contra qué comparación. El tipo de pregunta (descriptiva, exploratoria, inferencial, predictiva o causal) dice qué herramientas hacen falta y hasta dónde se puede concluir: una correlación nunca prueba una causa por sí sola. Con la pregunta clara, el análisis recorre un ciclo de seis pasos (preguntar, obtener, limpiar, explorar, modelar y comunicar) que el curso sigue capítulo a capítulo con los datos de Almacenes Ejemplo.</p></div></section>
 <section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Qué pregunta conviene hacer antes de abrir los datos ante un pedido como «las ventas están mal»?</summary><p>Qué decisión depende de la respuesta. Define qué métrica, qué comparación y cuánta precisión hacen falta, y cuándo termina el análisis.</p></details><details><summary>¿Por qué comparar las ventas de octubre con las de septiembre puede engañar en un supermercado?</summary><p>Porque las ventas tienen estacionalidad: cada mes tiene su ritmo. La comparación interanual (octubre contra octubre del año anterior) cancela el efecto del calendario.</p></details><details><summary>«¿Qué productos se compran juntos?» y «¿Cuánto venderá T07 en diciembre?»: ¿de qué tipo es cada pregunta?</summary><p>La primera es exploratoria (busca patrones que nadie planteó); la segunda es predictiva (pide un valor futuro).</p></details><details><summary>Las tiendas con más reseñas venden más. ¿Por qué no basta para pedir más reseñas?</summary><p>Porque es una correlación: el tamaño de la tienda aumenta a la vez las reseñas y las ventas. Para afirmar una causa haría falta un experimento.</p></details><details><summary>¿Qué diferencia hay entre «ventas» y «ticket promedio» como métricas?</summary><p>Ventas es un total (suma de cantidad por precio); el ticket promedio es un cociente (ventas divididas por tickets) y puede subir aunque vengan menos clientes.</p></details><details><summary>¿En qué paso del ciclo se suele ir más de la mitad del tiempo de un análisis?</summary><p>En limpiar: dejar los datos con tipos correctos, sin duplicados, con los faltantes tratados y las tablas unidas.</p></details></div></section>
 <section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es el «efecto cobra» y qué otros casos famosos hay de metas que empeoraron justo lo que querían mejorar?<small>Pista: busca también «Goodhart's law».</small></li><li>¿Qué es un ensayo aleatorizado controlado y por qué el azar en la asignación es lo que permite hablar de causa?</li><li>¿Qué son las pruebas A/B que hacen las tiendas en línea y en qué se parecen a un ensayo clínico?<small>Pista: busca «A/B testing» y «grupo de control».</small></li><li>¿Qué es el sesgo de supervivencia y qué tiene que ver con los aviones de la Segunda Guerra Mundial?<small>Pista: busca «Abraham Wald».</small></li><li>¿Cuáles son las seis fases de CRISP-DM y qué metodologías la reemplazaron o la extendieron después?<small>Pista: busca «TDSP» y «ASUM-DM».</small></li></ol></div></section>

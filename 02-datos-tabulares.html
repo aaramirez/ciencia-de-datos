@@ -76,46 +76,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <text x="32" y="380" class="t t-s">continuo, sin tocar las demás columnas. Polars usa el formato Apache Arrow; pandas 3, para el texto.</text>
 <text x="32" y="400" class="t t-s k-fis t-b">fecha_hora todavía es texto en las dos tablas: convertirla es el primer paso de limpieza.</text>
 </svg></div><figcaption><b>La misma tabla en pandas y en Polars.</b> A la izquierda, un <code>DataFrame</code> de pandas con cinco tickets: la columna gris del borde es el índice, y bajo cada nombre de columna está su tipo. A la derecha, la misma tabla en Polars, sin índice. Abajo, cómo se guarda en memoria: no fila por fila, sino una columna detrás de otra, cada una del mismo tipo. La columna <code>fecha_hora</code>, en ámbar, es texto en las dos: todavía no se convirtió en fecha.</figcaption></figure></section>
-<section><h2>Leer CSV, Excel, Parquet y bases de datos</h2><div class="prose"><p>Los datos llegan en muchos formatos. Las dos bibliotecas leen los mismos con funciones casi iguales: en pandas empiezan con <code>pd.read_</code>, y en Polars con <code>pl.read_</code> o <code>pl.scan_</code>.</p></div><div class="analogia"><b>Imagínalo así</b><p>Leer un archivo es como recibir una carta en otro idioma. Si sabes de antemano que viene en portugués y que las fechas se escriben al revés, la entiendes a la primera. Si no, lees cualquier cosa. Las opciones de lectura son el aviso que le das a la biblioteca antes de abrir la carta.</p></div><div class="prose"><ul><li><b>CSV</b> (<i>comma-separated values</i>, valores separados por comas). Texto plano, el formato más común y el más traicionero: no dice qué tipo tiene cada columna, ni qué separador usa, ni cómo se escriben los decimales y las fechas. La biblioteca adivina, y a veces adivina mal. Las opciones clave son <code>sep</code> (el separador), <code>decimal</code> (el signo decimal), el tipo de cada columna y el formato de las fechas.</li><li><b>Excel</b> (<code>.xlsx</code>). Muy usado en las empresas. Se lee con <code>pd.read_excel</code> o <code>pl.read_excel</code>, que necesitan una biblioteca extra (openpyxl o fastexcel). Hay que decir qué hoja leer y desde qué fila empiezan los datos, porque muchos archivos tienen títulos y notas encima.</li><li><b>Parquet</b>. Un formato binario por columnas, comprimido y con los tipos guardados dentro: una fecha se lee como fecha, sin adivinar. Es el formato estándar de las plataformas de datos. Se lee con <code>pd.read_parquet</code> o <code>pl.read_parquet</code>. Los detalles de cómo está hecho por dentro están en <a href="https://aaramirez.github.io/ingenieria-de-datos/temario.html" target="_blank" rel="noopener">Ingeniería de datos</a>.</li><li><b>Bases de datos</b>. Con una consulta SQL y una conexión: <code>pd.read_sql</code> con una conexión de SQLAlchemy o de <code>sqlite3</code>, o <code>pl.read_database</code>. Cómo funciona SQL por dentro está en <a href="https://aaramirez.github.io/bases-de-datos/temario.html" target="_blank" rel="noopener">Bases de datos</a>.</li></ul><p>El archivo del Oriente es el ejemplo perfecto de por qué importan las opciones. Leído sin ellas, pandas ve una sola columna llamada <code>ticket_id;fecha_hora;tienda_id;cliente_id;medio_pago;total</code>, porque busca comas y no las hay. Con <code>sep=";"</code> separa bien las columnas, pero el total <code>3,20</code> queda como texto. Con <code>sep=";"</code> y <code>decimal=","</code>, todo cae en su lugar. Falta la fecha: <code>01/01/2025</code> se lee igual en cualquier orden, pero <code>02/01/2025</code> es el 2 de enero para nosotros y el 1 de febrero para un programa que espera el orden de Estados Unidos (mes/día/año). Por eso se le da el formato exacto: <code>format="%d/%m/%Y %H:%M"</code>.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Lee los archivos de la cadena con pandas y guárdalos en Parquet</h3></div><p>Vas a crear el entorno de Python del curso, leer los tres archivos de ventas con las opciones correctas y comparar un CSV con un Parquet. Necesitas los datos del capítulo 01 en <code>datos-cadena/crudo</code>. Crea el entorno virtual e instala las bibliotecas (son unos 150 MB; se hace una sola vez):</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python -m venv .venv</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install pandas polars pyarrow duckdb openpyxl</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python3 -m venv .venv</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install pandas polars pyarrow duckdb openpyxl</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Guarda este script como <code>leer.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia"><pre><code>"""Lee los tres archivos de ventas de Almacenes Ejemplo, cada uno con sus opciones."""
-import time
-from pathlib import Path
-
-import pandas as pd
-
-CARPETA = Path.home() / "datos-cadena"
-CRUDO = CARPETA / "crudo"
-
-# 1. El archivo del sistema nuevo: basta con la ruta
-ventas = pd.read_csv(CRUDO / "ventas.csv")
-print("ventas.csv:", ventas.shape)
-print(ventas.dtypes, "\n")
-
-# 2. El del Oriente, leído sin opciones: todo cae en una sola columna
-mal = pd.read_csv(CRUDO / "ventas_oriente.csv")
-print("Oriente sin opciones:", mal.shape, list(mal.columns)[:1])
-
-# 3. El del Oriente, bien leído: separador, coma decimal y fecha día/mes/año
-oriente = pd.read_csv(CRUDO / "ventas_oriente.csv", sep=";", decimal=",")
-oriente["fecha_hora"] = pd.to_datetime(oriente["fecha_hora"], format="%d/%m/%Y %H:%M")
-print("Oriente bien leído:", oriente.shape, oriente["total"].dtype, "\n")
-
-# 4. Juntar los tres archivos con las fechas como fecha de verdad
-reenvio = pd.read_csv(CRUDO / "ventas_T09_reenvio.csv")
-for df in (ventas, reenvio):
-    df["fecha_hora"] = pd.to_datetime(df["fecha_hora"], format="%Y-%m-%d %H:%M")
-todas = pd.concat([ventas, oriente, reenvio], ignore_index=True)
-print("Todas las ventas:", todas.shape)
-print(todas.dtypes, "\n")
-
-# 5. Guardar en Parquet y comparar tamaño y tiempo de lectura con el CSV
-todas.to_parquet(CARPETA / "ventas_todas.parquet")
-todas.to_csv(CARPETA / "ventas_todas.csv", index=False)
-for nombre in ("ventas_todas.csv", "ventas_todas.parquet"):
-    ruta = CARPETA / nombre
-    inicio = time.perf_counter()
-    df = pd.read_parquet(ruta) if nombre.endswith(".parquet") else pd.read_csv(ruta)
-    ms = (time.perf_counter() - inicio) * 1000
-    print(f"{nombre:&lt;22} {ruta.stat().st_size / 1e6:6.1f} MB  {ms:7.0f} ms  fecha_hora: {df['fecha_hora'].dtype}")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo con el entorno activado:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python leer.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 leer.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Mira los tipos de <code>ventas.csv</code> y luego los de la tabla juntada. ¿Qué columna cambió de tipo?</span></li><li><span>Compara las dos últimas líneas: tamaño en disco y tipo de <code>fecha_hora</code> al volver a leer.</span></li></ol><p><b>Qué observar:</b> <code>ventas.csv</code> tiene 158.690 filas y 6 columnas, y <code>fecha_hora</code> sale como texto (<code>str</code>): el CSV no guarda tipos. <code>cliente_id</code> sale como decimal (<code>float64</code>) porque tiene vacíos. El Oriente sin opciones queda en una sola columna; bien leído, <code>total</code> es <code>float64</code>. La tabla juntada tiene 197.622 filas y <code>fecha_hora</code> ya es <code>datetime64</code>. El CSV guardado pesa unos 10 MB y el Parquet unos 3 MB, y al releerlo el Parquet devuelve la fecha como fecha, mientras que el CSV la devuelve otra vez como texto. Los tiempos dependen de tu equipo; con este tamaño son parecidos, y la diferencia crece con archivos grandes.</p></div></section>
+<section><h2>Leer CSV, Excel, Parquet y bases de datos</h2><div class="prose"><p>Los datos llegan en muchos formatos. Las dos bibliotecas leen los mismos con funciones casi iguales: en pandas empiezan con <code>pd.read_</code>, y en Polars con <code>pl.read_</code> o <code>pl.scan_</code>.</p></div><div class="analogia"><b>Imagínalo así</b><p>Leer un archivo es como recibir una carta en otro idioma. Si sabes de antemano que viene en portugués y que las fechas se escriben al revés, la entiendes a la primera. Si no, lees cualquier cosa. Las opciones de lectura son el aviso que le das a la biblioteca antes de abrir la carta.</p></div><div class="prose"><ul><li><b>CSV</b> (<i>comma-separated values</i>, valores separados por comas). Texto plano, el formato más común y el más traicionero: no dice qué tipo tiene cada columna, ni qué separador usa, ni cómo se escriben los decimales y las fechas. La biblioteca adivina, y a veces adivina mal. Las opciones clave son <code>sep</code> (el separador), <code>decimal</code> (el signo decimal), el tipo de cada columna y el formato de las fechas.</li><li><b>Excel</b> (<code>.xlsx</code>). Muy usado en las empresas. Se lee con <code>pd.read_excel</code> o <code>pl.read_excel</code>, que necesitan una biblioteca extra (openpyxl o fastexcel). Hay que decir qué hoja leer y desde qué fila empiezan los datos, porque muchos archivos tienen títulos y notas encima.</li><li><b>Parquet</b>. Un formato binario por columnas, comprimido y con los tipos guardados dentro: una fecha se lee como fecha, sin adivinar. Es el formato estándar de las plataformas de datos. Se lee con <code>pd.read_parquet</code> o <code>pl.read_parquet</code>. Los detalles de cómo está hecho por dentro están en <a href="https://aaramirez.github.io/ingenieria-de-datos/temario.html" target="_blank" rel="noopener">Ingeniería de datos</a>.</li><li><b>Bases de datos</b>. Con una consulta SQL y una conexión: <code>pd.read_sql</code> con una conexión de SQLAlchemy o de <code>sqlite3</code>, o <code>pl.read_database</code>. Cómo funciona SQL por dentro está en <a href="https://aaramirez.github.io/bases-de-datos/temario.html" target="_blank" rel="noopener">Bases de datos</a>.</li></ul><p>El archivo del Oriente es el ejemplo perfecto de por qué importan las opciones. Leído sin ellas, pandas ve una sola columna llamada <code>ticket_id;fecha_hora;tienda_id;cliente_id;medio_pago;total</code>, porque busca comas y no las hay. Con <code>sep=";"</code> separa bien las columnas, pero el total <code>3,20</code> queda como texto. Con <code>sep=";"</code> y <code>decimal=","</code>, todo cae en su lugar. Falta la fecha: <code>01/01/2025</code> se lee igual en cualquier orden, pero <code>02/01/2025</code> es el 2 de enero para nosotros y el 1 de febrero para un programa que espera el orden de Estados Unidos (mes/día/año). Por eso se le da el formato exacto: <code>format="%d/%m/%Y %H:%M"</code>.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Lee los archivos de la cadena con pandas y guárdalos en Parquet</h3></div><p>Vas a crear el entorno de Python del curso, leer los tres archivos de ventas con las opciones correctas y comparar un CSV con un Parquet. Necesitas los datos del capítulo 01 en <code>datos-cadena/crudo</code>. Crea el entorno virtual e instala las bibliotecas (son unos 150 MB; se hace una sola vez):</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python -m venv .venv</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install pandas polars pyarrow duckdb openpyxl</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python3 -m venv .venv</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install pandas polars pyarrow duckdb openpyxl</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Guarda este script como <code>leer.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia code-lineas"><pre><code><span class="ln">"""Lee los tres archivos de ventas de Almacenes Ejemplo, cada uno con sus opciones."""</span>
+<span class="ln">import time</span>
+<span class="ln">from pathlib import Path</span>
+<span class="ln"></span>
+<span class="ln">import pandas as pd</span>
+<span class="ln"></span>
+<span class="ln">CARPETA = Path.home() / "datos-cadena"</span>
+<span class="ln">CRUDO = CARPETA / "crudo"</span>
+<span class="ln"></span>
+<span class="ln"># 1. El archivo del sistema nuevo: basta con la ruta</span>
+<span class="ln">ventas = pd.read_csv(CRUDO / "ventas.csv")</span>
+<span class="ln">print("ventas.csv:", ventas.shape)</span>
+<span class="ln">print(ventas.dtypes, "\n")</span>
+<span class="ln"></span>
+<span class="ln"># 2. El del Oriente, leído sin opciones: todo cae en una sola columna</span>
+<span class="ln">mal = pd.read_csv(CRUDO / "ventas_oriente.csv")</span>
+<span class="ln">print("Oriente sin opciones:", mal.shape, list(mal.columns)[:1])</span>
+<span class="ln"></span>
+<span class="ln"># 3. El del Oriente, bien leído: separador, coma decimal y fecha día/mes/año</span>
+<span class="ln">oriente = pd.read_csv(CRUDO / "ventas_oriente.csv", sep=";", decimal=",")</span>
+<span class="ln">oriente["fecha_hora"] = pd.to_datetime(oriente["fecha_hora"], format="%d/%m/%Y %H:%M")</span>
+<span class="ln">print("Oriente bien leído:", oriente.shape, oriente["total"].dtype, "\n")</span>
+<span class="ln"></span>
+<span class="ln"># 4. Juntar los tres archivos con las fechas como fecha de verdad</span>
+<span class="ln">reenvio = pd.read_csv(CRUDO / "ventas_T09_reenvio.csv")</span>
+<span class="ln">for df in (ventas, reenvio):</span>
+<span class="ln">    df["fecha_hora"] = pd.to_datetime(df["fecha_hora"], format="%Y-%m-%d %H:%M")</span>
+<span class="ln">todas = pd.concat([ventas, oriente, reenvio], ignore_index=True)</span>
+<span class="ln">print("Todas las ventas:", todas.shape)</span>
+<span class="ln">print(todas.dtypes, "\n")</span>
+<span class="ln"></span>
+<span class="ln"># 5. Guardar en Parquet y comparar tamaño y tiempo de lectura con el CSV</span>
+<span class="ln">todas.to_parquet(CARPETA / "ventas_todas.parquet")</span>
+<span class="ln">todas.to_csv(CARPETA / "ventas_todas.csv", index=False)</span>
+<span class="ln">for nombre in ("ventas_todas.csv", "ventas_todas.parquet"):</span>
+<span class="ln">    ruta = CARPETA / nombre</span>
+<span class="ln">    inicio = time.perf_counter()</span>
+<span class="ln">    df = pd.read_parquet(ruta) if nombre.endswith(".parquet") else pd.read_csv(ruta)</span>
+<span class="ln">    ms = (time.perf_counter() - inicio) * 1000</span>
+<span class="ln">    print(f"{nombre:&lt;22} {ruta.stat().st_size / 1e6:6.1f} MB  {ms:7.0f} ms  fecha_hora: {df['fecha_hora'].dtype}")</span></code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo con el entorno activado:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python leer.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 leer.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Mira los tipos de <code>ventas.csv</code> y luego los de la tabla juntada. ¿Qué columna cambió de tipo?</span></li><li><span>Compara las dos últimas líneas: tamaño en disco y tipo de <code>fecha_hora</code> al volver a leer.</span></li></ol><p><b>Qué observar:</b> <code>ventas.csv</code> tiene 158.690 filas y 6 columnas, y <code>fecha_hora</code> sale como texto (<code>str</code>): el CSV no guarda tipos. <code>cliente_id</code> sale como decimal (<code>float64</code>) porque tiene vacíos. El Oriente sin opciones queda en una sola columna; bien leído, <code>total</code> es <code>float64</code>. La tabla juntada tiene 197.622 filas y <code>fecha_hora</code> ya es <code>datetime64</code>. El CSV guardado pesa unos 10 MB y el Parquet unos 3 MB, y al releerlo el Parquet devuelve la fecha como fecha, mientras que el CSV la devuelve otra vez como texto. Los tiempos dependen de tu equipo; con este tamaño son parecidos, y la diferencia crece con archivos grandes.</p></div></section>
 <section><h2>Seleccionar, filtrar, ordenar y crear columnas</h2><div class="prose"><p>Con la tabla cargada, el trabajo diario se reduce a cinco operaciones que se combinan: elegir columnas, elegir filas, ordenar, crear columnas nuevas y resumir. Las dos bibliotecas las hacen todas, con estilos distintos.</p></div><div class="analogia"><b>Imagínalo así</b><p>Piensa en un fichero de tarjetas de clientes. Seleccionar es tapar con la mano todo menos dos datos de cada tarjeta. Filtrar es sacar solo las tarjetas que cumplen una condición. Ordenar es barajarlas por apellido. Crear una columna es escribir en cada tarjeta un dato calculado a partir de los otros, como la edad a partir de la fecha de nacimiento.</p></div><div class="prose"><div class="tbl"><table><thead><tr><th>Operación</th><th>pandas</th><th>Polars</th></tr></thead><tbody><tr><td>Seleccionar columnas</td><td><code>ventas[["tienda_id", "total"]]</code></td><td><code>ventas.select("tienda_id", "total")</code></td></tr><tr><td>Filtrar filas</td><td><code>ventas[ventas["total"] &gt; 30]</code></td><td><code>ventas.filter(pl.col("total") &gt; 30)</code></td></tr><tr><td>Ordenar</td><td><code>ventas.sort_values("total", ascending=False)</code></td><td><code>ventas.sort("total", descending=True)</code></td></tr><tr><td>Crear columnas</td><td><code>ventas.assign(con_iva=ventas["total"] * 1.12)</code></td><td><code>ventas.with_columns(con_iva=pl.col("total") * 1.12)</code></td></tr><tr><td>Agrupar y resumir</td><td><code>ventas.groupby("tienda_id")["total"].sum()</code></td><td><code>ventas.group_by("tienda_id").agg(pl.col("total").sum())</code></td></tr></tbody></table></div><p>Para filtrar, las dos usan una <b>máscara booleana</b> (<i>boolean mask</i>): una columna de verdadero o falso, una por fila, que dice qué filas se quedan. <code>ventas["total"] &gt; 30</code> no es una pregunta sobre un número; es una operación sobre toda la columna que devuelve 240 verdaderos o falsos de una vez. Varias condiciones se combinan con <code>&amp;</code> (y), <code>|</code> (o) y <code>~</code> (no), cada una entre paréntesis. Usar <code>and</code> u <code>or</code> de Python da error, porque esas palabras esperan un solo verdadero o falso, no una columna entera.</p><p>En pandas, el índice añade dos formas de seleccionar: <code>.loc[]</code> busca por etiqueta (filas y columnas por nombre) y <code>.iloc[]</code> por posición (la fila número 3, la columna número 0). En Polars no existen: se filtra por columnas.</p><p>Hay una diferencia de estilo importante. En Polars, todo lo que va dentro de <code>select</code>, <code>filter</code> o <code>with_columns</code> es una <b>expresión</b> (<i>expression</i>): una descripción de un cálculo sobre columnas, como <code>pl.col("total") * 1.12</code>, que todavía no se ejecutó. Las expresiones se pueden guardar, combinar y reutilizar, y Polars decide cómo calcularlas de la forma más eficiente. pandas, en cambio, calcula cada paso en el momento.</p></div><div class="lab" id="02-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Operaciones sobre las ventas de la cadena, con el código y la tabla lado a lado</h3></div><p class="hint">Elige una operación y una biblioteca: verás el código y la tabla que produce, con 240 tickets de octubre de 2026. Pulsa «Cargar Python» para ejecutar el código en tu navegador; después, cámbialo y vuelve a ejecutarlo. Prueba a filtrar los tickets de otra tienda o a ordenar por fecha. Si cambias a Polars después de cargar, se descargan unos 18 MB más.</p><style>
 [id="02-lab-1"] .c2l1-rot{font:700 .7rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 [id="02-lab-1"] .btns{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -273,57 +273,57 @@ for nombre in ("ventas_todas.csv", "ventas_todas.parquet"):
 <text x="500" y="398" class="t t-s">pero el motor elige el orden real, igual</text>
 <text x="500" y="416" class="t t-s">que el plan de Polars. pandas ejecuta</text>
 <text x="500" y="434" class="t t-s">los pasos en el orden en que los escribes.</text>
-</svg></div><figcaption><b>Una pregunta, tres idiomas.</b> Cada columna es la misma consulta escrita en pandas, en Polars y en SQL con DuckDB. Las filas alinean los pasos equivalentes con el mismo color: leer (ámbar), filtrar octubre, unir con las tiendas, agrupar por región y ordenar. Abajo, el resultado, idéntico en los tres. Fíjate en el orden: en SQL el filtro va después de unir porque así se escribe, pero el motor decide el orden real, como en el plan de Polars.</figcaption></figure><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Escribe la misma consulta en pandas, Polars y DuckDB</h3></div><p>Vas a calcular las ventas de octubre de 2026 por región de tres formas y comparar resultados y tiempos. Necesitas <code>ventas_todas.parquet</code>, que crea la práctica anterior, y el entorno activado.</p><ol class="steps"><li><span>Guarda este script como <code>consulta.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia"><pre><code>"""La misma consulta en pandas, Polars y DuckDB: ventas por región en octubre de 2026."""
-import time
-from pathlib import Path
-
-import duckdb
-import pandas as pd
-import polars as pl
-
-CARPETA = Path.home() / "datos-cadena"
-pl.Config.set_ascii_tables(True)  # tablas legibles en cualquier terminal
-VENTAS, TIENDAS = CARPETA / "ventas_todas.parquet", CARPETA / "crudo" / "tiendas.csv"
-
-
-def con_pandas():
-    v = pd.read_parquet(VENTAS)
-    t = pd.read_csv(TIENDAS)
-    octubre = v[(v["fecha_hora"] &gt;= "2026-10-01") &amp; (v["fecha_hora"] &lt; "2026-11-01")]
-    return (octubre.merge(t, on="tienda_id")
-                   .groupby("region", as_index=False)
-                   .agg(tickets=("ticket_id", "count"), ventas=("total", "sum"))
-                   .sort_values("ventas", ascending=False))
-
-
-def con_polars():
-    t = pl.read_csv(TIENDAS)
-    return (pl.scan_parquet(VENTAS)
-              .filter(pl.col("fecha_hora").is_between(pl.datetime(2026, 10, 1), pl.datetime(2026, 11, 1),
-                                                      closed="left"))
-              .join(t.lazy(), on="tienda_id")
-              .group_by("region")
-              .agg(tickets=pl.col("ticket_id").count(), ventas=pl.col("total").sum())
-              .sort("ventas", descending=True)
-              .collect())
-
-
-def con_duckdb():
-    return duckdb.sql(f"""
-        SELECT t.region, COUNT(v.ticket_id) AS tickets, SUM(v.total) AS ventas
-        FROM '{VENTAS.as_posix()}' AS v
-        JOIN read_csv('{TIENDAS.as_posix()}') AS t USING (tienda_id)
-        WHERE v.fecha_hora &gt;= '2026-10-01' AND v.fecha_hora &lt; '2026-11-01'
-        GROUP BY t.region
-        ORDER BY ventas DESC""").df()
-
-
-for nombre, funcion in (("pandas", con_pandas), ("Polars", con_polars), ("DuckDB", con_duckdb)):
-    inicio = time.perf_counter()
-    resultado = funcion()
-    ms = (time.perf_counter() - inicio) * 1000
-    print(f"--- {nombre} ({ms:.0f} ms)")
-    print(resultado, "\n")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python consulta.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 consulta.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Compara las tres tablas fila por fila. Después cambia el mes a septiembre en las tres funciones y vuelve a correr.</span></li></ol><p><b>Qué observar:</b> las tres dan lo mismo: el Norte con 3.042 tickets y unos US$ 51.546, y el Sur al final con 1.759 tickets y unos US$ 24.636. Los tiempos son de decenas o cientos de milisegundos y cambian de una corrida a otra; la primera consulta de DuckDB suele tardar más porque arranca el motor. Estas cifras todavía no son las definitivas: los datos tienen duplicados, totales vacíos y errores de digitación que el capítulo 03 limpia, y entonces el Norte de octubre sube a US$ 51.800,30.</p></div><div class="prose"><p>No hay una respuesta única sobre cuál usar. SQL es el idioma común con las bases de datos y con quien no programa en Python. pandas es el más conocido y el que más bibliotecas acepta. Polars es el más rápido con datos grandes y el que obliga a pensar en expresiones. Lo que vale la pena aprender es la forma de pensar que comparten: operaciones sobre columnas enteras, encadenadas, que describen qué resultado quieres y no cómo recorrer las filas para conseguirlo.</p></div></section>
+</svg></div><figcaption><b>Una pregunta, tres idiomas.</b> Cada columna es la misma consulta escrita en pandas, en Polars y en SQL con DuckDB. Las filas alinean los pasos equivalentes con el mismo color: leer (ámbar), filtrar octubre, unir con las tiendas, agrupar por región y ordenar. Abajo, el resultado, idéntico en los tres. Fíjate en el orden: en SQL el filtro va después de unir porque así se escribe, pero el motor decide el orden real, como en el plan de Polars.</figcaption></figure><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Escribe la misma consulta en pandas, Polars y DuckDB</h3></div><p>Vas a calcular las ventas de octubre de 2026 por región de tres formas y comparar resultados y tiempos. Necesitas <code>ventas_todas.parquet</code>, que crea la práctica anterior, y el entorno activado.</p><ol class="steps"><li><span>Guarda este script como <code>consulta.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia code-lineas"><pre><code><span class="ln">"""La misma consulta en pandas, Polars y DuckDB: ventas por región en octubre de 2026."""</span>
+<span class="ln">import time</span>
+<span class="ln">from pathlib import Path</span>
+<span class="ln"></span>
+<span class="ln">import duckdb</span>
+<span class="ln">import pandas as pd</span>
+<span class="ln">import polars as pl</span>
+<span class="ln"></span>
+<span class="ln">CARPETA = Path.home() / "datos-cadena"</span>
+<span class="ln">pl.Config.set_ascii_tables(True)  # tablas legibles en cualquier terminal</span>
+<span class="ln">VENTAS, TIENDAS = CARPETA / "ventas_todas.parquet", CARPETA / "crudo" / "tiendas.csv"</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def con_pandas():</span>
+<span class="ln">    v = pd.read_parquet(VENTAS)</span>
+<span class="ln">    t = pd.read_csv(TIENDAS)</span>
+<span class="ln">    octubre = v[(v["fecha_hora"] &gt;= "2026-10-01") &amp; (v["fecha_hora"] &lt; "2026-11-01")]</span>
+<span class="ln">    return (octubre.merge(t, on="tienda_id")</span>
+<span class="ln">                   .groupby("region", as_index=False)</span>
+<span class="ln">                   .agg(tickets=("ticket_id", "count"), ventas=("total", "sum"))</span>
+<span class="ln">                   .sort_values("ventas", ascending=False))</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def con_polars():</span>
+<span class="ln">    t = pl.read_csv(TIENDAS)</span>
+<span class="ln">    return (pl.scan_parquet(VENTAS)</span>
+<span class="ln">              .filter(pl.col("fecha_hora").is_between(pl.datetime(2026, 10, 1), pl.datetime(2026, 11, 1),</span>
+<span class="ln">                                                      closed="left"))</span>
+<span class="ln">              .join(t.lazy(), on="tienda_id")</span>
+<span class="ln">              .group_by("region")</span>
+<span class="ln">              .agg(tickets=pl.col("ticket_id").count(), ventas=pl.col("total").sum())</span>
+<span class="ln">              .sort("ventas", descending=True)</span>
+<span class="ln">              .collect())</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">def con_duckdb():</span>
+<span class="ln">    return duckdb.sql(f"""</span>
+<span class="ln">        SELECT t.region, COUNT(v.ticket_id) AS tickets, SUM(v.total) AS ventas</span>
+<span class="ln">        FROM '{VENTAS.as_posix()}' AS v</span>
+<span class="ln">        JOIN read_csv('{TIENDAS.as_posix()}') AS t USING (tienda_id)</span>
+<span class="ln">        WHERE v.fecha_hora &gt;= '2026-10-01' AND v.fecha_hora &lt; '2026-11-01'</span>
+<span class="ln">        GROUP BY t.region</span>
+<span class="ln">        ORDER BY ventas DESC""").df()</span>
+<span class="ln"></span>
+<span class="ln"></span>
+<span class="ln">for nombre, funcion in (("pandas", con_pandas), ("Polars", con_polars), ("DuckDB", con_duckdb)):</span>
+<span class="ln">    inicio = time.perf_counter()</span>
+<span class="ln">    resultado = funcion()</span>
+<span class="ln">    ms = (time.perf_counter() - inicio) * 1000</span>
+<span class="ln">    print(f"--- {nombre} ({ms:.0f} ms)")</span>
+<span class="ln">    print(resultado, "\n")</span></code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python consulta.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 consulta.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Compara las tres tablas fila por fila. Después cambia el mes a septiembre en las tres funciones y vuelve a correr.</span></li></ol><p><b>Qué observar:</b> las tres dan lo mismo: el Norte con 3.042 tickets y unos US$ 51.546, y el Sur al final con 1.759 tickets y unos US$ 24.636. Los tiempos son de decenas o cientos de milisegundos y cambian de una corrida a otra; la primera consulta de DuckDB suele tardar más porque arranca el motor. Estas cifras todavía no son las definitivas: los datos tienen duplicados, totales vacíos y errores de digitación que el capítulo 03 limpia, y entonces el Norte de octubre sube a US$ 51.800,30.</p></div><div class="prose"><p>No hay una respuesta única sobre cuál usar. SQL es el idioma común con las bases de datos y con quien no programa en Python. pandas es el más conocido y el que más bibliotecas acepta. Polars es el más rápido con datos grandes y el que obliga a pensar en expresiones. Lo que vale la pena aprender es la forma de pensar que comparten: operaciones sobre columnas enteras, encadenadas, que describen qué resultado quieres y no cómo recorrer las filas para conseguirlo.</p></div></section>
 <section><h2>La idea clave</h2><div class="prose"><p>Una tabla de datos tiene filas que son casos, columnas que son variables y un tipo por columna; pandas agrega un índice y Polars no. Los formatos se leen con funciones parecidas, pero un CSV hay que leerlo con sus opciones (separador, decimal, fechas), mientras que Parquet guarda los tipos. Seleccionar, filtrar, ordenar, crear columnas y resumir son operaciones sobre columnas enteras: vectorizadas, son cientos de veces más rápidas que un bucle. Polars agrega expresiones, un plan optimizado en modo perezoso y trabajo en paralelo. La misma consulta se puede escribir en pandas, en Polars o en SQL con DuckDB, y el resultado es el mismo.</p></div></section>
 <section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué <code>fecha_hora</code> aparece como texto al leer <code>ventas.csv</code> y como fecha al leer el Parquet?</summary><p>Porque el CSV es texto plano y no guarda tipos: la biblioteca no convierte la fecha si no se le pide. El Parquet guarda el tipo de cada columna dentro del archivo.</p></details><details><summary>¿Qué opciones hacen falta para leer bien <code>ventas_oriente.csv</code>?</summary><p>El separador <code>sep=";"</code>, el signo decimal <code>decimal=","</code> y convertir la fecha con el formato día/mes/año (<code>format="%d/%m/%Y %H:%M"</code>).</p></details><details><summary>¿Por qué <code>ventas[(ventas["total"] &gt; 30) and (ventas["tienda_id"] == "T07")]</code> da error?</summary><p>Porque <code>and</code> espera un solo verdadero o falso y las condiciones son columnas enteras. Se combinan con <code>&amp;</code>, cada una entre paréntesis.</p></details><details><summary>¿Por qué multiplicar una columna entera es mucho más rápido que un bucle sobre sus filas?</summary><p>Porque la operación vectorizada corre en código compilado sobre un bloque de memoria del mismo tipo, aprovecha instrucciones del procesador y no convierte cada valor en un objeto de Python.</p></details><details><summary>¿Qué gana Polars al leer con <code>scan_parquet</code> en lugar de <code>read_parquet</code> si la consulta filtra octubre y usa tres columnas?</summary><p>Con la evaluación perezosa arma un plan y lo optimiza: filtra mientras lee y solo lee las columnas necesarias, en vez de cargar el archivo entero.</p></details><details><summary>¿Qué es una expresión en Polars?</summary><p>La descripción de un cálculo sobre columnas, como <code>pl.col("total") * 1.12</code>, que no se ejecuta en el momento: Polars la recibe y decide cómo calcularla.</p></details></div></section>
 <section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es la codificación de caracteres UTF-8 y qué pasa cuando un CSV se guarda en otra, como Latin-1 o Windows-1252?<small>Pista: busca «mojibake» y el parámetro <code>encoding</code> de <code>read_csv</code>.</small></li><li>¿Qué es el <i>copy-on-write</i> de pandas 3 y por qué cambió la forma de modificar una tabla?</li><li>¿Qué es Apache Arrow y cómo permite que pandas, Polars y DuckDB se pasen tablas sin copiarlas?<small>Pista: busca «zero-copy» y «Arrow columnar format».</small></li><li>¿Qué es la memoria caché del procesador y por qué recorrer un bloque continuo de memoria es más rápido que saltar de objeto en objeto?</li><li>¿Cómo funciona Pyodide para ejecutar Python dentro del navegador?<small>Pista: busca «WebAssembly» y «Emscripten».</small></li></ol></div></section>
