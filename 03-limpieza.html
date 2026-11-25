@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Limpieza · Ciencia de datos · Ciencia de datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Del dato crudo a la decisión: hacer buenas preguntas, limpiar, explorar, visualizar, minar datos y texto y comunicar resultados con pandas y Polars, con código que corre en la página.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="limpieza">
+<header class="topbar"><a class="brand" href="index.html">Ciencia de <b>datos</b></a><span class="eyebrow">Curso visual e interactivo · Datos e inteligencia artificial</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 03 DE 10</span><h1>Limpieza: faltantes, duplicados, tipos y atípicos</h1><p class="lede">Los datos reales llegan sucios: archivos con formatos distintos, filas repetidas, valores vacíos, categorías escritas de mil formas y números imposibles. Este capítulo enseña a detectar cada problema, decidir qué hacer con él y dejar esa decisión escrita en código, para que cualquiera pueda repetir la limpieza y llegar a las mismas cifras.</p></header>
+<section><h2>Datos ordenados (<i>tidy data</i>): una variable por columna, una observación por fila</h2><div class="prose"><p>Hernán Ibáñez, el gerente regional del Sur, le manda a Mariana su propia planilla «para ahorrarle trabajo»: una fila por tienda y una columna por mes, con las ventas en cada casilla. Es cómoda para leer en una reunión. Para analizar, es un problema: para saber qué mes vendió más hay que comparar columnas, para agregar abril hay que agregar una columna, y la palabra «mes» no aparece en ningún lado, porque está escondida en los títulos.</p></div><div class="analogia"><b>Imagínalo así</b><p>Una biblioteca puede ordenar los libros por color del lomo: queda preciosa, pero encontrar un libro es imposible. Ordenarlos por autor y título es menos lindo y mucho más útil, porque cualquier persona sabe dónde buscar. Los datos ordenados son la biblioteca por autor: una convención aburrida que hace que todo lo demás funcione.</p></div><div class="prose"><p>En 2014, Hadley Wickham publicó un artículo que puso nombre a esa convención: <b>datos ordenados</b> (<i>tidy data</i>). Tiene tres reglas:</p><ol class="steps"><li><span>Cada <b>variable</b> es una columna.</span></li><li><span>Cada <b>observación</b> es una fila.</span></li><li><span>Cada tipo de unidad de observación es una tabla (los tickets en una, las tiendas en otra).</span></li></ol><p>La planilla de Hernán rompe la primera regla: el mes es una variable, pero está repartido en los nombres de las columnas. Ordenada, tiene tres columnas (<code>tienda_id</code>, <code>mes</code>, <code>ventas</code>) y una fila por tienda y mes. Se ve más larga y menos elegante, pero ahora filtrar un mes es filtrar una columna, graficar es una línea de código y agregar abril es agregar filas. A la planilla de Hernán se le llama <b>formato ancho</b> (<i>wide format</i>) y a la ordenada, <b>formato largo</b> (<i>long format</i>). Pasar de una a otra se hace con <code>melt</code> y <code>pivot</code> en pandas, o <code>unpivot</code> y <code>pivot</code> en Polars, y es parte del capítulo 04.</p><p>Los archivos de las cajas ya vienen casi ordenados: una fila por ticket y una columna por variable. Su suciedad es de otro tipo, y ocupa el resto del capítulo.</p></div><figure class="fig fig-comparacion" id="03-diagrama-1"><div class="lienzo"><svg viewBox="0 0 900 430" style="min-width:720px" role="img" aria-label="La planilla de Hernán en formato ancho, con una columna por mes, y la misma información en formato largo, con columnas tienda, mes y ventas y una fila por tienda y mes; abajo, las tres reglas de los datos ordenados">
+<defs>
+<marker id="c3d1-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+</defs>
+<text x="16" y="26" class="t t-xs t-b k-warm">ANCHO · LA PLANILLA DE HERNÁN</text>
+<rect x="16" y="38" width="80" height="34" class="caja"/><text x="26" y="60" class="t t-s t-b t-mono">tienda</text>
+<rect x="96" y="38" width="80" height="34" style="fill:var(--warm-soft);stroke:var(--warm)"/><text x="106" y="60" class="t t-s t-b t-mono k-warm">ene-26</text>
+<rect x="176" y="38" width="80" height="34" style="fill:var(--warm-soft);stroke:var(--warm)"/><text x="186" y="60" class="t t-s t-b t-mono k-warm">feb-26</text>
+<rect x="256" y="38" width="80" height="34" style="fill:var(--warm-soft);stroke:var(--warm)"/><text x="266" y="60" class="t t-s t-b t-mono k-warm">mar-26</text>
+<rect x="16" y="72" width="320" height="96" class="caja"/>
+<g class="t t-s t-mono">
+<text x="26" y="96" class="t t-s t-mono">T07</text><text x="166" y="96" class="t t-s t-mono" text-anchor="end">20.495</text><text x="246" y="96" class="t t-s t-mono" text-anchor="end">19.108</text><text x="326" y="96" class="t t-s t-mono" text-anchor="end">20.873</text>
+<text x="26" y="126" class="t t-s t-mono">T08</text><text x="166" y="126" class="t t-s t-mono" text-anchor="end">5.447</text><text x="246" y="126" class="t t-s t-mono" text-anchor="end">4.469</text><text x="326" y="126" class="t t-s t-mono" text-anchor="end">5.650</text>
+<text x="26" y="156" class="t t-s t-mono">T09</text><text x="166" y="156" class="t t-s t-mono" text-anchor="end">4.976</text><text x="246" y="156" class="t t-s t-mono" text-anchor="end">4.458</text><text x="326" y="156" class="t t-s t-mono" text-anchor="end">5.271</text>
+</g>
+<text x="16" y="196" class="t t-s k-warm">La variable «mes» está escondida en los títulos.</text>
+<text x="16" y="214" class="t t-s t-m">Agregar abril obliga a agregar una columna.</text>
+<path d="M350 110H440" class="ln" style="stroke-width:2" marker-end="url(#c3d1-m)"/>
+<text x="356" y="100" class="t t-s t-mono">melt</text>
+<text x="356" y="128" class="t t-s t-m">ancho → largo</text>
+<text x="456" y="26" class="t t-xs t-b k-enl">LARGO · DATOS ORDENADOS</text>
+<rect x="456" y="38" width="90" height="34" class="c-enl"/><text x="466" y="60" class="t t-s t-b t-mono">tienda</text>
+<rect x="546" y="38" width="90" height="34" class="c-enl"/><text x="556" y="60" class="t t-s t-b t-mono">mes</text>
+<rect x="636" y="38" width="100" height="34" class="c-enl"/><text x="646" y="60" class="t t-s t-b t-mono">ventas</text>
+<rect x="456" y="72" width="280" height="280" class="caja"/>
+<g>
+<text x="466" y="92" class="t t-s t-mono">T07</text><text x="556" y="92" class="t t-s t-mono">2026-01</text><text x="726" y="92" class="t t-s t-mono" text-anchor="end">20.495</text>
+<text x="466" y="122" class="t t-s t-mono">T07</text><text x="556" y="122" class="t t-s t-mono">2026-02</text><text x="726" y="122" class="t t-s t-mono" text-anchor="end">19.108</text>
+<text x="466" y="152" class="t t-s t-mono">T07</text><text x="556" y="152" class="t t-s t-mono">2026-03</text><text x="726" y="152" class="t t-s t-mono" text-anchor="end">20.873</text>
+<text x="466" y="182" class="t t-s t-mono">T08</text><text x="556" y="182" class="t t-s t-mono">2026-01</text><text x="726" y="182" class="t t-s t-mono" text-anchor="end">5.447</text>
+<text x="466" y="212" class="t t-s t-mono">T08</text><text x="556" y="212" class="t t-s t-mono">2026-02</text><text x="726" y="212" class="t t-s t-mono" text-anchor="end">4.469</text>
+<text x="466" y="242" class="t t-s t-mono">T08</text><text x="556" y="242" class="t t-s t-mono">2026-03</text><text x="726" y="242" class="t t-s t-mono" text-anchor="end">5.650</text>
+<text x="466" y="272" class="t t-s t-mono">T09</text><text x="556" y="272" class="t t-s t-mono">2026-01</text><text x="726" y="272" class="t t-s t-mono" text-anchor="end">4.976</text>
+<text x="466" y="302" class="t t-s t-mono">T09</text><text x="556" y="302" class="t t-s t-mono">2026-02</text><text x="726" y="302" class="t t-s t-mono" text-anchor="end">4.458</text>
+<text x="466" y="332" class="t t-s t-mono">T09</text><text x="556" y="332" class="t t-s t-mono">2026-03</text><text x="726" y="332" class="t t-s t-mono" text-anchor="end">5.271</text>
+</g>
+<text x="752" y="92" class="t t-s t-m">9 filas:</text>
+<text x="752" y="108" class="t t-s t-m">3 tiendas</text>
+<text x="752" y="124" class="t t-s t-m">× 3 meses</text>
+<text x="752" y="160" class="t t-s">Filtrar un mes,</text>
+<text x="752" y="176" class="t t-s">graficar o agregar</text>
+<text x="752" y="192" class="t t-s">abril: siempre la</text>
+<text x="752" y="208" class="t t-s">misma operación.</text>
+<rect x="16" y="368" width="868" height="48" rx="10" class="caja" style="stroke-dasharray:5 4"/>
+<text x="32" y="390" class="t t-xs t-b t-m">LAS TRES REGLAS (WICKHAM, 2014)</text>
+<text x="32" y="406" class="t t-s">1. Cada variable es una columna · 2. Cada observación es una fila · 3. Cada tipo de unidad, una tabla</text>
+</svg></div><figcaption><b>La planilla de Hernán, desordenada y ordenada.</b> A la izquierda, en formato ancho: una fila por tienda y una columna por mes; la variable «mes» está escondida en los títulos (en rojo). A la derecha, la misma información en formato largo: tres columnas y una fila por tienda y mes. La flecha <code>melt</code> pasa de una forma a la otra. Abajo, las tres reglas de los datos ordenados.</figcaption></figure></section>
+<section><h2>Tipos equivocados: fechas como texto, números con comas, categorías mal escritas</h2><div class="prose"><p>El primer síntoma de datos sucios aparece al mirar los tipos con <code>df.dtypes</code>. Una columna que debería ser número sale como texto, o una fecha sale como texto. La biblioteca no se equivocó: adivinó a partir de lo que había, y lo que había no era limpio.</p></div><div class="analogia"><b>Imagínalo así</b><p>Si en un formulario de edad alguien escribe «treinta y dos», la persona que tabula no puede sumarlo con los «32» de los demás hasta traducirlo. Una sola casilla escrita distinto convierte toda la columna en texto, porque la computadora no puede guardar números y palabras mezclados en una columna de números.</p></div><div class="prose"><p>Los tres casos más comunes, todos presentes en los archivos de la cadena:</p><ul><li><b>Fechas como texto.</b> En un CSV, <code>2026-10-14 19:32</code> es una cadena de caracteres. Para restar fechas, agrupar por mes o filtrar un rango hay que convertirla: <code>pd.to_datetime(col, format="%Y-%m-%d %H:%M")</code> en pandas, <code>pl.col(...).str.to_datetime("%Y-%m-%d %H:%M")</code> en Polars. Dar el formato explícito es más rápido y evita que la biblioteca confunda día y mes. Si alguna fila no cumple el formato, la conversión falla y te avisa: mejor un error ahora que una fecha equivocada después.</li><li><b>Números con comas.</b> El Oriente escribe <code>3,20</code>. Leído sin <code>decimal=","</code>, la columna queda como texto. Si ya está leída, se arregla con <code>str.replace(",", ".")</code> y luego <code>pd.to_numeric(col, errors="coerce")</code>, que convierte lo que puede y deja vacío lo que no: conviene contar esos vacíos para no perder datos en silencio. Otras variantes del mismo problema son los símbolos de moneda (<code>US$ 3,20</code>), los puntos de miles y los espacios.</li><li><b>Categorías mal escritas.</b> El medio de pago aparece de 20 formas distintas para 3 valores reales: <code>tarjeta</code>, <code>Tarjeta</code>, <code>TARJETA</code>, <code>tarjeta </code> (con un espacio al final, invisible), <code>transf.</code>… Para la computadora son 20 categorías. La receta: quitar espacios (<code>str.strip()</code>), pasar a minúsculas (<code>str.lower()</code>) y unificar las abreviaturas con un diccionario de reemplazos. En productos pasa lo mismo: <code>Lacteos</code> sin tilde y <code>bebidas</code> en minúscula.</li></ul><p>Después de convertir, una categoría limpia conviene guardarla con el tipo <b>categórico</b> (<i>categorical</i>, <code>category</code> en pandas, <code>Categorical</code> o <code>Enum</code> en Polars): ocupa menos memoria y rechaza valores que no estén en la lista.</p></div></section>
+<section><h2>Valores faltantes: por qué faltan y qué hacer con ellos</h2><div class="prose"><p>Un <b>valor faltante</b> (<i>missing value</i>) es una casilla sin dato. pandas lo muestra como <code>NaN</code> (<i>not a number</i>, no es un número) o <code>NA</code>, y Polars como <code>null</code>. Antes de decidir qué hacer con él, hay que preguntarse por qué falta, porque la respuesta cambia la decisión.</p></div><div class="analogia"><b>Imagínalo así</b><p>En una encuesta de salud, algunas personas no contestan cuánto pesan. Si la pregunta se perdió porque se cayó el sistema, da igual quién no contestó. Si no contestaron más las personas de un barrio, porque allí la encuesta se hizo con prisa, el promedio queda torcido hacia los otros barrios. Y si no contestaron justo las que más pesan, por vergüenza, el promedio miente en la dirección exacta que importa.</p></div><div class="prose"><p>El estadístico Donald Rubin clasificó los faltantes en tres tipos en 1976:</p><ul><li><b>Faltante completamente al azar</b> (MCAR, <i>missing completely at random</i>): que falte no tiene relación con nada. Un ticket cuyo total se perdió por una falla de la caja.</li><li><b>Faltante al azar</b> (MAR, <i>missing at random</i>): que falte depende de otra variable que sí conoces. En la cadena, la fecha de nacimiento de los socios falta en el 19,6 % de los inscritos en tiendas express y solo en el 8,6 % de los inscritos en tiendas grandes, quizás porque en las express la inscripción se hace de pie en la caja.</li><li><b>Faltante no al azar</b> (MNAR, <i>missing not at random</i>): que falte depende del propio valor que falta. Las personas mayores que prefieren no dar su edad.</li></ul><p>Además, hay faltantes que no son faltantes. El 38 % de los tickets no tiene <code>cliente_id</code>: no es un error, es una compra sin tarjeta del Club. Llenarlo con algo sería inventar socios. Y hay faltantes disfrazados de dato: 30 socios tienen como fecha de nacimiento el 1 de enero de 1900, un <b>valor centinela</b> (<i>sentinel value</i>) que el sistema pone cuando el campo es obligatorio y nadie sabe qué escribir. Si no se convierte en vacío, la cadena tiene 30 socios de 126 años.</p><p>Qué hacer depende del caso:</p><ol class="steps"><li><span><b>Recuperar</b> el valor de otra fuente. Es lo mejor cuando se puede: los 835 totales vacíos se recalculan con el detalle de cada ticket, que viene de otro sistema.</span></li><li><span><b>Dejarlo vacío</b> y excluirlo solo de los cálculos que lo necesitan. pandas y Polars ignoran los vacíos al sumar o promediar, pero hay que saber cuántos se ignoraron.</span></li><li><span><b>Imputar</b> (<i>impute</i>): reemplazarlo por un valor estimado, como la media, la mediana, la media de su grupo o un valor sorteado de los datos que hay. Cada método tiene un costo en la distribución.</span></li><li><span><b>Marcarlo</b>: agregar una columna que diga «este valor fue imputado», para que cualquier análisis posterior pueda separarlo.</span></li></ol></div><figure class="fig fig-flujo" id="03-diagrama-2"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:720px" role="img" aria-label="Árbol de decisión para un valor faltante: primero si de verdad falta o es un centinela, luego si se puede recuperar de otra fuente, luego si el análisis lo necesita; solo al final imputar y marcar, con un ejemplo de la cadena en cada hoja">
+<defs>
+<marker id="c3d2-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+</defs>
+<rect x="16" y="20" width="250" height="44" rx="8" class="caja"/>
+<text x="30" y="47" class="t t-b">Una casilla vacía (o rara)</text>
+<path d="M141 64V86" class="ln" marker-end="url(#c3d2-m)"/>
+
+<rect x="16" y="90" width="250" height="56" rx="22" class="c-enl"/>
+<text x="34" y="114" class="t t-s t-b">1 · ¿De verdad falta?</text>
+<text x="34" y="132" class="t t-s">¿o es un dato, o un disfraz?</text>
+<path d="M266 106H420" class="ln" marker-end="url(#c3d2-m)"/>
+<text x="290" y="100" class="t t-s t-m">no falta: es un dato</text>
+<rect x="424" y="84" width="460" height="44" rx="8" class="caja"/>
+<text x="438" y="104" class="t t-s t-b">Dejarlo así</text>
+<text x="438" y="120" class="t t-s">el ticket sin cliente_id es una compra sin tarjeta (38 %)</text>
+<path d="M266 134C330 150 360 156 420 158" class="ln" marker-end="url(#c3d2-m)"/>
+<text x="290" y="164" class="t t-s t-m">es un centinela</text>
+<rect x="424" y="140" width="460" height="44" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="438" y="160" class="t t-s t-b k-warm">Convertirlo en vacío y seguir</text>
+<text x="438" y="176" class="t t-s">30 fechas de nacimiento «1900-01-01»</text>
+<path d="M141 146V196" class="ln" marker-end="url(#c3d2-m)"/>
+<text x="150" y="178" class="t t-s t-m">sí falta</text>
+
+<rect x="16" y="200" width="250" height="56" rx="22" class="c-enl"/>
+<text x="34" y="224" class="t t-s t-b">2 · ¿Se puede recuperar?</text>
+<text x="34" y="242" class="t t-s">de otra fuente o sistema</text>
+<path d="M266 228H420" class="ln" marker-end="url(#c3d2-m)"/>
+<text x="300" y="220" class="t t-s t-m">sí</text>
+<rect x="424" y="206" width="460" height="44" rx="8" style="fill:var(--good-soft);stroke:var(--good)"/>
+<text x="438" y="226" class="t t-s t-b">Recuperarlo (lo mejor)</text>
+<text x="438" y="242" class="t t-s">835 totales vacíos, recalculados con el detalle del ticket</text>
+<path d="M141 256V296" class="ln" marker-end="url(#c3d2-m)"/>
+<text x="150" y="282" class="t t-s t-m">no</text>
+
+<rect x="16" y="300" width="250" height="56" rx="22" class="c-enl"/>
+<text x="34" y="324" class="t t-s t-b">3 · ¿El análisis lo necesita?</text>
+<text x="34" y="342" class="t t-s">¿cambia la respuesta?</text>
+<path d="M266 316H420" class="ln" marker-end="url(#c3d2-m)"/>
+<text x="300" y="308" class="t t-s t-m">no</text>
+<rect x="424" y="294" width="460" height="44" rx="8" class="caja"/>
+<text x="438" y="314" class="t t-s t-b">Dejarlo vacío y contar cuántos</text>
+<text x="438" y="330" class="t t-s">171 correos vacíos: no importan para las ventas</text>
+<path d="M266 346C330 380 360 392 420 392" class="ln" marker-end="url(#c3d2-m)"/>
+<text x="300" y="384" class="t t-s t-m">sí</text>
+<rect x="424" y="356" width="460" height="96" rx="8" class="caja" style="stroke:var(--warm);stroke-dasharray:5 4"/>
+<text x="438" y="378" class="t t-s t-b">Imputar, y marcar que se imputó</text>
+<text x="438" y="396" class="t t-s">755 edades (MAR: faltan más en las express)</text>
+<text x="438" y="414" class="t t-s">media, mediana, media del grupo o sorteo de los datos</text>
+<text x="438" y="432" class="t t-s t-m">cada método cambia la distribución: lab de esta sección</text>
+<text x="16" y="400" class="t t-s t-m">Antes de todo, pregunta por qué falta:</text>
+<text x="16" y="416" class="t t-s t-m">al azar (MCAR), según otra variable (MAR)</text>
+<text x="16" y="432" class="t t-s t-m">o según el propio valor (MNAR).</text>
+</svg></div><figcaption><b>Qué hacer con un valor faltante.</b> Se lee de arriba hacia abajo, como un árbol de decisiones. La primera pregunta es si de verdad falta (el ticket anónimo no falta: es un dato) o si es un centinela disfrazado. La segunda, si se puede recuperar de otra fuente. La tercera, si el análisis lo necesita. Solo al final aparece imputar, y siempre con una marca. En cada hoja, el ejemplo de Almacenes Ejemplo que cae ahí.</figcaption></figure><div class="lab" id="03-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Imputar faltantes con la media, la mediana o un grupo: el efecto sobre la distribución</h3></div><p class="hint">El histograma muestra la edad de los 6.015 socios del Club. Elige qué hacer con las 755 fechas vacías y las 30 de 1900, y mira qué pasa con la forma de la distribución, la media y la desviación estándar. Las edades inventadas se pintan de rojo. Empieza por «No hacer nada» y fíjate en la barra de la derecha.</p><style>
+[id="03-lab-2"] .c3l2-rot{font:700 .7rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+[id="03-lab-2"] .btns{display:flex;flex-wrap:wrap;gap:6px}
+[id="03-lab-2"] .c3l2-hist{display:flex;align-items:flex-end;gap:2px;height:190px;padding:6px 0 0;border-bottom:1px solid var(--muted)}
+[id="03-lab-2"] .c3l2-hist div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0}
+[id="03-lab-2"] .c3l2-hist i{display:block;width:100%;background:var(--c-red-s);border:1px solid var(--c-red);border-bottom:0;transition:height .35s}
+[id="03-lab-2"] .c3l2-hist i.imp{background:var(--warm-soft);border-color:var(--warm)}
+[id="03-lab-2"] .c3l2-eje{display:flex;gap:2px;font:500 .62rem var(--f-mono);color:var(--muted)}
+[id="03-lab-2"] .c3l2-eje span{flex:1;min-width:0;text-align:center}
+[id="03-lab-2"] .c3l2-met{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:8px}
+[id="03-lab-2"] .c3l2-met div{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--card)}
+[id="03-lab-2"] .c3l2-met b{display:block;font:700 1.05rem var(--f-mono)}
+[id="03-lab-2"] .c3l2-met small{color:var(--muted);font:500 .74rem var(--f-display)}
+@media (prefers-reduced-motion: reduce){[id="03-lab-2"] .c3l2-hist i{transition:none}}
+</style>
+<div><span class="c3l2-rot">Qué hacer con las 755 fechas de nacimiento vacías y las 30 de 1900</span>
+<div class="btns" id="c3l2-met" role="group" aria-label="Método">
+  <button type="button" data-m="centinela" aria-pressed="false">No hacer nada</button>
+  <button type="button" data-m="quitar" aria-pressed="true">Dejar fuera los faltantes</button>
+  <button type="button" data-m="media" aria-pressed="false">Rellenar con la media</button>
+  <button type="button" data-m="mediana" aria-pressed="false">Rellenar con la mediana</button>
+  <button type="button" data-m="grupo" aria-pressed="false">Media por formato de tienda</button>
+  <button type="button" data-m="azar" aria-pressed="false">Sortear de los datos que hay</button>
+</div></div>
+<div>
+  <div class="c3l2-hist" id="c3l2-hist" role="img" aria-label="Histograma de edades de los socios"></div>
+  <div class="c3l2-eje" id="c3l2-eje" aria-hidden="true"></div>
+</div>
+<div class="legend"><span><i style="background:var(--c-red-s);border:1px solid var(--c-red)"></i>edad registrada</span><span><i style="background:var(--warm-soft);border:1px solid var(--warm)"></i>edad inventada (imputada o falsa)</span></div>
+<div class="c3l2-met" id="c3l2-num"></div>
+<div class="readout texto" id="c3l2-out" aria-live="polite"></div></div></section>
+<section><h2>Duplicados exactos y aproximados</h2><div class="prose"><p>Un <b>duplicado</b> (<i>duplicate</i>) es una observación que aparece más de una vez. Inflan conteos y sumas sin que nada se vea raro a simple vista.</p></div><div class="analogia"><b>Imagínalo así</b><p>Si en una fiesta cuentas a los invitados mirando la lista de confirmaciones, y alguien confirmó dos veces (una por correo y otra por mensaje), vas a comprar comida para una persona que no existe. Si confirmó como «Ma. José» y como «María José Pérez», ni siquiera vas a notar que es la misma.</p></div><div class="prose"><p>Los <b>duplicados exactos</b> son filas idénticas en todas sus columnas. En la cadena hay 46: las cajas de T02 y T05 mandaron dos veces el lote de un día. Se detectan con <code>df.duplicated()</code> y se quitan con <code>df.drop_duplicates()</code> en pandas, o <code>df.is_duplicated()</code> y <code>df.unique()</code> en Polars. Antes de quitarlos, conviene mirarlos: si dos filas tienen el mismo <code>ticket_id</code> pero distinto total, no es un duplicado sino un conflicto, y hay que averiguar cuál es la buena. Por eso el script de limpieza comprueba, después de quitar los exactos, que cada <code>ticket_id</code> aparezca una sola vez.</p><p>Los <b>duplicados aproximados</b> (<i>near duplicates</i>) son la misma entidad escrita distinto. En <code>clientes.csv</code> hay 15 personas inscritas dos veces, con otro <code>cliente_id</code> y el nombre en mayúsculas, sin tildes o con doble espacio, pero con el mismo correo. Se buscan en tres pasos:</p><ol class="steps"><li><span><b>Normalizar</b> las columnas que identifican a la persona: minúsculas, sin tildes, sin espacios dobles.</span></li><li><span><b>Comparar</b> por una llave que debería ser única, como el correo, o por <b>similitud de texto</b> (<i>fuzzy matching</i>) cuando no hay llave: la distancia de Levenshtein cuenta cuántas letras hay que cambiar para pasar de un nombre al otro, y bibliotecas como <code>difflib</code> (incluida en Python) o RapidFuzz la calculan.</span></li><li><span><b>Decidir</b> con criterio: dos «Rosa Méndez» de la misma tienda pueden ser la misma persona o dos vecinas. Por eso los duplicados aproximados se marcan para revisarlos, no se borran solos.</span></li></ol><p>Los 25 socios que aparecen dos veces de forma exacta en <code>clientes.csv</code> tienen una consecuencia que se verá en el capítulo 04: al unir las ventas con los clientes, cada compra de esos socios se cuenta dos veces.</p></div></section>
+<section><h2>Valores atípicos: error o hallazgo</h2><div class="prose"><p>Un <b>valor atípico</b> (<i>outlier</i>) es uno que se aleja mucho del resto. En las ventas de la cadena, el ticket típico vale entre US$ 6 y US$ 21, y en los archivos crudos hay 14 tickets de más de US$ 400. Algunos son errores y otros son las compras más interesantes del año. La limpieza consiste en distinguirlos, no en borrarlos.</p></div><div class="analogia"><b>Imagínalo así</b><p>Un termómetro de una casa marca 85 grados una mañana. Puede ser que el sensor se rompió, o que hubo un incendio en la cocina. Borrar la lectura «porque es rara» es lo peor que se puede hacer en los dos casos: en el primero pierdes la pista de un sensor roto, y en el segundo, la de un incendio.</p></div><div class="prose"><p>Para detectar candidatos hay reglas simples. La más usada es la del <b>rango intercuartílico</b> (IQR, <i>interquartile range</i>): se calcula la distancia entre el percentil 25 (US$ 6,42 en los datos limpios) y el percentil 75 (US$ 20,87), y se marca todo lo que queda a más de 1,5 veces esa distancia por encima del percentil 75, es decir, más de US$ 42,55. La regla marca 7.580 tickets. Casi todos son compras grandes normales de los sábados: la regla sirve para revisar, no para decidir. Con un umbral de 3 veces quedan 631.</p><p>Lo que decide es el contexto. En la cadena hay dos grupos en la cola:</p><ul><li><b>12 errores de digitación</b>: totales como US$ 2.545,00 en un ticket cuyas líneas suman US$ 25,45. El total es exactamente cien veces la suma del detalle: se perdió el punto decimal. Se corrigen con el detalle.</li><li><b>6 compras grandes de verdad</b>, de US$ 228,80 a US$ 430,41: eventos y empresas que compraron gaseosas, papas fritas y agua por cajas. Su detalle cuadra con el total. Se quedan, y quizás merecen una conversación con Verónica Peña, la jefa de mercadeo: ¿hay un negocio de ventas a empresas que nadie está atendiendo?</li></ul></div><div class="caso"><b>Un caso real</b><p><b>El agujero de ozono que el software descartaba.</b> En 1985, científicos británicos publicaron mediciones desde la Antártida que mostraban una caída enorme del ozono en primavera. Los satélites de la NASA llevaban años midiendo lo mismo, pero el procesamiento automático marcaba como sospechosos los valores muy bajos, y nadie los había mirado con atención hasta entonces. Cuando se revisaron los datos, el agujero estaba ahí desde hacía años. Se suele contar como «el software los borró», y la historia real es más matizada; la lección es la misma: un atípico marcado es una pregunta, no un error para tirar.</p></div></section>
+<section><h2>Un registro de limpieza reproducible</h2><div class="prose"><p>Mariana limpió los datos. Lorena le pregunta: «¿Por qué tu total de ventas es distinto del que me mandó Beatriz?». Si la limpieza se hizo a mano en una hoja de cálculo, borrando filas y corrigiendo casillas, no hay forma de responder. Si se hizo con un script que deja registro, la respuesta está en una tabla.</p></div><div class="analogia"><b>Imagínalo así</b><p>Un buen cocinero de restaurante no improvisa el plato cada noche: tiene una receta escrita, con cantidades y pasos, que cualquier otro cocinero puede seguir y obtener el mismo resultado. Si un cliente se queja, se revisa la receta, no la memoria del cocinero.</p></div><div class="prose"><p>Una limpieza <b>reproducible</b> (<i>reproducible</i>) cumple cuatro reglas:</p><ol class="steps"><li><span><b>Los datos crudos no se tocan nunca.</b> Viven en <code>crudo/</code> y nadie los edita. Si mañana descubres un error en la limpieza, vuelves a empezar desde ellos.</span></li><li><span><b>Cada paso es código.</b> Ninguna corrección a mano: si un valor se cambia, hay una línea que dice cuál, por qué y cómo se detectó.</span></li><li><span><b>Cada paso deja registro</b>: cuántas filas había antes y después, y cuánto sumaba el total antes y después. Así se ve qué decisión movió cada cifra.</span></li><li><span><b>El resultado se guarda aparte</b>, en <code>limpio/</code>, en un formato que conserve los tipos, como Parquet.</span></li></ol><p>El script además verifica sus supuestos con <code>assert</code>: después de quitar duplicados, cada <code>ticket_id</code> debe ser único; después de corregir, cada total debe cuadrar con su detalle. Si algún día llega un archivo con un problema nuevo, el script se detiene y avisa, en lugar de producir cifras equivocadas en silencio.</p></div><figure class="fig fig-arquitectura" id="03-diagrama-3"><div class="lienzo"><svg viewBox="0 0 900 450" style="min-width:740px" role="img" aria-label="El camino de la limpieza: la carpeta crudo con ocho archivos de solo lectura, el script limpieza.py con seis pasos y cuánto cambia cada uno la suma de ventas, y la carpeta limpio con archivos Parquet y el registro de limpieza; una flecha de vuelta indica que todo se corre de nuevo desde crudo">
+<defs>
+<marker id="c3d3-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+<symbol id="i3-candado" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</defs>
+<rect x="16" y="30" width="200" height="330" rx="12" class="c-fis"/>
+<text x="30" y="54" class="t t-xs t-b k-fis">CRUDO/ · NO SE TOCA</text>
+<use href="#i3-candado" x="178" y="38" width="24" height="24" class="ico"/>
+<g class="t t-s t-mono">
+<text x="30" y="84" class="t t-s t-mono">ventas.csv</text>
+<text x="30" y="104" class="t t-s t-mono">ventas_oriente.csv</text>
+<text x="30" y="124" class="t t-s t-mono">ventas_T09_reenvio.csv</text>
+<text x="30" y="144" class="t t-s t-mono">detalle.csv</text>
+<text x="30" y="164" class="t t-s t-mono">clientes.csv</text>
+<text x="30" y="184" class="t t-s t-mono">productos.csv</text>
+<text x="30" y="204" class="t t-s t-mono">tiendas.csv</text>
+<text x="30" y="224" class="t t-s t-mono">resenas.csv</text>
+</g>
+<text x="30" y="262" class="t t-s">Tal como llegan de</text>
+<text x="30" y="278" class="t t-s">las cajas. Si algo</text>
+<text x="30" y="294" class="t t-s">sale mal, se vuelve</text>
+<text x="30" y="310" class="t t-s">a empezar desde aquí.</text>
+<path d="M216 190H250" class="ln" style="stroke-width:2" marker-end="url(#c3d3-m)"/>
+<rect x="254" y="30" width="390" height="330" rx="12" class="caja"/>
+<text x="268" y="54" class="t t-xs t-b k-enl">LIMPIEZA.PY · SEIS PASOS EN CÓDIGO</text>
+<text x="268" y="72" class="t t-s t-m">suma de ventas después de cada paso (US$)</text>
+<rect x="268" y="82" width="362" height="38" rx="6" class="c-enl"/><text x="278" y="106" class="t t-s">1. + Oriente bien leído</text><text x="620" y="106" class="t t-s t-mono" text-anchor="end">3.031.671,84</text>
+<rect x="268" y="126" width="362" height="38" rx="6" class="c-enl"/><text x="278" y="150" class="t t-s">2. + reenvío de T09</text><text x="620" y="150" class="t t-s t-mono" text-anchor="end">3.033.192,39</text>
+<rect x="268" y="170" width="362" height="38" rx="6" class="c-enl"/><text x="278" y="194" class="t t-s">3. sin 46 duplicados exactos</text><text x="620" y="194" class="t t-s t-mono" text-anchor="end">3.032.462,60</text>
+<rect x="268" y="214" width="362" height="38" rx="6" class="c-enl"/><text x="278" y="238" class="t t-s">4. 12 totales ×100 corregidos</text><text x="620" y="238" class="t t-s t-mono" text-anchor="end">3.014.324,81</text>
+<rect x="268" y="258" width="362" height="38" rx="6" class="c-enl"/><text x="278" y="282" class="t t-s">5. 835 vacíos recuperados</text><text x="620" y="282" class="t t-s t-mono" text-anchor="end">3.027.430,10</text>
+<rect x="268" y="302" width="362" height="38" rx="6" class="c-enl"/><text x="278" y="326" class="t t-s">6. medio de pago: 20 → 3</text><text x="620" y="326" class="t t-s t-mono" text-anchor="end">3.027.430,10</text>
+<path d="M644 150H678" class="ln" style="stroke-width:2" marker-end="url(#c3d3-m)"/>
+<rect x="682" y="30" width="202" height="214" rx="12" class="c-enl"/>
+<text x="696" y="54" class="t t-xs t-b k-enl">LIMPIO/ · PARQUET</text>
+<g>
+<text x="696" y="84" class="t t-s t-mono">ventas.parquet</text>
+<text x="696" y="104" class="t t-s t-mono">detalle.parquet</text>
+<text x="696" y="124" class="t t-s t-mono">clientes.parquet</text>
+<text x="696" y="144" class="t t-s t-mono">productos.parquet</text>
+<text x="696" y="164" class="t t-s t-mono">tiendas.parquet</text>
+<text x="696" y="184" class="t t-s t-mono">resenas.parquet</text>
+</g>
+<text x="696" y="220" class="t t-s">los usan los cap. 04 a 10</text>
+<rect x="682" y="258" width="202" height="102" rx="12" class="caja" style="stroke:var(--warm)"/>
+<text x="696" y="282" class="t t-xs t-b k-warm">REGISTRO_LIMPIEZA.CSV</text>
+<text x="696" y="304" class="t t-s">paso · filas antes y</text>
+<text x="696" y="320" class="t t-s">después · suma antes y</text>
+<text x="696" y="336" class="t t-s">después · nota</text>
+<path d="M783 360V400H116V364" class="ln" style="stroke-dasharray:5 4" marker-end="url(#c3d3-m)"/>
+<text x="300" y="420" class="t t-s t-m">¿cambió una regla o llegó un archivo nuevo? Se corre todo otra vez desde crudo/</text>
+</svg></div><figcaption><b>El camino de los datos en la limpieza.</b> A la izquierda, la carpeta <code>crudo/</code> con los ocho archivos tal como llegan, de solo lectura (candado). En el centro, <code>limpieza.py</code> con sus seis pasos en verde, cada uno con lo que hace y cuánto cambia la suma de las ventas. A la derecha, la carpeta <code>limpio/</code> con los archivos Parquet que usan los capítulos siguientes y, debajo, el registro de limpieza. La flecha de vuelta indica que, si algo cambia, se corre todo de nuevo desde <code>crudo/</code>.</figcaption></figure><div class="lab" id="03-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Limpia el archivo de ventas paso a paso y mira cómo cambia el total</h3></div><p class="hint">Elige hasta qué paso limpiar: el script se arma solo y el registro muestra filas y suma después de cada paso, con una muestra de 150 tickets. Debajo están las cifras de los archivos completos. Pulsa «Cargar Python» para ejecutar el script en tu navegador; después, comenta un paso con <code>#</code> o cambia una regla y mira cómo cambia el registro.</p><style>
+[id="03-lab-1"] .c3l1-rot{font:700 .7rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+[id="03-lab-1"] .btns{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+[id="03-lab-1"] .c3l1-pasos{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+[id="03-lab-1"] .c3l1-pasos button{padding:6px 2px;font:600 .72rem/1.15 var(--f-display);white-space:normal;min-width:0}
+[id="03-lab-1"] .c3l1-pasos button.hecho{background:var(--c-enl-s);border-color:var(--c-enl)}
+[id="03-lab-1"] .c3l1-estado{font:500 .85rem var(--f-display);color:var(--muted)}
+[id="03-lab-1"] .c3l1-estado.ok{color:var(--good)} [id="03-lab-1"] .c3l1-estado.warn{color:var(--warm)}
+[id="03-lab-1"] .c3l1-lado{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;align-items:start}
+[id="03-lab-1"] textarea{width:100%;box-sizing:border-box;min-height:360px;font:.78rem/1.45 var(--f-mono);padding:8px;border:1px solid var(--line);border-left:5px solid var(--c-enl);border-radius:6px;background:var(--card);color:var(--ink);resize:vertical}
+[id="03-lab-1"] pre.c3l1-salida{margin:0 0 6px;font:.76rem/1.45 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+[id="03-lab-1"] .c3l1-tabla{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+[id="03-lab-1"] .c3l1-tabla table{font-size:.78rem;margin:0}
+[id="03-lab-1"] .c3l1-tabla th small{font:500 .66rem var(--f-mono);color:var(--muted)}
+[id="03-lab-1"] .c3l1-tabla .hint{margin:4px 8px}
+[id="03-lab-1"] .c3l1-tabla tbody tr:last-child td{background:var(--c-enl-s);font-weight:600}
+[id="03-lab-1"] .c3l1-sello{font:700 .66rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--mark)}
+[id="03-lab-1"] .c3l1-total{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:8px}
+[id="03-lab-1"] .c3l1-total div{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--card)}
+[id="03-lab-1"] .c3l1-total b{display:block;font:700 1.05rem var(--f-mono)}
+[id="03-lab-1"] .c3l1-total small{color:var(--muted);font:500 .74rem var(--f-display)}
+@media (max-width:520px){[id="03-lab-1"] .c3l1-pasos{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+<div><span class="c3l1-rot">Hasta el paso</span>
+<div class="c3l1-pasos" id="c3l1-pasos" role="group" aria-label="Pasos de limpieza"></div></div>
+<div class="btns">
+  <button type="button" class="primary" id="c3l1-cargar">Cargar Python (unos 20 MB · tarda unos segundos)</button>
+  <span class="c3l1-estado" id="c3l1-estado" aria-live="polite">Python sin cargar · mientras tanto ves el resultado guardado</span>
+</div>
+<div class="c3l1-lado">
+  <div>
+    <label class="c3l1-rot" for="c3l1-cod">El script de limpieza hasta este paso</label>
+    <textarea id="c3l1-cod" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    <div class="btns"><button type="button" id="c3l1-run" disabled>Ejecutar (Ctrl+Enter)</button>
+      <button type="button" id="c3l1-rest">Restaurar</button></div>
+  </div>
+  <div>
+    <span class="c3l1-rot">Registro de limpieza</span> <span class="c3l1-sello" id="c3l1-sello">guardado</span>
+    <pre class="c3l1-salida" id="c3l1-salida" hidden></pre>
+    <div class="c3l1-tabla" id="c3l1-tabla"></div>
+  </div>
+</div>
+<div class="c3l1-total" id="c3l1-total"></div>
+<div class="readout texto" id="c3l1-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Escribe el script de limpieza de la cadena y revisa su registro</h3></div><p>Vas a limpiar los ocho archivos de una vez, guardar el resultado en <code>limpio/</code> y leer el registro. Necesitas los datos del capítulo 01 y el entorno del capítulo 02 activado. Los capítulos siguientes parten de <code>limpio/</code>.</p><ol class="steps"><li><span>Guarda este script como <code>limpieza.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia"><pre><code>"""Limpia los archivos de Almacenes Ejemplo: lee crudo/, escribe limpio/ y deja un registro.
+
+Nunca modifica crudo/. Cada paso anota cuántas filas y cuánto suma el total antes y
+después, para que cualquiera pueda revisar qué decisión movió cada cifra.
+"""
+from pathlib import Path
+
+import pandas as pd
+
+CARPETA = Path.home() / "datos-cadena"
+CRUDO, LIMPIO = CARPETA / "crudo", CARPETA / "limpio"
+LIMPIO.mkdir(exist_ok=True)
+registro = []
+
+
+def anotar(paso, antes, despues, nota):
+    registro.append({"paso": paso, "filas_antes": len(antes), "filas_despues": len(despues),
+                     "suma_antes": round(antes["total"].sum(), 2), "suma_despues": round(despues["total"].sum(), 2),
+                     "nota": nota})
+    print(f"{paso:&lt;34} {len(antes):&gt;8,} -&gt; {len(despues):&gt;8,} filas   "
+          f"suma {antes['total'].sum():&gt;14,.2f} -&gt; {despues['total'].sum():&gt;14,.2f}")
+
+
+# 1. Leer los tres archivos de ventas, cada uno con su formato
+nuevo = pd.read_csv(CRUDO / "ventas.csv")
+oriente = pd.read_csv(CRUDO / "ventas_oriente.csv", sep=";", decimal=",")
+reenvio = pd.read_csv(CRUDO / "ventas_T09_reenvio.csv")
+nuevo["fecha_hora"] = pd.to_datetime(nuevo["fecha_hora"], format="%Y-%m-%d %H:%M")
+reenvio["fecha_hora"] = pd.to_datetime(reenvio["fecha_hora"], format="%Y-%m-%d %H:%M")
+oriente["fecha_hora"] = pd.to_datetime(oriente["fecha_hora"], format="%d/%m/%Y %H:%M")
+v = pd.concat([nuevo, oriente], ignore_index=True)
+anotar("1. ventas.csv + Oriente", nuevo, v, "Oriente leído con sep=';', decimal=',' y fecha día/mes/año")
+antes, v = v, pd.concat([v, reenvio], ignore_index=True)
+anotar("2. + reenvío de T09", antes, v, "123 tickets de T09 del 8 al 16 de septiembre de 2026")
+
+# 3. Duplicados exactos: la misma fila dos veces
+antes, v = v, v.drop_duplicates()
+anotar("3. quitar duplicados exactos", antes, v, "lotes reenviados por las cajas de T02 y T05")
+assert v["ticket_id"].is_unique, "quedan tickets repetidos con datos distintos: revisar a mano"
+
+# 4 y 5. El total se valida contra el detalle (que viene de otro sistema)
+detalle = pd.read_csv(CRUDO / "detalle.csv")
+suma_detalle = (detalle["cantidad"] * detalle["precio_unitario"]).groupby(detalle["ticket_id"]).sum().round(2)
+v["total_detalle"] = v["ticket_id"].map(suma_detalle)
+x100 = (v["total"] - v["total_detalle"] * 100).abs() &lt; 0.05
+antes = v.copy()
+v.loc[x100, "total"] = v.loc[x100, "total_detalle"]
+anotar("4. corregir totales ×100", antes, v, f"{x100.sum()} totales con el punto decimal perdido")
+vacio = v["total"].isna()
+antes = v.copy()
+v.loc[vacio, "total"] = v.loc[vacio, "total_detalle"]
+anotar("5. rellenar totales vacíos", antes, v, f"{vacio.sum()} totales vacíos, recuperados del detalle")
+v["total_corregido"] = x100 | vacio
+assert (v["total"] - v["total_detalle"]).abs().max() &lt; 0.01, "hay totales que no cuadran con el detalle"
+
+# 6. Medio de pago: una sola forma de escribir cada valor (el total no cambia)
+antes = v.copy()
+v["medio_pago"] = v["medio_pago"].str.strip().str.lower().replace({"transf.": "transferencia"})
+anotar("6. normalizar medio de pago", antes, v,
+       f"{antes['medio_pago'].nunique()} formas distintas -&gt; {v['medio_pago'].nunique()} valores")
+
+v = (v.drop(columns="total_detalle")
+      .astype({"ticket_id": "Int64", "cliente_id": "Int64"})
+      .sort_values("ticket_id"))
+v.to_parquet(LIMPIO / "ventas.parquet", index=False)
+
+# Clientes: duplicados exactos fuera; fecha centinela 1900-01-01 -&gt; vacío; posibles duplicados marcados
+c = pd.read_csv(CRUDO / "clientes.csv")
+filas = len(c)
+c = c.drop_duplicates()
+c["fecha_nacimiento"] = pd.to_datetime(c["fecha_nacimiento"].replace("1900-01-01", None), format="%Y-%m-%d")
+c["fecha_alta"] = pd.to_datetime(c["fecha_alta"], format="%Y-%m-%d")
+c["posible_duplicado"] = c["email"].str.lower().duplicated() &amp; c["email"].notna()
+c.to_parquet(LIMPIO / "clientes.parquet", index=False)
+print(f"clientes: {filas:,} -&gt; {len(c):,} filas; {c['posible_duplicado'].sum()} posibles duplicados marcados")
+
+# Productos, tiendas, detalle y reseñas
+p = pd.read_csv(CRUDO / "productos.csv")
+p["categoria"] = p["categoria"].str.strip().replace({"Lacteos": "Lácteos", "bebidas": "Bebidas"})
+p.to_parquet(LIMPIO / "productos.parquet", index=False)
+pd.read_csv(CRUDO / "tiendas.csv").to_parquet(LIMPIO / "tiendas.parquet", index=False)
+detalle.to_parquet(LIMPIO / "detalle.parquet", index=False)
+r = pd.read_csv(CRUDO / "resenas.csv")
+r = r.drop_duplicates().astype({"cliente_id": "Int64", "estrellas": "Int64"})
+r["fecha_hora"] = pd.to_datetime(r["fecha_hora"], format="%Y-%m-%d %H:%M")
+r.to_parquet(LIMPIO / "resenas.parquet", index=False)
+
+pd.DataFrame(registro).to_csv(LIMPIO / "registro_limpieza.csv", index=False)
+print(f"\nListo: {len(v):,} tickets, ventas totales {v['total'].sum():,.2f}. Registro en {LIMPIO}")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python limpieza.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 limpieza.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Abre <code>limpio/registro_limpieza.csv</code> con una hoja de cálculo o con <code>pd.read_csv</code> y lee la columna <code>nota</code>.</span></li><li><span>Haz una prueba: comenta con <code>#</code> las líneas del paso 3 (quitar duplicados) y vuelve a correr el script. ¿Qué pasa?</span></li></ol><p><b>Qué observar:</b> el script muestra seis pasos. La suma sube de US$ 2.462.025,03 a US$ 3.031.671,84 al sumar el Oriente, baja US$ 729,79 al quitar los 46 duplicados, baja US$ 18.137,79 al corregir los 12 totales ×100 y sube US$ 13.105,29 al recuperar los 835 vacíos, hasta US$ 3.027.430,10, la misma cifra que da el detalle. Clientes pasa de 6.040 a 6.015 filas con 15 posibles duplicados marcados. Si comentas el paso 3, el script se detiene en el <code>assert</code> con el mensaje «quedan tickets repetidos»: la verificación hizo su trabajo. Vuelve a dejar el paso como estaba y córrelo otra vez.</p></div><div class="ml"><b>En la práctica</b><p><b>La respuesta a Lorena.</b> Mariana le mandó a Lorena el registro de limpieza en lugar de una explicación larga. La diferencia con la cifra de Beatriz estaba en tres renglones: el archivo del Oriente que no se había sumado, los dos lotes repetidos y los doce totales ×100. Lorena pidió una sola cosa más: que el registro se guarde junto con cada informe, para que la próxima vez la pregunta se responda sola.</p></div></section>
+<section><h2>La idea clave</h2><div class="prose"><p>Los datos ordenados tienen una variable por columna y una observación por fila. Limpiar es detectar y decidir: convertir tipos (fechas, números con coma, categorías mal escritas), entender por qué falta un valor antes de tratarlo (recuperar, dejar vacío, imputar o marcar), quitar duplicados exactos y marcar los aproximados, y distinguir un atípico que es error de uno que es hallazgo. Cada decisión va en código, los datos crudos no se tocan y un registro dice cuánto movió cada paso las cifras.</p></div></section>
+<section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué la planilla de Hernán, con una columna por mes, no cumple las reglas de los datos ordenados?</summary><p>Porque el mes es una variable y está repartido en los nombres de las columnas. Ordenada tendría una columna <code>mes</code> y una fila por tienda y mes.</p></details><details><summary>¿Qué tienen en común <code>tarjeta</code>, <code>Tarjeta</code> y <code>tarjeta </code> (con espacio), y cómo se unifican?</summary><p>Son el mismo valor escrito distinto. Se unifican quitando espacios (<code>str.strip()</code>), pasando a minúsculas (<code>str.lower()</code>) y reemplazando abreviaturas con un diccionario.</p></details><details><summary>El 38 % de los tickets no tiene <code>cliente_id</code>. ¿Hay que imputarlo?</summary><p>No: no es un faltante sino una compra sin tarjeta del Club. Imputarlo sería inventar socios.</p></details><details><summary>¿Por qué rellenar 785 edades con la media cambia el análisis aunque la media no se mueva?</summary><p>Porque crea un pico artificial en ese valor y reduce la desviación estándar: los datos parecen más parejos de lo que son.</p></details><details><summary>Un total es exactamente cien veces la suma de las líneas de su ticket. ¿Es un atípico que hay que conservar?</summary><p>No: es un error de digitación (se perdió el punto decimal). Se corrige con la suma del detalle. Los atípicos cuyo detalle cuadra, en cambio, se conservan.</p></details><details><summary>¿Para qué sirve el <code>assert</code> que comprueba que cada <code>ticket_id</code> sea único después de quitar duplicados?</summary><p>Para que el script se detenga si llega un problema nuevo (dos filas con el mismo ticket y datos distintos) en lugar de producir cifras equivocadas en silencio.</p></details></div></section>
+<section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es la imputación múltiple y por qué se considera mejor que rellenar una sola vez con la media?<small>Pista: busca «multiple imputation by chained equations» (MICE).</small></li><li>¿Qué otras medidas de similitud de texto existen además de la distancia de Levenshtein, como Jaro-Winkler, y cuándo conviene cada una?<small>Pista: busca «string similarity metrics».</small></li><li>¿Qué es la normalización Unicode (NFC y NFD) y por qué «José» puede escribirse de dos formas que se ven iguales?</li><li>¿Qué es el bosque de aislamiento (<i>isolation forest</i>) y en qué se diferencia de la regla del rango intercuartílico para detectar atípicos?</li><li>¿Qué herramientas existen para escribir reglas de calidad de datos como pruebas automáticas?<small>Pista: busca «Great Expectations», «Pandera» y «Soda».</small></li></ol></div></section>
+<section><h2>Para saber más</h2><div class="vids"><span>Para saber más</span><a class="vid" href="https://www.jstatsoft.org/article/view/v059i10" target="_blank" rel="noopener">Tidy Data <small>el artículo de Hadley Wickham, <i>Journal of Statistical Software</i>, 2014, en inglés</small></a><a class="vid" href="https://pandas.pydata.org/docs/user_guide/missing_data.html" target="_blank" rel="noopener">pandas: Working with missing data <small>faltantes en pandas, en inglés</small></a><a class="vid" href="https://docs.pola.rs/user-guide/expressions/missing-data/" target="_blank" rel="noopener">Polars: Missing data <small>faltantes en Polars, en inglés</small></a><a class="vid" href="https://r4ds.hadley.nz/data-tidy.html" target="_blank" rel="noopener">R for Data Science: Data tidying <small>datos ordenados con ejemplos, en inglés</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/ciencia-de-datos" target="_blank" rel="noopener">github.com/aaramirez/ciencia-de-datos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="03-lab-2"]');
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  function rnd(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  // Edad al 1 de noviembre de 2026 de los 6.015 socios (sin duplicados exactos): −2 = vacía, −1 = 1900-01-01
+  const E={"grande":[-2,62,22,44,70,26,-2,35,44,38,66,49,28,36,71,28,-2,38,72,40,24,66,29,70,37,67,27,63,45,-2,62,49,45,24,59,31,61,-2,42,26,36,55,-2,75,41,72,73,66,62,-2,75,37,47,23,55,60,60,33,69,24,62,56,23,-2,40,22,34,45,40,30,32,74,31,76,27,72,-2,-2,55,51,50,22,49,61,70,53,67,49,55,36,76,75,72,40,70,36,70,45,43,46,68,-2,33,23,64,56,35,74,69,32,37,71,27,36,37,41,59,61,55,35,-2,69,45,74,64,-2,70,43,44,37,62,43,69,32,48,61,27,33,65,72,27,37,41,41,34,51,26,34,34,42,39,33,41,24,34,33,25,41,46,66,60,47,49,43,29,25,68,35,39,64,74,45,55,25,45,60,26,36,75,55,56,25,70,33,-2,55,47,34,32,50,23,32,33,55,40,70,23,40,26,45,62,28,48,50,64,61,33,32,61,67,22,51,54,39,-2,57,38,49,74,32,48,75,62,71,-2,-1,-2,-2,76,32,39,70,68,54,36,65,74,-2,38,54,58,-2,28,61,26,71,66,50,57,61,70,39,46,74,40,22,-2,69,39,24,53,64,-2,-2,65,57,76,52,67,74,25,26,46,42,-2,75,45,35,72,65,52,27,25,44,61,66,61,37,33,-2,48,69,67,26,-2,41,38,67,50,64,24,42,50,56,39,62,49,31,44,66,42,-1,37,27,57,66,51,63,37,69,73,61,42,30,-2,33,62,40,33,46,31,31,72,68,-2,48,21,66,27,34,40,30,76,-2,45,41,52,52,29,66,44,25,30,-2,58,69,21,52,-1,41,65,52,26,51,23,41,35,74,32,62,66,54,67,29,60,59,43,30,52,53,-2,22,-2,49,58,28,-2,55,21,64,60,56,40,38,23,54,30,36,-2,34,26,24,51,64,67,32,66,-2,34,71,28,43,63,64,69,48,-2,51,72,36,53,66,67,27,25,67,64,41,37,62,37,60,24,51,49,74,75,55,71,55,42,55,75,51,65,60,22,53,76,33,33,42,37,49,40,55,-2,67,47,73,76,65,66,71,67,39,75,63,-2,30,43,59,30,36,51,25,36,64,59,68,43,39,-2,35,51,23,43,64,49,33,69,68,51,31,42,48,69,51,49,31,62,74,-2,48,31,40,25,62,35,51,22,55,48,52,27,76,50,32,70,60,66,36,41,38,36,39,24,34,41,46,30,47,76,40,26,73,66,48,41,74,49,33,45,24,39,33,73,72,31,37,-2,30,37,46,46,31,36,47,69,24,39,40,50,49,31,40,68,59,28,48,62,67,24,70,64,50,45,-2,46,35,22,56,76,56,26,65,29,38,33,71,36,-2,50,75,36,-2,63,55,70,46,50,-2,59,24,31,73,25,32,50,27,59,41,35,74,56,64,42,27,51,39,58,54,35,54,72,42,47,64,41,29,-2,-2,-2,39,36,49,63,73,55,30,31,31,37,74,-2,42,64,64,60,-2,-2,22,44,22,30,36,67,73,28,47,55,38,-2,65,41,76,23,36,24,37,28,-2,51,-2,59,-2,47,68,24,30,40,-2,33,38,56,66,40,28,44,73,65,65,76,54,67,59,56,51,57,49,29,-2,70,-2,30,53,73,57,53,57,67,57,43,32,-2,28,42,46,52,48,63,39,32,69,-2,75,41,49,26,41,31,62,64,65,53,45,37,-2,52,39,62,41,32,67,-2,48,53,-2,36,53,58,57,52,48,67,30,38,48,48,65,76,46,37,39,58,59,-2,29,72,41,50,55,38,45,50,36,49,27,41,65,63,38,47,69,-2,67,31,76,37,53,55,51,-2,26,45,32,39,74,69,40,31,-2,74,-2,24,71,27,45,-2,-2,65,28,56,71,60,38,28,75,-2,22,24,28,58,74,74,31,69,47,64,25,27,64,50,36,42,26,-2,53,-2,66,70,43,58,29,41,50,22,-2,50,-2,-2,63,52,43,40,75,29,48,-2,38,58,-2,66,69,32,35,59,31,63,71,48,-2,59,60,54,60,29,37,68,67,60,25,40,35,23,43,72,-2,69,42,23,32,28,69,66,23,-2,33,51,41,42,31,34,58,28,64,32,50,-2,62,61,51,67,53,22,76,-2,68,34,76,75,42,43,53,44,33,66,25,-2,35,58,-2,31,-2,37,75,76,50,68,22,68,56,49,24,75,45,45,59,61,38,34,58,55,64,75,28,23,54,52,-1,74,53,31,40,31,68,25,48,68,56,49,71,38,69,43,26,73,36,44,23,49,49,72,60,49,43,73,70,27,37,42,74,71,25,42,41,40,39,64,44,34,42,52,73,58,34,40,63,24,45,63,45,51,53,75,43,31,25,70,21,37,59,65,50,76,-2,22,32,40,64,40,75,51,21,-2,34,25,34,33,59,53,36,43,47,68,62,56,58,41,36,58,56,58,33,72,-2,74,35,63,75,34,28,36,-2,62,27,56,67,46,74,34,-2,65,61,69,24,-2,44,59,24,-2,70,44,59,40,35,42,29,48,50,54,32,44,68,51,27,55,37,36,26,33,63,56,43,36,37,-2,35,-2,38,70,43,23,47,70,46,51,69,73,23,62,55,48,49,-2,-2,21,34,49,57,61,-2,31,44,26,-2,46,73,-2,46,40,67,40,53,25,65,58,52,31,30,26,44,55,56,64,51,25,43,34,62,27,25,59,56,72,28,37,66,22,73,53,72,-2,29,65,29,61,35,73,60,-2,59,23,40,74,76,70,22,73,46,38,57,60,29,64,75,43,50,34,49,54,66,40,41,71,46,30,51,64,32,76,55,28,60,33,-2,25,55,73,50,27,55,22,41,61,29,26,66,72,61,38,51,30,44,72,38,42,61,67,49,58,60,36,65,26,57,49,25,35,53,47,64,64,53,42,68,35,46,49,41,23,42,38,37,29,76,32,45,27,75,46,56,29,-2,54,64,-2,67,23,62,28,53,25,74,-2,59,32,24,53,54,-2,42,76,32,-2,-2,72,41,32,38,57,40,41,60,67,75,70,46,61,31,49,59,45,67,-2,35,23,56,-2,23,50,54,24,38,52,29,36,76,50,64,72,-2,31,30,28,71,69,72,-2,45,30,73,57,69,46,55,47,74,76,62,45,37,-2,-2,-2,44,43,70,53,28,41,46,61,39,53,62,22,31,34,64,51,40,-2,53,56,42,73,55,64,29,29,26,60,49,25,64,72,29,26,35,74,25,72,25,62,45,56,56,37,55,52,40,70,64,40,35,47,65,26,35,36,53,24,26,35,38,46,23,52,39,24,45,56,46,34,44,27,-2,71,72,62,25,-2,38,43,61,24,64,34,60,34,46,66,73,44,42,63,59,36,48,25,74,40,53,28,69,66,-2,30,63,-2,76,-2,31,45,65,39,75,28,31,76,76,30,62,26,23,75,41,42,-2,-1,60,50,-2,27,49,32,44,44,69,40,67,48,72,33,40,32,37,24,70,69,71,-2,45,38,35,40,64,67,28,58,74,76,26,49,50,-2,63,-2,46,36,41,40,76,69,56,64,25,51,25,48,63,30,76,74,24,-2,54,43,25,-2,47,64,45,61,-2,60,76,50,67,58,46,75,21,55,71,45,59,72,23,34,27,74,66,42,39,59,-2,24,50,29,38,43,43,72,37,-2,36,36,58,29,30,55,47,39,63,66,50,-2,-2,71,59,37,73,27,26,36,44,26,59,47,74,52,22,49,68,56,63,38,52,47,72,43,23,37,52,76,62,39,72,56,60,39,66,40,60,38,36,59,43,46,69,29,40,30,61,-2,54,-2,31,34,64,69,70,60,47,28,23,71,56,64,30,22,75,-2,61,66,52,-2,40,76,73,27,40,22,61,-2,43,54,29,-2,34,48,47,-2,27,38,32,40,71,24,60,-2,42,41,72,28,58,41,58,41,55,44,-2,25,72,-2,27,74,43,-2,50,51,41,48,28,59,70,41,26,22,47,53,59,70,51,41,42,34,34,38,40,25,73,58,53,50,62,64,70,38,36,40,47,36,42,22,70,27,35,-2,72,52,76,34,27,34,-2,-2,36,43,53,33,39,37,48,36,50,31,63,47,-2,58,25,26,-2,58,42,42,24,52,35,66,42,53,-2,-2,63,37,28,37,70,71,61,-2,54,68,57,37,44,40,41,65,42,39,69,68,25,41,24,66,67,34,32,23,63,70,58,66,35,37,-2,57,46,44,58,62,-2,31,33,34,52,74,32,74,26,22,-2,-2,59,61,47,71,64,22,41,-2,-2,69,43,57,50,39,74,74,33,30,-2,31,73,41,51,40,66,23,32,35,56,55,41,30,30,38,69,71,29,72,44,37,48,70,54,68,38,58,53,49,48,37,50,34,67,35,75,24,-2,44,42,-2,44,32,74,46,-2,27,72,61,76,68,44,-2,27,50,-2,76,63,74,57,-2,25,68,72,57,45,30,22,48,32,68,56,66,53,44,49,64,64,48,37,67,71,66,62,62,33,23,-2,55,45,67,27,69,-1,67,74,-2,60,31,42,59,50,76,22,23,72,65,24,54,67,48,45,57,24,75,59,-2,23,22,60,60,22,72,47,34,68,55,66,-2,23,70,52,61,58,22,-2,46,37,28,30,53,39,42,51,36,61,35,-2,-2,44,38,75,24,25,34,43,-2,57,69,22,43,68,43,40,69,40,44,64,-2,26,74,74,39,24,57,43,30,75,47,35,38,56,31,37,46,44,62,25,51,28,53,23,35,28,46,43,54,62,52,55,70,27,51,30,23,47,75,22,-2,41,53,22,41,-2,72,24,67,71,28,66,75,34,51,33,31,42,35,55,28,72,21,30,65,26,62,-2,73,64,75,41,56,76,-2,45,34,55,37,46,34,72,75,40,57,47,38,47,32,23,51,67,35,47,24,46,48,45,66,76,42,57,46,50,32,40,58,-2,33,56,39,67,-2,36,53,28,21,42,-2,33,69,48,67,41,52,53,67,-2,-2,28,-2,24,-2,37,56,42,49,42,33,-2,28,71,-2,59,40,56,31,54,63,35,72,33,52,41,53,75,72,29,41,75,64,25,43,-2,68,50,25,43,61,60,53,47,26,27,66,35,41,34,57,24,54,38,25,58,38,-2,24,41,-2,26,67,24,22,25,40,60,73,58,66,24,71,74,75,60,-2,42,73,40,59,34,42,-2,34,34,45,40,68,29,30,48,43,27,66,-2,32,34,60,30,-2,49,65,28,31,28,73,35,42,76,43,32,34,27,30,-2,24,74,56,-2,55,70,22,35,58,27,63,53,61,66,50,25,68,70,58,36,66,48,41,32,52,46,66,59,30,25,-2,42,69,58,74,28,54,33,44,34,40,68,65,73,25,35,46,68,40,71,73,34,41,32,53,35,30,53,58,28,59,57,-1,25,49,62,38,69,44,29,68,63,39,-1,-2,58,49,39,50,65,59,31,48,23,73,50,72,31,59,35,44,37,-1,45,33,24,46,67,64,26,32,26,53,22,37,22,65,42,23,62,64,46,22,44,-2,51,-2,26,25,29,34,41,33,75,49,68,62,56,-2,66,39,23,61,-1,-2,45,25,59,-2,48,24,-2,34,-2,-2,31,53,52,55,48,27,43,72,58,38,34,34,36,45,29,66,60,54,-2,52,38,60,41,46,73,62,-2,-2,30,45,29,64,72,-2,24,37,44,43,59,-2,44,43,72,25,36,64,23,26,40,75,71,64,36,53,67,68,54,32,-2,63,38,33,63,66,56,34,27,24,53,-2,-2,63,61,36,45,25,41,36,37,-2,45,69,26,58,66,31,46,60,24,57,60,46,35,45,35,24,23,47,41,53,46,46,30,27,67,69,61,-2,41,54,25,68,61,64,36,32,55,59,-2,23,43,45,75,64,-2,40,74,69,36,-2,25,44,29,40,74,67,47,24,26,57,32,32,51,29,71,23,64,35,52,67,67,49,48,23,-2,65,45,-2,-2,74,24,46,66,63,74,27,29,29,75,44,22,29,25,30,70,28,61,67,27,53,36,35,36,57,53,23,23,62,24,-2,40,51,26,43,31,35,30,66,36,33,64,23,-2,66,29,25,38,33,32,39,22,47,23,50,57,-2,33,32,65,58,28,-2,66,47,52,76,22,38,55,41,73,60,60,43,51,57,63,49,23,75,54,34,23,42,32,24,57,65,54,76,61,71,-2,22,60,34,67,53,69,75,47,26,27,38,-2,25,71,30,40,56,71,57,55,69,52,55,61,29,26,61,23,73,67,72,41,70,61,33,-2,-2,27,44,-2,51,45,54,44,61,41,46,51,58,48,67,-2,72,47,58,54,-2,37,31,46,50,49,73,56,-1,44,47,43,60,-2,42,71,64,45,61,57,36,-2,70,31,56,-2,45,71,47,31,34,67,-2,24,26,56,-1,38,67,23,54,-2,-2,53,25,73,54,42,75,-2,36,45,34,-1,29,55,71,66,56,28,71,49,24,27,63,32,56,60,67,72,-2,63,54,46,-2,23,72,33,50,47,-2,56,-2,55,35,73,25,74,34,25,-2,-2,36,33,-1,50,76,-2,70,42,67,34,47,39,60,40,62,41,-2,52,62,53,-1,22,51,55,70,31,70,38,68,47,44,64,43,29,73,69,25,51,33,30,42,75,54,54,48,26,57,74,-2,26,50,50,42,49,56,42,32,56,25,73,71,71,58,37,-2,57,64,45,-2,76,54,50,40,32,76,24,45,64,69,28,73,34,24,25,-2,38,-2,28,46,-2,58,38,44,37,31,37,42,31,-2,-2,-2,68,56,41,53,43,51,36,76,76,53,44,31,63,54,38,28,52,40,37,67,28,44,31,24,27,41,66,61,50,75,35,69,39,58,71,36,22,39,-2,67,66,59,74,56,34,48,-2,65,29,38,55,53,73,67,75,62,57,52,68,58,57,66,58,-2,27,-2,25,-2,56,23,37,-2,23,38,50,38,-2,36,73,48,69,53,42,27,59,32,59,22,42,50,38,40,54,75,37,36,71,53,57,34,-2,26,49,22,67,-2,-2,61,45,73,23,43,50,62,25,48,-2,30,74,50,52,33,48,42,65,36,57,44,23,40,63,41,67,64,26,51,51,51,66,28,36,48,27,-2,-2,43,25,42,39,55,-2,28,64,61,31,43,-2,53,67,-2,29,52,62,75,37,48,26,64,67,55,38,63,70,44,62,25,71,-2,-2,-2,64,50,33,50,65,56,-2,52,-2,71,65,47,49,63,48,67,38,72,71,58,42,62,36,23,-2,36,66,44,38,43,58,72,-2,23,39,60,42,70,-2,53,62,38,76,30,55,-1,-2,25,28,-2,69,36,34,28,24,72,42,30,39,31,70,72,51,37,36,66,71,36,42,73,70,-2,56,48,-2,75,74,76,24,68,26,24,38,64,53,47,41,62,54,28,57,24,22,27,25,71,69,37,59,64,36,45,28,35,26,28,54,23,23,39,69,73,60,36,70,39,55,60,61,49,30,23,70,50,-1,62,66,39,65,58,74,67,22,22,66,51,51,50,62,54,33,57,70,43,53,28,44,61,48,39,64,71,-2,69,54,75,67,76,57,63,69,75,70,-1,53,28,33,65,74,74,69,27,49,71,29,32,76,31,72,69,48,40,55,-2,67,56,75,45,-2,31,69,25,51,28,24,42,26,33,60,65,54,67,25,64,-2,-2,75,-1,41,28,55,40,48,52,62,69,30,39,65,27,65,33,33,73,75,34,47,46,48,63,42,76,33,69,74,-2,38,73,49,43,42,65,73,58,73,45,53,54,-2,29,55,58,40,74,30,23,54,26,51,27,68,33,70,-2,23,29,73,60,25,58,74,-2,50,53,49,25,56,-2,69,36,62,29,49,37,22,73,36,61,41,60,-2,75,55,52,66,23,26,34,59,23,26,76,41,23,72,70,31,33,58,57,76,76,-2,65,73,44,-2,53,71,33,-2,-2,29,73,56,54,37,33,58,62,36,-2,24,65,52,38,54,54,60,30,35,33,-2,34,57,38,31,25,23,76,58,50,-2,50,76,57,56,31,63,57,71,30,43,42,52,55,45,67,70,49,69,49,44,27,62,70,59,58,67,24,59,26,57,-2,53,54,64,49,46,72,60,37,26,72,76,38,24,-2,27,70,43,50,57,76,67,42,-2,54,60,52,35,31,24,52,22,47,65,34,55,75,48,69,54,33,37,29,-2,75,53,56,65,64,39,33,41,23,35,24,38,37,52,31,68,53,61,64,47,55,29,67,54,50,42,30,24,25,46,30,22,24,53,48,62,38,68,24,-2,60,74,40,55,27,22,26,74,57,26,44,71,23,72,57,32,26,23,58,45,37,39,-2,41,39,61,53,50,47,23,25,75,52,66,76,68,53,33,43,60,53,52,66,-2,72,39,72,54,43,29,32,53,39,22,62,52,72,68,67,52,53,51,57,56,32,69,67,74,24,61,64,72,26,46,68,62,61,44,33,26,-2,36,24,47,29,53,39,75,26,69,47,74,55,41,-2,69,-2,-2,44,63,41,64,-2,21,61,73,48,57,34,74,50,54,-2,-1,67,66,58,64,50,42,69,31,22,65,60,44,71,27,30,-2,34,37,67,-2,-2,61,45,-2,76,45,30,-2,33,63,28,35,37,33,46,59,59,37,64,67,39,54,36,48,30,72,31,27,-2,51,25,36,25,30,-2,64,41,68,68,69,37,-2,38,64,43,47,56,32,55,56,27,73,71,68,22,31,72,51,66,55,34,50,48,69,44,42,32,25,23,64,43,42,53,54,43,75,43,25,60,37,67,53,60,41,26,72,41,-2,60,68,43,45,66,27,48,59,63,65,38,47,68,34,45,72,34,48,76,-2,63,58,24,72,73,35,36,46,-2,32,57,73,32,75,68,67,66,41,67,75,69,30,73,40,44,72,27,49,30,-2,33,51,36,29,27,-2,46,32,27,56,23,69,25,-2,61,48,76,69,-2,67,61,42,55,39,73,30,69,42,29,-2,60,74,57,-2,64,29,51],"express":[67,42,53,-2,-2,-2,38,-2,49,57,68,-2,22,69,30,28,74,54,65,42,49,36,-2,56,23,63,41,67,-2,35,54,53,-2,67,26,-2,31,26,-2,55,-2,-2,22,68,73,22,50,-2,60,73,37,52,50,32,35,69,61,-2,25,72,49,43,58,46,26,37,-2,27,38,28,49,73,-2,32,71,59,68,75,41,-2,48,60,55,61,42,60,63,36,40,23,28,37,-2,36,44,46,-2,64,-2,37,48,39,61,61,-2,56,-2,35,47,-2,33,46,46,26,-2,41,34,31,57,53,30,-2,75,59,45,41,-2,24,-2,65,62,23,67,56,29,38,26,62,-2,52,56,-2,50,76,-2,72,51,-2,-2,33,23,57,53,-2,26,61,28,35,56,53,32,60,-2,26,67,49,51,69,42,58,72,44,-2,-2,-2,34,52,29,25,46,39,54,69,63,56,41,-2,-1,75,-2,33,29,27,36,-2,34,-2,50,-2,36,46,49,68,51,66,47,52,-2,66,37,-2,51,73,28,34,32,22,38,42,68,-2,-2,-2,36,55,63,52,27,73,40,35,60,33,31,34,-2,28,50,-2,25,-2,-2,-2,29,75,-2,73,75,44,34,44,33,-2,42,28,45,54,70,68,58,37,49,74,27,21,51,42,32,-2,66,-2,24,68,65,-2,-2,50,54,68,-2,-2,-2,-2,25,58,44,-2,43,64,-2,51,28,66,-2,-2,54,75,69,75,26,-2,56,58,61,43,31,43,45,40,65,32,40,61,28,61,-2,-2,-2,58,49,26,49,71,30,-2,43,64,71,25,-2,-2,33,34,64,-2,37,23,61,28,72,61,54,38,76,-2,-2,27,39,-2,-2,-2,-2,-2,-2,71,39,74,60,41,62,40,22,-2,25,-2,-2,65,-2,71,47,65,27,43,40,60,-2,36,-2,23,41,35,39,22,62,40,57,-2,65,53,52,47,67,70,-2,-2,-2,38,75,-2,38,64,55,76,62,32,44,33,59,22,38,28,65,37,36,46,65,46,-2,72,36,22,23,-2,58,69,59,-2,39,45,48,72,75,26,-2,23,71,47,52,43,62,69,24,54,36,35,42,60,40,25,58,27,-2,66,66,44,32,49,57,60,51,29,-2,27,48,62,35,66,73,41,38,52,-2,75,54,66,38,49,49,62,-2,70,33,63,58,47,70,48,-2,48,44,-2,72,27,33,74,26,66,67,73,35,44,46,64,37,54,33,37,45,74,48,74,42,62,60,41,38,-2,66,-2,28,-2,63,-2,36,48,53,-2,71,57,48,70,22,71,71,-2,58,66,74,37,24,63,28,-2,24,26,-2,48,61,-2,30,66,32,38,68,32,22,45,32,68,-2,-2,47,-2,61,35,45,-2,54,70,26,73,37,67,28,63,44,62,-2,-2,73,44,58,28,56,28,-2,49,69,74,59,-2,51,-2,-2,27,55,32,72,57,-2,66,24,75,38,54,76,-2,-2,-2,68,52,69,40,60,65,74,31,-2,40,42,29,41,57,36,50,49,25,63,62,69,-2,-2,67,-2,24,32,22,32,44,67,36,48,41,-2,67,60,56,-2,57,23,-2,64,66,47,37,53,22,45,28,57,24,-2,66,73,65,59,74,35,-2,-2,52,22,56,25,27,30,24,39,56,36,24,34,68,-2,40,56,54,68,-2,-2,34,76,32,36,-2,53,52,45,57,29,64,-2,24,-2,75,56,39,33,44,48,53,52,47,46,-2,49,-2,-2,61,41,-2,59,-2,43,69,68,-2,65,22,67,35,62,62,-2,42,46,46,42,66,-2,47,70,61,45,27,-2,-2,75,62,-2,49,-2,47,23,75,62,58,50,-2,73,75,41,42,33,72,75,75,-2,67,66,57,40,-2,76,60,33,60,40,-2,39,51,53,-2,38,26,66,43,69,55,49,-2,28,51,68,50,-2,22,47,41,69,61,75,55,48,31,64,53,57,22,31,38,44,68,61,-2,55,60,34,-2,74,41,31,28,-2,-2,63,56,-2,37,67,49,62,65,31,72,75,23,43,73,56,56,75,31,-2,-2,33,60,37,57,40,60,24,55,56,59,48,33,61,48,61,51,58,64,38,32,-2,41,45,39,33,22,52,70,-2,27,43,-2,51,38,34,32,76,45,27,49,26,68,-2,52,-2,27,71,23,48,29,34,64,-2,47,25,32,33,62,40,-2,21,75,-2,-2,25,-2,51,22,-2,61,57,-2,74,29,-2,49,30,69,56,41,53,66,33,-2,44,41,-2,-2,72,-1,58,60,30,43,57,39,63,32,37,74,52,72,31,70,-2,-2,30,-2,-2,-2,29,31,65,68,23,25,43,60,24,-2,44,45,51,-2,63,27,48,-2,-2,69,-2,63,71,66,35,-2,33,22,-2,34,59,56,-2,-2,32,-2,60,28,46,70,45,45,54,72,76,73,38,38,37,-2,26,43,58,62,49,-2,-2,53,67,53,33,27,50,68,73,75,50,51,-2,64,73,65,29,29,40,75,67,60,40,-2,28,37,-2,57,-2,27,52,36,31,24,62,75,-2,56,39,48,61,-2,30,-2,-2,55,23,42,74,-2,53,31,47,37,26,25,24,65,29,76,47,21,-2,-2,-2,57,47,63,57,-2,37,-2,21,-2,44,66,32,46,-2,73,73,38,44,-2,56,37,75,26,29,53,69,75,75,65,41,38,22,42,46,68,44,46,-2,43,74,64,54,36,27,44,-2,-2,-2,47,34,60,-2,71,60,75,22,54,40,25,-2,-2,38,69,30,66,68,33,74,-2,33,47,67,46,26,29,33,53,55,24,-2,33,52,56,71,26,33,58,47,-2,32,48,39,39,28,48,48,59,-2,-2,-2,54,-2,64,38,36,62,-2,47,29,30,-2,70,59,-2,23,21,-2,50,-2,36,61,31,75,71,-2,29,33,27,46,25,71,36,30,24,69,47,66,22,45,64,28,-2,29,28,-2,63,73,40,60,27,75,42,45,63,71,-2,71,24,66,-2,-2,46,64,38,41,52,-2,56,48,29,-2,35,61,58,29,-2,69,61,-2,33,44,59,37,-2,26,40,-2,73,68,58,57,-2,45,32,44,35,30,56,23,22,36,39,70,71,22,41,-2,53,37,65,63,56,31,49,39,-2,-2,48,32,-2,56,54,26,45,58,76,74,27,52,45,68,72,72,23,-2,31,24,37,58,44,67,47,43,36,25,44,43,44,50,68,55,51,37,-2,57,26,30,71,40,60,40,37,54,-2,25,24,-2,25,45,70,-2,-2,61,39,73,-2,25,71,35,54,70,24,-2,68,36,53,29,-2,54,28,33,74,71,33,76,27,39,-2,74,59,25,-2,68,58,49,32,65,73,39,39,74,38,49,75,-2,47,58,69,-1,24,61,26,76,35,50,-2,23,57,37,54,26,34,69,71,-2,37,29,58,24,22,-2,60,70,64,56,28,-2,64,-2,70,55,47,-2,59,70,65,-2,-2,35,51,39,-2,50,48,76,42,54,22,-2,-2,41,-2,66,25,28,-2,46,36,69,68,34,55,36,46,67,43,61,-2,-2,-2,-1,40,67,-2,30,37,62,-2,54,60,-2,32,44,30,49,64,26,49,75,72,45,72,60,-2,44,76,39,36,37,24,66,56,32,71,65,25,28,71,61,49,30,-2,70,72,-2,59,-2,42,-2,60,-2,60,45,61,-2,41,28,67,57,-2,48,76,24,39,64,31,29,67,72,31,50,37,-2,57,67,42,-2,46,-2,53,73,31,24,-2,32,56,-2,50,27,46,58,63,54,75,56,72,41,27,47,64,29,71,75,-2,34,36,56,50,27,45,-2,38,60,53,-2,-2,54,50,-2,43,63,40,44,27,45,61,52,44,53,-2,-2,-2,55,-2,29,50,36,62,41,74,61,33,75,-2,46,27,64,40,-2,67,33,68,72,-2,-2,33,40,-2,-2,-2,34,-2,47,22,40,-2,23,63,47,32,41,58,40,48,51,22,73,41,74,63,-2,64,57,65,64,47,52,54,53,55,42,25,-2,32,-2,-2,-2,22,39,73,67,47,-2,31,68,32,52,41,72,34,-2,-2,59,72,36,62,-2,33,61,76,60,70,57,75,-2,48,-2,53,68,45,72,-1,72,39,32,-2,35,65,53,-2,40,-2,56,32,-2,27,66,-2,63,58,-2,43,54,63,58,63,-2,53,46,-2,37,40,-2,68,67,39,28,53,-2,23,40,51,29,-2,42,73,70,-2,37,38,68,-1,-2,63,30,40,53,66,57,66,24,38,-2,47,49,31,71,44,-2,63,-2,-2,75,-1,27,21,52,71,61,30,58,38,-2,-2,25,-2,56,58,41,38,33,66,-2,60,-2,42,-2,54,24,60,67,23,22,-2,25,29,31,70,26,-2,76,51,68,74,22,36,32,-1,36,-2,37,65,70,63,-2,-2,-2,69,42,22,72,49,39,33,40,-2,74,-2,48,-2,49,-2,52,52,59,62,57,36,58,24,41,32,-2,35,56,57,74,53,57,34,32,68,58,-2,54,30,54,-2,30,75,53,26,-2,62,65,28,60,32,36,29,33,-2,64,67,45,25,30,55,43,37,68,-2,65,71,-2,59,-1,-2,71,54,64,-2,46,-2,-2,47,46,69,47,31,-2,-2,50,-2,-2,47,66,72,25,67,22,62,26,43,56,32,29,37,64,44,42,47,53,26,38,55,30,-2,24,39,26,41,47,58,45,-2,-2,68,46,35,49,-1,-2,43,43,38,62,67,57,27,28,33,58,-2,50,35,67,45,34,70,-2,-2,59,65,31,33,53,39,-2,34,75,-2,-2,68,44,45,62,-2,-2,37,30,30,39,53,38,53,71,31,-2,25,73,51,28,50,58,59,69,26,44,-2,46,72,67,-2,-2,40,-2,56,69,72,36,53,53,26,22,-2,39,61,55,52,47,40,42,51,30,55,33,72,60,-2,66,-2,-2,68,44,43,39,31,67,-2,23,61,37,-2,-2,-2,67,31,54,50,44,41,68,-2,28,54,62,-2,58,73,26,47,42,50,58,74,-2,24,65,64,54,71,50,72,54,24,-2,25,41,73,59,45,50,-2,28,25,-2,49,41,37,-2,26,-2,74,24,52,55,22,26,-2,25,48,30,76,27,49,44,-2,75,33,29,23,41,50,33,-2,57,-2,-2,-2,42,-2,56,25,34,44,-2,-2,-2,26,65,43,61,61,75,52,37,41,68,-2,38,46,-2,43,38,51]};
+  const todos=[...E.grande.map(e=>[e,'g']),...E.express.map(e=>[e,'e'])];
+  const reales=todos.filter(x=>x[0]>=0);
+  const media=a=>a.reduce((s,x)=>s+x,0)/a.length;
+  const mediana=a=>{const b=[...a].sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2;};
+  const desv=a=>{const m=media(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1));};
+  const R=reales.map(x=>x[0]),MG={g:media(reales.filter(x=>x[1]==='g').map(x=>x[0])),e:media(reales.filter(x=>x[1]==='e').map(x=>x[0]))};
+  const B0=20,ANCHO=5,NB=23; // 20 a 134 años
+  let metodo='quitar';
+  function datos(){
+    const r=[],imp=[];const azar=rnd(42);
+    todos.forEach(([e,f])=>{
+      if(e>=0){r.push(e);return;}
+      if(metodo==='centinela'){if(e===-1)imp.push(126);return;}
+      if(metodo==='quitar')return;
+      if(metodo==='media')imp.push(Math.round(media(R)));
+      else if(metodo==='mediana')imp.push(mediana(R));
+      else if(metodo==='grupo')imp.push(Math.round(MG[f]));
+      else imp.push(R[Math.floor(azar()*R.length)]);
+    });
+    return {r,imp};
+  }
+  function pintar(){
+    raiz.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===metodo));
+    const {r,imp}=datos(),all=r.concat(imp);
+    const cr=new Array(NB).fill(0),ci=new Array(NB).fill(0);
+    r.forEach(e=>cr[Math.min(NB-1,Math.floor((e-B0)/ANCHO))]++);imp.forEach(e=>ci[Math.min(NB-1,Math.floor((e-B0)/ANCHO))]++);
+    const max=Math.max(...cr.map((c,i)=>c+ci[i]),1);
+    $('#c3l2-hist').innerHTML=cr.map((c,i)=>'<div title="'+(B0+i*ANCHO)+'-'+(B0+i*ANCHO+4)+' años: '+(c+ci[i])+'">'+(ci[i]?'<i class="imp" style="height:'+(ci[i]/max*100)+'%"></i>':'')+(c?'<i style="height:'+(c/max*100)+'%"></i>':'')+'</div>').join('');
+    $('#c3l2-eje').innerHTML=cr.map((c,i)=>'<span>'+(i%3===0?B0+i*ANCHO:'')+'</span>').join('');
+    const m=media(all),md=mediana(all),sd=desv(all),pico=Math.max(...cr.map((c,i)=>c+ci[i]))/all.length*100;
+    $('#c3l2-num').innerHTML='<div><small>Socios con edad</small><b>'+nf(all.length)+'</b></div><div><small>Media</small><b>'+nf(m,1)+'</b></div><div><small>Mediana</small><b>'+nf(md,1)+'</b></div><div><small>Desviación estándar</small><b>'+nf(sd,1)+'</b></div><div><small>Barra más alta</small><b>'+nf(pico,1)+' %</b></div>';
+    const T={
+      centinela:'<span class="warn">Las 30 fechas «1900-01-01» se cuelan como socios de 126 años: la barra solitaria de la derecha.</span><span>Sube la media y, sobre todo, la desviación estándar. Un valor centinela no es un dato: es un faltante disfrazado, y hay que convertirlo en vacío antes de cualquier cálculo.</span>',
+      quitar:'<span class="ok">Solo se usan las 5.230 edades verdaderas.</span><span>La distribución no cambia de forma, pero se pierde el 13 % de los socios, y no al azar: faltan más en las tiendas express (19,6 %) que en las grandes (8,6 %). Si los socios de las express fueran más jóvenes, la media quedaría sesgada.</span>',
+      media:'<span class="warn">785 socios reciben la misma edad, 48 años.</span><span>La media no se mueve, pero aparece un pico artificial y la desviación estándar baja: los datos parecen más parejos de lo que son. Cualquier análisis por edad verá una multitud de socios de 48 años que no existe.</span>',
+      mediana:'<span class="warn">Igual que con la media: 785 socios con 48 años.</span><span>Con edades simétricas, media y mediana casi coinciden. La mediana resiste mejor a los atípicos (como los 126 años), pero también crea un pico y achica la dispersión.</span>',
+      grupo:'<span>Cada faltante recibe la media de su formato de tienda.</span><span>Respeta un poco más la estructura: si los dos formatos tuvieran edades distintas, cada grupo conservaría la suya. Aquí los dos formatos tienen casi la misma media (48,4 y 48,5 años), así que el resultado es igual al de la media: imputar por grupo solo ayuda cuando el grupo de verdad explica la variable.</span>',
+      azar:'<span class="ok">Cada faltante recibe la edad de un socio real elegido al azar (semilla 42).</span><span>La forma de la distribución y su dispersión se conservan. A cambio, una persona concreta queda con una edad que no es la suya: sirve para totales y gráficos, no para escribirle a ese socio por su cumpleaños.</span>'};
+    $('#c3l2-out').innerHTML='<span class="big">Media '+nf(m,1)+' años · desviación '+nf(sd,1)+'</span>'+T[metodo];
+  }
+  raiz.querySelectorAll('[data-m]').forEach(b=>b.addEventListener('click',()=>{metodo=b.dataset.m;pintar();}));
+  pintar();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="03-lab-1"]');
+  /* ---- Componente Pyodide común del curso «Ciencia de datos» (copiar tal cual) ----
+     Pyodide 314.0.7 (Python 3.14.2; pandas 3.0.2, polars 1.33.1, numpy 2.4.6, duckdb 1.5.1).
+     Se descarga solo al pulsar el botón y se comparte entre todos los labs de la página. */
+  const PY=window.cdatosPy||(window.cdatosPy=(function(){
+    const VER='314.0.7',BASE='https://cdn.jsdelivr.net/pyodide/v'+VER+'/full/';
+    let base=null;const listos={};
+    const AYUDA=[
+      'import ast, io, json, sys',
+      '_cdatos_espacios = {}',
+      'def _cdatos_limpio(v):',
+      '    if v is None: return None',
+      '    if hasattr(v, "item") and not isinstance(v, (str, bytes)):',
+      '        try: v = v.item()',
+      '        except Exception: v = str(v)',
+      '    if isinstance(v, float) and v != v: return None',
+      '    if isinstance(v, (bool, int, float, str)): return v',
+      '    return str(v)',
+      'def _cdatos_tabla(x, n=12):',
+      '    mod = type(x).__module__.split(".")[0]',
+      '    if mod == "polars":',
+      '        import polars as pl',
+      '        if isinstance(x, pl.LazyFrame): x = x.collect()',
+      '        if isinstance(x, pl.Series): x = x.to_frame()',
+      '        if not isinstance(x, pl.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.rows(); indice = None',
+      '        cols = list(h.columns); tipos = [str(t) for t in h.dtypes]',
+      '    elif mod == "pandas":',
+      '        import pandas as pd',
+      '        if isinstance(x, pd.Series): x = x.to_frame()',
+      '        if not isinstance(x, pd.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.astype(object).values.tolist()',
+      '        indice = [str(i) for i in h.index]',
+      '        cols = [str(c) for c in h.columns]; tipos = [str(t) for t in h.dtypes]',
+      '    elif x is None: return None',
+      '    else: return {"valor": repr(x)}',
+      '    return {"columnas": cols, "tipos": tipos, "indice": indice, "forma": list(x.shape), "motor": mod,',
+      '            "filas": [[_cdatos_limpio(v) for v in f] for f in filas]}',
+      'def _cdatos_correr(lab, codigo):',
+      '    ns = _cdatos_espacios.setdefault(lab, {"__name__": "__main__"})',
+      '    buf, viejo = io.StringIO(), sys.stdout',
+      '    sys.stdout = buf',
+      '    try:',
+      '        arbol = ast.parse(codigo); ultimo = None',
+      '        if arbol.body and isinstance(arbol.body[-1], ast.Expr):',
+      '            exp = ast.Expression(arbol.body.pop().value)',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '            ultimo = eval(compile(exp, "<lab>", "eval"), ns)',
+      '        else:',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '        return json.dumps({"salida": buf.getvalue(), "tabla": _cdatos_tabla(ultimo)})',
+      '    except BaseException as e:',
+      '        return json.dumps({"salida": buf.getvalue(), "error": type(e).__name__ + ": " + str(e)})',
+      '    finally:',
+      '        sys.stdout = viejo'].join('\n');
+    function script(){return new Promise((ok,mal)=>{
+      if(window.loadPyodide)return ok();
+      const s=document.createElement('script');s.src=BASE+'pyodide.js';
+      s.onload=ok;s.onerror=()=>mal(new Error('No se pudo descargar Pyodide'));document.head.appendChild(s);});}
+    return {VER,
+      /* paquetes: ['pandas'] o ['pandas','polars']; aviso(texto) recibe el estado */
+      cargar(paquetes,aviso){
+        if(!base){aviso&&aviso('Descargando Python (Pyodide '+VER+')…');
+          base=script().then(()=>loadPyodide({indexURL:BASE})).then(py=>{py.runPython(AYUDA);return py;});
+          base.catch(()=>{base=null;});}
+        return base.then(async py=>{
+          const faltan=paquetes.filter(p=>!listos[p]);
+          if(faltan.length){aviso&&aviso('Instalando '+faltan.join(' y ')+'…');
+            await py.loadPackage(faltan);faltan.forEach(p=>listos[p]=1);}
+          return py;});
+      },
+      /* archivos: {'ventas.csv': 'texto…'}; se escriben en la carpeta de trabajo de Python */
+      archivos(py,archivos){for(const k in archivos)py.FS.writeFile(k,archivos[k]);},
+      async correr(py,lab,codigo){
+        py.globals.set('_cdatos_codigo',codigo);
+        const r=JSON.parse(py.runPython('_cdatos_correr('+JSON.stringify(lab)+', _cdatos_codigo)'));
+        return r;}
+    };
+  })());
+  /* Dibuja la tabla que devuelve PY.correr (r.tabla) dentro de un elemento */
+  function pintarTabla(el,t){
+    const nfx=(v,dec)=>{if(typeof v!=='number')return v===null?'<i>nulo</i>':String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const d=dec?2:(Number.isInteger(v)?0:2);const s=Math.abs(v).toFixed(d).split('.');
+      s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (v<0?'−':'')+s.join(',');};
+    if(!t){el.innerHTML='';return;}
+    if(t.valor!==undefined){el.innerHTML='<pre class="cdatos-valor">'+nfx(t.valor)+'</pre>';return;}
+    const idx=t.indice&&!t.indice.every((v,i)=>v===String(i));
+    let h='<table class="tbl"><thead><tr>'+(idx?'<th></th>':'')+t.columnas.map((c,i)=>'<th>'+nfx(c)+'<br><small>'+t.tipos[i]+'</small></th>').join('')+'</tr></thead><tbody>';
+    t.filas.forEach((f,j)=>{h+='<tr>'+(idx?'<th>'+nfx(t.indice[j])+'</th>':'')+f.map((v,i)=>'<td'+(typeof v==='number'?' style="text-align:right"':'')+'>'+(/(^|_)id$|^año$|^anio$/i.test(String(t.columnas[i]))&&typeof v==='number'?String(v):nfx(v,/float/i.test(t.tipos[i])))+'</td>').join('')+'</tr>';});
+    const n=t.forma[0];
+    el.innerHTML=h+'</tbody></table><p class="hint">'+(n>t.filas.length?'Primeras '+t.filas.length+' de ':'')+nfx(n)+' filas × '+t.forma[1]+' columnas · '+t.motor+'</p>';
+  }
+  /* ---- fin del componente ---- */
+  const L={"archivos":{"ventas.csv":"ticket_id,fecha_hora,tienda_id,cliente_id,medio_pago,total\r\n100393,2025-01-02 16:42,T02,,efectivo,8.40\r\n102526,2025-01-10 20:20,T04,5869,Tarjeta,12.30\r\n108500,2025-02-02 16:28,T07,6818,tarjeta,4.15\r\n111276,2025-02-14 09:31,T04,,Tarjeta,8.55\r\n111976,2025-02-16 14:28,T01,,transferencia,44.85\r\n113677,2025-02-23 09:44,T06,4460,efectivo,7.50\r\n115058,2025-02-28 19:55,T02,1629,efectivo,\r\n115316,2025-03-01 16:53,T01,,tarjeta,25.05\r\n115541,2025-03-02 11:06,T02,3928,efectivo,25.00\r\n115669,2025-03-02 16:33,T07,5996,tarjeta,4.70\r\n115845,2025-03-03 11:30,T07,,tarjeta,8.45\r\n117717,2025-03-10 10:58,T06,4035,tarjeta,8.00\r\n119727,2025-03-17 12:24,T01,,transferencia,33.80\r\n120467,2025-03-20 13:05,T04,6206,Efectivo,32.90\r\n120505,2025-03-20 15:07,T02,2938,tarjeta,14.90\r\n122473,2025-03-27 18:55,T04,,Efectivo,6.80\r\n123279,2025-03-30 12:56,T04,5458,Efectivo,9.25\r\n123680,2025-03-31 17:27,T05,,tarjeta,1.80\r\n124010,2025-04-01 20:21,T04,2834,Tarjeta,11.20\r\n125788,2025-04-08 11:03,T04,,Efectivo,21.90\r\n125809,2025-04-08 12:01,T08,,TARJETA,9.60\r\n126708,2025-04-11 18:15,T07,2315,efectivo,3.40\r\n133776,2025-05-05 21:47,T04,,Efectivo,25.90\r\n135133,2025-05-10 17:36,T04,,Tarjeta,30.00\r\n136753,2025-05-16 12:41,T07,1789,transferencia,7.45\r\n138174,2025-05-20 18:55,T08,,TRANSFERENCIA,7.30\r\n139889,2025-05-26 13:55,T04,2603,Tarjeta,8.40\r\n140486,2025-05-28 19:21,T08,,EFECTIVO,970.00\r\n142685,2025-06-05 12:17,T04,,Tarjeta,31.90\r\n143399,2025-06-07 16:27,T02,6213,tarjeta,9.00\r\n143850,2025-06-08 20:42,T04,,Efectivo,48.85\r\n154309,2025-07-15 10:32,T02,1191,tarjeta,2140.00\r\n155837,2025-07-20 12:16,T08,4480,EFECTIVO,10.20\r\n158957,2025-07-31 09:51,T04,4973,Efectivo,8.90\r\n161879,2025-08-09 19:01,T07,,efectivo,\r\n167792,2025-08-30 09:59,T01,5942,efectivo,8.50\r\n168499,2025-08-31 20:17,T07,3252,tarjeta,1.10\r\n169709,2025-09-05 14:46,T04,3150,Tarjeta,3.70\r\n170011,2025-09-06 13:27,T09,4105,tarjeta,9.45\r\n170415,2025-09-07 15:15,T07,4566,tarjeta,12.90\r\n172117,2025-09-13 17:34,T02,4277,tarjeta,19.60\r\n174467,2025-09-21 17:18,T04,6072,Tarjeta,10.30\r\n174501,2025-09-21 18:34,T04,3850,Efectivo,43.10\r\n174660,2025-09-22 11:57,T04,6292,Tarjeta,9.80\r\n174945,2025-09-23 14:30,T04,6960,Tarjeta,25.35\r\n175377,2025-09-25 10:43,T01,6011,tarjeta,29.95\r\n179528,2025-10-09 13:50,T04,,Efectivo,30.40\r\n183626,2025-10-23 12:03,T04,6161,Efectivo,13.10\r\n191431,2025-11-17 10:47,T02,5987,efectivo,12.00\r\n191431,2025-11-17 10:47,T02,5987,efectivo,12.00\r\n191531,2025-11-17 15:16,T04,,Efectivo,10.10\r\n198787,2025-12-08 17:28,T02,,efectivo,13.50\r\n201672,2025-12-15 15:28,T01,,tarjeta,37.20\r\n203780,2025-12-20 16:55,T06,4120,efectivo,15.60\r\n204033,2025-12-21 10:30,T02,2809,tarjeta,\r\n205000,2025-12-23 16:35,T02,,efectivo,16.70\r\n206718,2025-12-27 18:47,T09,,tarjeta,29.30\r\n210150,2026-01-07 13:43,T01,5299,tarjeta,30.85\r\n213763,2026-01-20 15:43,T04,,Tarjeta,12.30\r\n215058,2026-01-25 11:18,T08,,TARJETA,27.44\r\n215901,2026-01-28 16:54,T07,6279,efectivo,13.99\r\n222442,2026-02-21 17:46,T07,2242,tarjeta,17.27\r\n223218,2026-02-24 17:57,T01,,tarjeta,10.70\r\n223779,2026-02-27 10:02,T04,,Efectivo,30.92\r\n224752,2026-03-02 11:26,T05,5292,efectivo,0.95\r\n224752,2026-03-02 11:26,T05,5292,efectivo,0.95\r\n224909,2026-03-02 18:51,T05,3398,transferencia,13.99\r\n224909,2026-03-02 18:51,T05,3398,transferencia,13.99\r\n225047,2026-03-03 13:20,T04,6072,Efectivo,13.69\r\n226817,2026-03-09 16:05,T06,3496,efectivo,\r\n228026,2026-03-14 11:05,T03,4721,efectivo,1.33\r\n229970,2026-03-20 20:30,T09,2396,tarjeta,23.18\r\n231467,2026-03-26 12:22,T01,6774,transferencia,33.81\r\n232585,2026-03-29 19:08,T06,2289,tarjeta,15.36\r\n232997,2026-03-31 11:35,T08,1176,TARJETA,4.57\r\n234056,2026-04-04 09:57,T01,,tarjeta,4.98\r\n234321,2026-04-04 18:41,T04,,Tarjeta,28.09\r\n236253,2026-04-11 15:19,T05,2669,efectivo,9.75\r\n238871,2026-04-20 10:08,T07,5541,efectivo,21.95\r\n239431,2026-04-22 12:07,T03,3215,tarjeta,13.41\r\n239847,2026-04-23 19:23,T08,4144,TARJETA,3.60\r\n249775,2026-05-25 13:29,T03,5141,efectivo,\r\n250447,2026-05-27 19:00,T08,2508,TARJETA,2.01\r\n251190,2026-05-30 11:19,T04,5589,Tarjeta,15.91\r\n251947,2026-06-01 09:03,T03,4780,tarjeta,8.27\r\n257669,2026-06-20 13:13,T07,,efectivo,19.86\r\n261690,2026-07-03 19:55,T07,3288,efectivo,18.12\r\n265354,2026-07-15 19:26,T07,6652,efectivo,6.79\r\n266212,2026-07-18 16:10,T08,2738,EFECTIVO,5.09\r\n266914,2026-07-20 17:19,T03,6786,tarjeta,6.78\r\n270983,2026-08-02 16:43,T04,2424,Tarjeta,15.79\r\n275307,2026-08-17 08:01,T07,2857,efectivo,18.98\r\n276272,2026-08-20 18:40,T04,6205,Tarjeta,23.87\r\n277542,2026-08-24 18:59,T05,1116,transferencia,28.62\r\n277903,2026-08-26 11:59,T01,4150,efectivo,5.20\r\n278276,2026-08-27 17:49,T02,,tarjeta,19.99\r\n279930,2026-09-01 19:25,T09,2634,transferencia,3.39\r\n284251,2026-09-16 20:51,T01,5549,efectivo,13.15\r\n284279,2026-09-17 09:02,T02,,efectivo,17.22\r\n285699,2026-09-21 18:54,T09,5018,tarjeta,26.73\r\n287051,2026-09-26 17:16,T02,5249,efectivo,2.23\r\n290384,2026-10-08 10:26,T09,5827,efectivo,13.15\r\n297416,2026-10-31 16:30,T09,4336,tarjeta,9.65\r\n","ventas_oriente.csv":"ticket_id;fecha_hora;tienda_id;cliente_id;medio_pago;total\r\n107603;30/01/2025 18:00;T10;;efectivo;15,25\r\n125225;06/04/2025 10:36;T10;;tarjeta;8,10\r\n125510;07/04/2025 08:59;T12;;transferencia;14,80\r\n128647;18/04/2025 15:46;T12;;tarjeta ;15,70\r\n132735;02/05/2025 17:57;T10;;efectivo;19,50\r\n137141;17/05/2025 12:54;T10;1974;efectivo;16,00\r\n137807;19/05/2025 13:25;T11;4221;tarjeta;6,75\r\n140939;30/05/2025 14:47;T12;5163;tarjeta;30,50\r\n143659;08/06/2025 13:07;T11;;tarjeta;10,80\r\n149216;28/06/2025 08:14;T10;;tarjeta;19,20\r\n151473;05/07/2025 13:43;T10;2768;efectivo;3,65\r\n161284;08/08/2025 09:50;T12;1639;tarjeta;2,10\r\n167845;30/08/2025 11:51;T10;;tarjeta;20,30\r\n182868;20/10/2025 12:56;T12;2097;tarjeta;2,80\r\n183443;22/10/2025 16:30;T10;4049;efectivo;8,80\r\n189938;12/11/2025 21:21;T10;6734;tarjeta;31,00\r\n193817;25/11/2025 12:52;T12;3406;tarjeta;7,25\r\n195128;29/11/2025 17:09;T10;5751;tarjeta;30,60\r\n201758;15/12/2025 18:13;T10;3368;efectivo;11,80\r\n209851;06/01/2026 09:57;T10;;tarjeta;11,15\r\n211973;14/01/2026 11:45;T10;4829;tarjeta;25,56\r\n218360;06/02/2026 17:00;T12;3298;efectivo;9,23\r\n221011;16/02/2026 11:26;T12;3485;tarjeta;5,30\r\n232000;28/03/2026 09:15;T10;5161;efectivo;2,34\r\n237604;16/04/2026 10:44;T12;1121;tarjeta;15,38\r\n243105;04/05/2026 11:30;T10;;efectivo;20,37\r\n253830;07/06/2026 13:13;T11;5277;efectivo;1,38\r\n257889;20/06/2026 20:36;T10;6025;efectivo;17,72\r\n271089;02/08/2026 20:31;T11;;efectivo;19,71\r\n273363;10/08/2026 18:22;T10;;transferencia;26,03\r\n276731;22/08/2026 11:50;T10;2041;efectivo;22,00\r\n279972;01/09/2026 21:30;T11;6307;tarjeta;13,47\r\n281242;06/09/2026 12:55;T11;;transferencia;2,23\r\n281529;07/09/2026 12:11;T10;3028;efectivo;27,14\r\n283385;13/09/2026 18:03;T12;5255;efectivo;5,09\r\n284691;18/09/2026 15:55;T11;4240;efectivo;2,01\r\n288138;30/09/2026 16:29;T11;1950;efectivo;11,46\r\n290974;10/10/2026 10:18;T10;6456;transferencia;12,09\r\n293777;19/10/2026 10:53;T11;6129;efectivo;12,40\r\n295500;25/10/2026 10:14;T12;6242;tarjeta;16,54\r\n","ventas_T09_reenvio.csv":"ticket_id,fecha_hora,tienda_id,cliente_id,medio_pago,total\r\n281802,2026-09-08 12:00,T09,3865,efectivo,15.31\r\n281881,2026-09-08 16:19,T09,2979,efectivo,2.02\r\n281938,2026-09-08 19:13,T09,5139,efectivo,7.63\r\n282105,2026-09-09 15:42,T09,5912,tarjeta,2.33\r\n282303,2026-09-10 12:13,T09,,efectivo,8.48\r\n282510,2026-09-11 08:33,T09,,tarjeta,12.09\r\n282671,2026-09-11 16:34,T09,1525,tarjeta,10.06\r\n283353,2026-09-13 17:04,T09,4370,efectivo,39.86\r\n283367,2026-09-13 17:38,T09,5874,tarjeta,10.59\r\n283896,2026-09-15 17:45,T09,3842,tarjeta,5.94\r\n","detalle.csv":"ticket_id,linea,producto_id,cantidad,precio_unitario\r\n100393,1,8,1,2.20\r\n100393,2,12,1,1.30\r\n100393,3,46,1,4.90\r\n102526,1,36,3,4.10\r\n107603,1,4,1,1.25\r\n107603,2,5,2,2.90\r\n107603,3,39,1,2.20\r\n107603,4,41,2,1.70\r\n107603,5,42,2,1.30\r\n108500,1,4,1,1.25\r\n108500,2,5,1,2.90\r\n111276,1,4,1,1.25\r\n111276,2,5,2,2.90\r\n111276,3,44,1,1.50\r\n111976,1,4,1,1.25\r\n111976,2,16,2,1.70\r\n111976,3,18,1,2.10\r\n111976,4,20,2,6.90\r\n111976,5,22,1,1.90\r\n111976,6,28,1,4.20\r\n111976,7,32,1,3.20\r\n111976,8,33,1,2.10\r\n111976,9,34,1,12.90\r\n113677,1,12,1,1.30\r\n113677,2,13,1,1.90\r\n113677,3,27,1,4.30\r\n115058,1,4,1,1.25\r\n115058,2,5,1,2.90\r\n115058,3,6,2,4.60\r\n115058,4,10,1,4.80\r\n115058,5,25,1,9.80\r\n115058,6,48,2,7.80\r\n115316,1,1,1,2.40\r\n115316,2,2,2,1.80\r\n115316,3,4,1,1.25\r\n115316,4,7,1,2.70\r\n115316,5,8,1,2.20\r\n115316,6,34,1,12.90\r\n115541,1,20,1,6.90\r\n115541,2,22,1,1.90\r\n115541,3,25,1,9.80\r\n115541,4,26,1,6.40\r\n115669,1,32,1,3.20\r\n115669,2,44,1,1.50\r\n115845,1,1,1,2.40\r\n115845,2,2,1,1.80\r\n115845,3,4,1,1.25\r\n115845,4,23,2,1.50\r\n117717,1,6,1,4.60\r\n117717,2,16,2,1.70\r\n119727,1,1,1,2.40\r\n119727,2,4,2,1.25\r\n119727,3,20,2,6.90\r\n119727,4,22,2,1.90\r\n119727,5,27,1,4.30\r\n119727,6,28,1,4.20\r\n119727,7,30,1,1.30\r\n119727,8,44,1,1.50\r\n120467,1,18,1,2.10\r\n120467,2,20,1,6.90\r\n120467,3,22,1,1.90\r\n120467,4,25,1,9.80\r\n120467,5,29,2,4.50\r\n120467,6,32,1,3.20\r\n120505,1,20,1,6.90\r\n120505,2,27,1,4.30\r\n120505,3,40,2,1.10\r\n120505,4,44,1,1.50\r\n122473,1,1,1,2.40\r\n122473,2,4,2,1.25\r\n122473,3,22,1,1.90\r\n123279,1,2,1,1.80\r\n123279,2,4,1,1.25\r\n123279,3,18,1,2.10\r\n123279,4,36,1,4.10\r\n123680,1,2,1,1.80\r\n124010,1,2,1,1.80\r\n124010,2,6,1,4.60\r\n124010,3,10,1,4.80\r\n125225,1,31,1,1.60\r\n125225,2,33,1,2.10\r\n125225,3,39,1,2.20\r\n125225,4,40,2,1.10\r\n125510,1,3,2,2.10\r\n125510,2,31,2,1.60\r\n125510,3,32,1,3.20\r\n125510,4,33,2,2.10\r\n125788,1,8,2,2.20\r\n125788,2,12,1,1.30\r\n125788,3,13,1,1.90\r\n125788,4,22,1,1.90\r\n125788,5,25,1,9.80\r\n125788,6,37,1,2.60\r\n125809,1,2,1,1.80\r\n125809,2,48,1,7.80\r\n126708,1,22,1,1.90\r\n126708,2,23,1,1.50\r\n128647,1,18,1,2.10\r\n128647,2,22,2,1.90\r\n128647,3,25,1,9.80\r\n132735,1,6,2,4.60\r\n132735,2,10,1,4.80\r\n132735,3,19,1,2.30\r\n132735,4,30,1,1.30\r\n132735,5,45,2,0.95\r\n133776,1,2,1,1.80\r\n133776,2,5,1,2.90\r\n133776,3,9,1,3.10\r\n133776,4,10,2,4.80\r\n133776,5,14,2,3.80\r\n133776,6,17,1,0.90\r\n135133,1,20,1,6.90\r\n135133,2,22,1,1.90\r\n135133,3,25,1,9.80\r\n135133,4,28,1,4.20\r\n135133,5,37,1,2.60\r\n135133,6,38,2,2.30\r\n136753,1,4,1,1.25\r\n136753,2,9,2,3.10\r\n137141,1,36,1,4.10\r\n137141,2,37,1,2.60\r\n137141,3,40,1,1.10\r\n137141,4,41,2,1.70\r\n137141,5,43,2,2.40\r\n137807,1,1,1,2.40\r\n137807,2,4,1,1.25\r\n137807,3,9,1,3.10\r\n138174,1,8,1,2.20\r\n138174,2,12,1,1.30\r\n138174,3,13,2,1.90\r\n139889,1,1,2,2.40\r\n139889,2,18,1,2.10\r\n139889,3,23,1,1.50\r\n140486,1,2,1,1.80\r\n140486,2,4,2,1.25\r\n140486,3,7,2,2.70\r\n140939,1,20,3,6.90\r\n140939,2,25,1,9.80\r\n142685,1,1,1,2.40\r\n142685,2,4,2,1.25\r\n142685,3,10,3,4.80\r\n142685,4,18,1,2.10\r\n142685,5,46,1,4.90\r\n142685,6,47,1,5.60\r\n143399,1,8,1,2.20\r\n143399,2,12,1,1.30\r\n143399,3,18,1,2.10\r\n143399,4,22,1,1.90\r\n143399,5,23,1,1.50\r\n143659,1,18,1,2.10\r\n143659,2,22,2,1.90\r\n143659,3,46,1,4.90\r\n143850,1,2,1,1.80\r\n143850,2,4,1,1.25\r\n143850,3,5,3,2.90\r\n143850,4,9,1,3.10\r\n143850,5,18,1,2.10\r\n143850,6,20,2,6.90\r\n143850,7,25,1,9.80\r\n143850,8,28,1,4.20\r\n143850,9,36,1,4.10\r\n149216,1,1,1,2.40\r\n149216,2,5,1,2.90\r\n149216,3,6,1,4.60\r\n149216,4,9,3,3.10\r\n151473,1,1,1,2.40\r\n151473,2,4,1,1.25\r\n154309,1,1,1,2.40\r\n154309,2,2,2,1.80\r\n154309,3,4,2,1.25\r\n154309,4,9,1,3.10\r\n154309,5,25,1,9.80\r\n155837,1,8,2,2.20\r\n155837,2,12,3,1.30\r\n155837,3,13,1,1.90\r\n158957,1,9,1,3.10\r\n158957,2,11,1,1.60\r\n158957,3,15,3,1.40\r\n161284,1,3,1,2.10\r\n161879,1,12,1,1.30\r\n161879,2,13,1,1.90\r\n167792,1,11,1,1.60\r\n167792,2,14,1,3.80\r\n167792,3,17,1,0.90\r\n167792,4,39,1,2.20\r\n167845,1,2,1,1.80\r\n167845,2,25,1,9.80\r\n167845,3,28,1,4.20\r\n167845,4,29,1,4.50\r\n168499,1,40,1,1.10\r\n169709,1,18,1,2.10\r\n169709,2,24,1,1.60\r\n170011,1,2,2,1.80\r\n170011,2,4,1,1.25\r\n170011,3,6,1,4.60\r\n170415,1,1,1,2.40\r\n170415,2,2,2,1.80\r\n170415,3,4,2,1.25\r\n170415,4,7,1,2.70\r\n170415,5,16,1,1.70\r\n172117,1,4,2,1.25\r\n172117,2,5,1,2.90\r\n172117,3,6,1,4.60\r\n172117,4,10,2,4.80\r\n174467,1,2,1,1.80\r\n174467,2,4,2,1.25\r\n174467,3,5,1,2.90\r\n174467,4,9,1,3.10\r\n174501,1,2,2,1.80\r\n174501,2,4,2,1.25\r\n174501,3,18,1,2.10\r\n174501,4,20,2,6.90\r\n174501,5,25,2,9.80\r\n174501,6,44,1,1.50\r\n174660,1,33,2,2.10\r\n174660,2,47,1,5.60\r\n174945,1,1,1,2.40\r\n174945,2,2,1,1.80\r\n174945,3,4,3,1.25\r\n174945,4,10,2,4.80\r\n174945,5,48,1,7.80\r\n175377,1,2,2,1.80\r\n175377,2,4,1,1.25\r\n175377,3,34,1,12.90\r\n175377,4,35,2,3.40\r\n175377,5,36,1,4.10\r\n175377,6,42,1,1.30\r\n179528,1,12,1,1.30\r\n179528,2,13,1,1.90\r\n179528,3,21,3,8.50\r\n179528,4,41,1,1.70\r\n182868,1,40,1,1.10\r\n182868,2,41,1,1.70\r\n183443,1,18,2,2.10\r\n183443,2,40,2,1.10\r\n183443,3,43,1,2.40\r\n183626,1,36,2,4.10\r\n183626,2,37,1,2.60\r\n183626,3,38,1,2.30\r\n189938,1,2,1,1.80\r\n189938,2,10,1,4.80\r\n189938,3,34,1,12.90\r\n189938,4,35,3,3.40\r\n189938,5,42,1,1.30\r\n191431,1,15,2,1.40\r\n191431,2,17,1,0.90\r\n191431,3,39,1,2.20\r\n191431,4,42,1,1.30\r\n191431,5,43,2,2.40\r\n191531,1,8,1,2.20\r\n191531,2,12,1,1.30\r\n191531,3,13,1,1.90\r\n191531,4,23,1,1.50\r\n191531,5,24,2,1.60\r\n193817,1,1,1,2.40\r\n193817,2,2,2,1.80\r\n193817,3,4,1,1.25\r\n195128,1,22,2,1.90\r\n195128,2,23,2,1.50\r\n195128,3,25,2,9.80\r\n195128,4,28,1,4.20\r\n198787,1,29,2,4.50\r\n198787,2,30,1,1.30\r\n198787,3,32,1,3.20\r\n201672,1,6,1,4.60\r\n201672,2,34,2,12.90\r\n201672,3,35,2,3.40\r\n201758,1,5,1,2.90\r\n201758,2,14,1,3.80\r\n201758,3,16,1,1.70\r\n201758,4,41,2,1.70\r\n203780,1,48,2,7.80\r\n204033,1,12,1,1.30\r\n204033,2,13,1,1.90\r\n204033,3,29,1,4.50\r\n204033,4,30,1,1.30\r\n204033,5,32,1,3.20\r\n205000,1,18,2,2.10\r\n205000,2,28,2,4.20\r\n205000,3,40,1,1.10\r\n205000,4,41,1,1.70\r\n205000,5,42,1,1.30\r\n206718,1,20,1,6.90\r\n206718,2,25,1,9.80\r\n206718,3,28,3,4.20\r\n209851,1,3,3,2.23\r\n209851,2,18,2,2.23\r\n210150,1,1,1,2.54\r\n210150,2,2,1,1.91\r\n210150,3,5,1,3.07\r\n210150,4,9,2,3.29\r\n210150,5,10,3,5.09\r\n210150,6,15,1,1.48\r\n211973,1,1,1,2.54\r\n211973,2,9,1,3.29\r\n211973,3,10,2,5.09\r\n211973,4,29,1,4.77\r\n211973,5,30,1,1.38\r\n211973,6,31,2,1.70\r\n213763,1,9,1,3.29\r\n213763,2,14,2,4.03\r\n213763,3,17,1,0.95\r\n215058,1,2,1,1.91\r\n215058,2,20,2,7.31\r\n215058,3,22,1,2.01\r\n215058,4,28,2,4.45\r\n215901,1,3,2,2.23\r\n215901,2,8,1,2.33\r\n215901,3,12,1,1.38\r\n215901,4,13,1,2.01\r\n215901,5,22,1,2.01\r\n215901,6,41,1,1.80\r\n218360,1,40,3,1.17\r\n218360,2,41,1,1.80\r\n218360,3,42,1,1.38\r\n218360,4,43,1,2.54\r\n221011,1,42,2,1.38\r\n221011,2,43,1,2.54\r\n222442,1,34,1,13.67\r\n222442,2,35,1,3.60\r\n223218,1,5,1,3.07\r\n223218,2,12,1,1.38\r\n223218,3,13,2,2.01\r\n223218,4,18,1,2.23\r\n223779,1,2,1,1.91\r\n223779,2,4,1,1.33\r\n223779,3,7,1,2.86\r\n223779,4,9,2,3.29\r\n223779,5,10,2,5.09\r\n223779,6,18,2,2.23\r\n223779,7,22,1,2.01\r\n223779,8,23,1,1.59\r\n224752,1,17,1,0.95\r\n224909,1,18,1,2.23\r\n224909,2,22,1,2.01\r\n224909,3,30,2,1.38\r\n224909,4,39,3,2.33\r\n225047,1,9,1,3.29\r\n225047,2,18,2,2.23\r\n225047,3,47,1,5.94\r\n226817,1,2,1,1.91\r\n226817,2,4,1,1.33\r\n226817,3,39,2,2.33\r\n228026,1,4,1,1.33\r\n229970,1,2,1,1.91\r\n229970,2,4,1,1.33\r\n229970,3,6,2,4.88\r\n229970,4,9,2,3.29\r\n229970,5,35,1,3.60\r\n231467,1,1,1,2.54\r\n231467,2,2,1,1.91\r\n231467,3,5,2,3.07\r\n231467,4,6,2,4.88\r\n231467,5,9,1,3.29\r\n231467,6,10,1,5.09\r\n231467,7,15,1,1.48\r\n231467,8,22,1,2.01\r\n231467,9,23,1,1.59\r\n232000,1,40,2,1.17\r\n232585,1,20,1,7.31\r\n232585,2,22,1,2.01\r\n232585,3,28,1,4.45\r\n232585,4,44,1,1.59\r\n232997,1,40,1,1.17\r\n232997,2,42,1,1.38\r\n232997,3,45,2,1.01\r\n234056,1,2,1,1.91\r\n234056,2,5,1,3.07\r\n234321,1,20,1,7.31\r\n234321,2,25,2,10.39\r\n236253,1,7,1,2.86\r\n236253,2,9,1,3.29\r\n236253,3,11,1,1.70\r\n236253,4,17,2,0.95\r\n237604,1,1,1,2.54\r\n237604,2,4,2,1.33\r\n237604,3,10,2,5.09\r\n238871,1,4,2,1.33\r\n238871,2,5,2,3.07\r\n238871,3,15,1,1.48\r\n238871,4,30,1,1.38\r\n238871,5,31,1,1.70\r\n238871,6,32,1,3.39\r\n238871,7,33,1,2.23\r\n238871,8,40,1,1.17\r\n238871,9,41,1,1.80\r\n239431,1,2,1,1.91\r\n239431,2,4,1,1.33\r\n239431,3,10,1,5.09\r\n239431,4,43,2,2.54\r\n239847,1,22,1,2.01\r\n239847,2,23,1,1.59\r\n243105,1,1,1,2.54\r\n243105,2,2,1,1.91\r\n243105,3,4,2,1.33\r\n243105,4,10,1,5.09\r\n243105,5,24,2,1.70\r\n243105,6,29,1,4.77\r\n249775,1,18,1,2.23\r\n249775,2,23,1,1.59\r\n250447,1,22,1,2.01\r\n251190,1,12,1,1.38\r\n251190,2,13,1,2.01\r\n251190,3,18,2,2.23\r\n251190,4,22,1,2.01\r\n251190,5,23,2,1.59\r\n251190,6,24,1,1.70\r\n251190,7,40,1,1.17\r\n251947,1,48,1,8.27\r\n253830,1,12,1,1.38\r\n257669,1,4,1,1.33\r\n257669,2,20,1,7.31\r\n257669,3,22,2,2.01\r\n257669,4,39,2,2.33\r\n257669,5,43,1,2.54\r\n257889,1,4,2,1.33\r\n257889,2,8,2,2.33\r\n257889,3,9,1,3.29\r\n257889,4,12,2,1.38\r\n257889,5,13,1,2.01\r\n257889,6,40,2,1.17\r\n261690,1,1,1,2.54\r\n261690,2,29,1,4.77\r\n261690,3,36,1,4.35\r\n261690,4,39,2,2.33\r\n261690,5,41,1,1.80\r\n265354,1,36,1,4.35\r\n265354,2,38,1,2.44\r\n266212,1,40,1,1.17\r\n266212,2,42,1,1.38\r\n266212,3,43,1,2.54\r\n266914,1,12,2,1.38\r\n266914,2,13,2,2.01\r\n270983,1,18,1,2.23\r\n270983,2,26,2,6.78\r\n271089,1,34,1,13.67\r\n271089,2,39,2,2.33\r\n271089,3,42,1,1.38\r\n273363,1,1,3,2.54\r\n273363,2,2,3,1.91\r\n273363,3,4,1,1.33\r\n273363,4,6,1,4.88\r\n273363,5,9,1,3.29\r\n273363,6,44,2,1.59\r\n275307,1,38,1,2.44\r\n275307,2,48,2,8.27\r\n276272,1,1,2,2.54\r\n276272,2,4,2,1.33\r\n276272,3,10,1,5.09\r\n276272,4,18,2,2.23\r\n276272,5,23,2,1.59\r\n276272,6,24,2,1.70\r\n276731,1,4,1,1.33\r\n276731,2,33,2,2.23\r\n276731,3,34,1,13.67\r\n276731,4,43,1,2.54\r\n277542,1,2,1,1.91\r\n277542,2,20,1,7.31\r\n277542,3,25,1,10.39\r\n277542,4,27,1,4.56\r\n277542,5,28,1,4.45\r\n277903,1,1,1,2.54\r\n277903,2,4,2,1.33\r\n278276,1,1,1,2.54\r\n278276,2,2,2,1.91\r\n278276,3,4,1,1.33\r\n278276,4,6,1,4.88\r\n278276,5,10,1,5.09\r\n278276,6,39,1,2.33\r\n279930,1,32,1,3.39\r\n279972,1,29,1,4.77\r\n279972,2,30,1,1.38\r\n279972,3,31,1,1.70\r\n279972,4,32,1,3.39\r\n279972,5,33,1,2.23\r\n281242,1,18,1,2.23\r\n281529,1,29,1,4.77\r\n281529,2,34,1,13.67\r\n281529,3,36,2,4.35\r\n281802,1,8,1,2.33\r\n281802,2,39,2,2.33\r\n281802,3,40,1,1.17\r\n281802,4,41,2,1.80\r\n281802,5,43,1,2.54\r\n281802,6,45,1,1.01\r\n281881,1,45,2,1.01\r\n281938,1,1,1,2.54\r\n281938,2,10,1,5.09\r\n282105,1,39,1,2.33\r\n282303,1,18,2,2.23\r\n282303,2,22,2,2.01\r\n282510,1,29,1,4.77\r\n282510,2,30,1,1.38\r\n282510,3,47,1,5.94\r\n282671,1,8,2,2.33\r\n282671,2,12,1,1.38\r\n282671,3,13,2,2.01\r\n283353,1,18,2,2.23\r\n283353,2,23,2,1.59\r\n283353,3,34,2,13.67\r\n283353,4,38,2,2.44\r\n283367,1,1,1,2.54\r\n283367,2,2,1,1.91\r\n283367,3,5,2,3.07\r\n283385,1,8,1,2.33\r\n283385,2,12,2,1.38\r\n283896,1,47,1,5.94\r\n284251,1,22,1,2.01\r\n284251,2,28,1,4.45\r\n284251,3,39,1,2.33\r\n284251,4,40,2,1.17\r\n284251,5,45,2,1.01\r\n284279,1,5,2,3.07\r\n284279,2,6,1,4.88\r\n284279,3,45,1,1.01\r\n284279,4,46,1,5.19\r\n284691,1,22,1,2.01\r\n285699,1,1,2,2.54\r\n285699,2,4,2,1.33\r\n285699,3,6,2,4.88\r\n285699,4,10,1,5.09\r\n285699,5,31,1,1.70\r\n285699,6,38,1,2.44\r\n287051,1,18,1,2.23\r\n288138,1,33,1,2.23\r\n288138,2,39,1,2.33\r\n288138,3,40,2,1.17\r\n288138,4,41,1,1.80\r\n288138,5,42,2,1.38\r\n290384,1,29,2,4.77\r\n290384,2,30,1,1.38\r\n290384,3,33,1,2.23\r\n290974,1,1,1,2.54\r\n290974,2,2,2,1.91\r\n290974,3,4,2,1.33\r\n290974,4,5,1,3.07\r\n293777,1,1,1,2.54\r\n293777,2,2,1,1.91\r\n293777,3,7,1,2.86\r\n293777,4,10,1,5.09\r\n295500,1,48,2,8.27\r\n297416,1,19,2,2.44\r\n297416,2,29,1,4.77\r\n"},"pasos":["import pandas as pd\n\nregistro = []\ndef anotar(paso, antes, despues):\n    registro.append({\"paso\": paso, \"filas\": len(despues),\n                     \"suma_total\": round(despues[\"total\"].sum(), 2),\n                     \"cambio\": round(despues[\"total\"].sum() - antes[\"total\"].sum(), 2)})\n\n# 0. El archivo del sistema nuevo, tal como llega\nv = pd.read_csv(\"ventas.csv\")\nanotar(\"0. ventas.csv tal cual\", v, v)\n","\n# 1. El Oriente: otro separador, coma decimal y fecha día/mes/año\noriente = pd.read_csv(\"ventas_oriente.csv\", sep=\";\", decimal=\",\")\noriente[\"fecha_hora\"] = (pd.to_datetime(oriente[\"fecha_hora\"], format=\"%d/%m/%Y %H:%M\")\n                         .dt.strftime(\"%Y-%m-%d %H:%M\"))\nantes, v = v, pd.concat([v, oriente], ignore_index=True)\nanotar(\"1. + Oriente bien leído\", antes, v)\n","\n# 2. Los tickets de T09 que llegaron tarde\nreenvio = pd.read_csv(\"ventas_T09_reenvio.csv\")\nantes, v = v, pd.concat([v, reenvio], ignore_index=True)\nanotar(\"2. + reenvío de T09\", antes, v)\n","\n# 3. Duplicados exactos: la misma fila dos veces\nprint(\"Filas repetidas:\", v.duplicated().sum())\nantes, v = v, v.drop_duplicates()\nanotar(\"3. sin duplicados exactos\", antes, v)\n","\n# 4. Validar el total contra el detalle: los ×100 se corrigen\ndetalle = pd.read_csv(\"detalle.csv\")\nsuma = (detalle[\"cantidad\"] * detalle[\"precio_unitario\"]).groupby(detalle[\"ticket_id\"]).sum().round(2)\nv = v.assign(total_detalle=v[\"ticket_id\"].map(suma))\nx100 = (v[\"total\"] - v[\"total_detalle\"] * 100).abs() < 0.05\nprint(\"Totales ×100:\", x100.sum())\nantes, v = v, v.assign(total=v[\"total\"].mask(x100, v[\"total_detalle\"]))\nanotar(\"4. totales ×100 corregidos\", antes, v)\n","\n# 5. Totales vacíos: se recuperan del detalle\nprint(\"Totales vacíos:\", v[\"total\"].isna().sum())\nantes, v = v, v.assign(total=v[\"total\"].fillna(v[\"total_detalle\"]))\nanotar(\"5. totales vacíos rellenados\", antes, v)\n","\n# 6. Medio de pago: una sola forma de escribir cada valor\nprint(\"Antes:\", sorted(v[\"medio_pago\"].dropna().unique()))\nantes, v = v, v.assign(medio_pago=v[\"medio_pago\"].str.strip().str.lower()\n                                   .replace({\"transf.\": \"transferencia\"}))\nprint(\"Después:\", sorted(v[\"medio_pago\"].dropna().unique()))\nanotar(\"6. medio de pago normalizado\", antes, v)\n"],"fin":"\npd.DataFrame(registro)","res":[{"salida":"","tabla":{"columnas":["paso","filas","suma_total","cambio"],"tipos":["str","int64","float64","float64"],"indice":["0"],"forma":[1,4],"motor":"pandas","filas":[["0. ventas.csv tal cual",103,4591.92,0.0]]}},{"salida":"","tabla":{"columnas":["paso","filas","suma_total","cambio"],"tipos":["str","int64","float64","float64"],"indice":["0","1"],"forma":[2,4],"motor":"pandas","filas":[["0. ventas.csv tal cual",103,4591.92,0.0],["1. + Oriente bien leído",143,5145.42,553.5]]}},{"salida":"","tabla":{"columnas":["paso","filas","suma_total","cambio"],"tipos":["str","int64","float64","float64"],"indice":["0","1","2"],"forma":[3,4],"motor":"pandas","filas":[["0. ventas.csv tal cual",103,4591.92,0.0],["1. + Oriente bien leído",143,5145.42,553.5],["2. + reenvío de T09",153,5259.73,114.31]]}},{"salida":"Filas repetidas: 3\n","tabla":{"columnas":["paso","filas","suma_total","cambio"],"tipos":["str","int64","float64","float64"],"indice":["0","1","2","3"],"forma":[4,4],"motor":"pandas","filas":[["0. ventas.csv tal cual",103,4591.92,0.0],["1. + Oriente bien leído",143,5145.42,553.5],["2. + reenvío de T09",153,5259.73,114.31],["3. sin duplicados exactos",150,5232.79,-26.94]]}},{"salida":"Filas repetidas: 3\nTotales ×100: 2\n","tabla":{"columnas":["paso","filas","suma_total","cambio"],"tipos":["str","int64","float64","float64"],"indice":["0","1","2","3","4"],"forma":[5,4],"motor":"pandas","filas":[["0. ventas.csv tal cual",103,4591.92,0.0],["1. + Oriente bien leído",143,5145.42,553.5],["2. + reenvío de T09",153,5259.73,114.31],["3. sin duplicados exactos",150,5232.79,-26.94],["4. totales ×100 corregidos",150,2153.89,-3078.9]]}},{"salida":"Filas repetidas: 3\nTotales ×100: 2\nTotales vacíos: 5\n","tabla":{"columnas":["paso","filas","suma_total","cambio"],"tipos":["str","int64","float64","float64"],"indice":["0","1","2","3","4","5"],"forma":[6,4],"motor":"pandas","filas":[["0. ventas.csv tal cual",103,4591.92,0.0],["1. + Oriente bien leído",143,5145.42,553.5],["2. + reenvío de T09",153,5259.73,114.31],["3. sin duplicados exactos",150,5232.79,-26.94],["4. totales ×100 corregidos",150,2153.89,-3078.9],["5. totales vacíos rellenados",150,2224.56,70.67]]}},{"salida":"Filas repetidas: 3\nTotales ×100: 2\nTotales vacíos: 5\nAntes: ['EFECTIVO', 'Efectivo', 'TARJETA', 'TRANSFERENCIA', 'Tarjeta', 'efectivo', 'tarjeta', 'tarjeta ', 'transferencia']\nDespués: ['efectivo', 'tarjeta', 'transferencia']\n","tabla":{"columnas":["paso","filas","suma_total","cambio"],"tipos":["str","int64","float64","float64"],"indice":["0","1","2","3","4","5","6"],"forma":[7,4],"motor":"pandas","filas":[["0. ventas.csv tal cual",103,4591.92,0.0],["1. + Oriente bien leído",143,5145.42,553.5],["2. + reenvío de T09",153,5259.73,114.31],["3. sin duplicados exactos",150,5232.79,-26.94],["4. totales ×100 corregidos",150,2153.89,-3078.9],["5. totales vacíos rellenados",150,2224.56,70.67],["6. medio de pago normalizado",150,2224.56,0.0]]}}]};
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  const usd=n=>'US$ '+nf(n,2);
+  const CORTO=['0 · Tal cual','1 · Oriente','2 · Reenvío','3 · Duplicados','4 · Totales ×100','5 · Vacíos','6 · Medio de pago'];
+  // Con los archivos completos (semilla 42): filas y suma de total después de cada paso
+  const COMPLETO=[[158690,2462025.03],[197499,3031671.84],[197622,3033192.39],[197576,3032462.60],[197576,3014324.81],[197576,3027430.10],[197576,3027430.10]];
+  const TXT=[
+    'El archivo del sistema nuevo, sin tocar. La suma ignora en silencio los totales vacíos, y ya incluye filas repetidas y errores: es la cifra que alguien entregaría si no limpia.',
+    'Las tres tiendas del Oriente entran recién ahora: sin <code>sep=";"</code> y <code>decimal=","</code> su archivo no se podía sumar. Es el salto más grande de todos: una región entera que faltaba.',
+    'Los tickets de T09 del 8 al 16 de septiembre llegaron en otro archivo. Sin ellos, la tienda parece haber cerrado nueve días.',
+    'Las cajas de T02 y T05 mandaron un lote dos veces. Quitar las filas idénticas baja la suma: esos tickets se contaban doble.',
+    'Doce totales tenían el punto decimal perdido (2.545,00 en vez de 25,45 en el ticket 110526). Se detectan porque son cien veces la suma de su detalle, y se corrigen con ella. Los seis tickets grandes de verdad no se tocan: su detalle cuadra.',
+    'Los totales vacíos no eran cero: el detalle dice cuánto valía cada ticket. Rellenarlos sube la suma, y ahora el total cuadra con el detalle en todas las filas.',
+    'El medio de pago se escribía de 20 formas distintas para 3 valores. Normalizarlo no mueve la suma, pero sin este paso un gráfico por medio de pago mostraría «Tarjeta» y «tarjeta» como si fueran cosas distintas.'];
+  let paso=6,py=null;
+  const cod=$('#c3l1-cod');
+  $('#c3l1-pasos').innerHTML=CORTO.map((t,i)=>'<button type="button" data-i="'+i+'">'+t+'</button>').join('');
+  const bs=[...raiz.querySelectorAll('#c3l1-pasos button')];
+  function codigo(k){return L.pasos.slice(0,k+1).join('')+L.fin;}
+  function estado(t,c){const e=$('#c3l1-estado');e.textContent=t;e.className='c3l1-estado'+(c?' '+c:'');}
+  function mostrar(r,guardado){
+    $('#c3l1-sello').textContent=guardado?'guardado':'en vivo';
+    const s=$('#c3l1-salida');s.hidden=!(r.salida||r.error);
+    s.textContent=(r.salida||'')+(r.error?'Error: '+r.error:'');s.style.color=r.error?'var(--warm)':'';
+    pintarTabla($('#c3l1-tabla'),r.error?null:r.tabla);
+  }
+  function pintar(){
+    bs.forEach((b,i)=>{b.setAttribute('aria-pressed',i===paso);b.classList.toggle('hecho',i<paso);});
+    cod.value=codigo(paso);mostrar(L.res[paso],true);
+    const [f,s]=COMPLETO[paso],[f0,s0]=paso?COMPLETO[paso-1]:COMPLETO[0],dif=s-s0;
+    $('#c3l1-total').innerHTML='<div><small>Muestra del lab: suma de total</small><b>'+usd(L.res[paso].tabla.filas.slice(-1)[0][2])+'</b></div>'+
+      '<div><small>Archivos completos: suma de total</small><b>'+usd(s)+'</b></div><div><small>Archivos completos: filas</small><b>'+nf(f)+'</b></div>';
+    $('#c3l1-out').innerHTML='<span class="big">Paso '+paso+': '+(paso?(dif>=0?'+':'')+usd(dif)+' en la suma de los archivos completos':'el punto de partida')+'</span><span>'+TXT[paso]+'</span>'+
+      (paso===6?'<span class="ok">Al final, la suma es US$ 3.027.430,10, la misma que la del detalle. Desde el primer paso cambió en US$ '+nf(3027430.10-2462025.03,2)+'.</span>':'');
+  }
+  bs.forEach(b=>b.addEventListener('click',()=>{paso=+b.dataset.i;pintar();}));
+  $('#c3l1-rest').addEventListener('click',pintar);
+  $('#c3l1-cargar').addEventListener('click',async()=>{
+    $('#c3l1-cargar').disabled=true;
+    try{py=await PY.cargar(['pandas'],t=>estado(t));PY.archivos(py,L.archivos);
+      estado('Listo: Python 3.14 con pandas · cambia el script y ejecútalo','ok');$('#c3l1-run').disabled=false;$('#c3l1-cargar').hidden=true;}
+    catch(e){estado('No se pudo cargar Python. Revisa tu conexión y vuelve a intentar; el resultado guardado sigue abajo.','warn');$('#c3l1-cargar').disabled=false;}
+  });
+  async function ejecutar(){if(!py)return;$('#c3l1-run').disabled=true;estado('Ejecutando…');
+    try{const r=await PY.correr(py,'03-lab-1',cod.value);mostrar(r,false);estado(r.error?'El script falló: lee el error':'Listo · ejecutado en tu navegador',r.error?'warn':'ok');}
+    catch(e){mostrar({error:String(e)},false);estado('Python se detuvo; recarga la página','warn');}
+    $('#c3l1-run').disabled=false;}
+  $('#c3l1-run').addEventListener('click',ejecutar);
+  cod.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();ejecutar();}});
+  pintar();
+})();
+</script>
+</body>
+</html>

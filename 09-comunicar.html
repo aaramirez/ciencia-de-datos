@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comunicar · Ciencia de datos · Ciencia de datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Del dato crudo a la decisión: hacer buenas preguntas, limpiar, explorar, visualizar, minar datos y texto y comunicar resultados con pandas y Polars, con código que corre en la página.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="comunicar">
+<header class="topbar"><a class="brand" href="index.html">Ciencia de <b>datos</b></a><span class="eyebrow">Curso visual e interactivo · Datos e inteligencia artificial</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 09 DE 10</span><h1>Comunicar: tableros, reportes e historias con datos</h1><p class="lede">Un hallazgo que nadie entiende no existe. Este capítulo convierte el análisis del Sur en algo que Lorena puede usar el lunes: una respuesta que va primero, una historia con contexto, conflicto y resolución, un reporte que se genera solo con código y un tablero de tres indicadores que dice la incertidumbre sin asustar.</p></header>
+<section><h2>La audiencia y la decisión que tiene que tomar</h2><div class="prose"><p>Mariana Solís terminó el análisis un jueves a las once de la noche. Tenía todo: la caída del Sur, la tienda que la explicaba, la semana en que empezó, las reseñas, los clientes que dejaron de venir. Exportó su cuaderno a un PDF de 23 páginas con 31 gráficos y se lo mandó a Lorena Quintero con un correo de una línea: «Te adjunto el análisis del Sur».</p><p>El viernes a las nueve llegó la respuesta: «Gracias. ¿Entonces qué hago con el Sur?». La respuesta estaba en la página 17, en el gráfico número 24, debajo de un título que decía «Ventas semanales por tienda». Lorena no llegó hasta ahí, y no tenía por qué.</p></div><div class="analogia"><b>Imagínalo así</b><p>Cuando llamas a un médico para saber el resultado de un examen, no quieres que te lea el informe del laboratorio línea por línea. Quieres que te diga primero si está todo bien o qué hay que hacer, y después, si preguntas, los valores. Un buen médico no oculta los números: los deja para quien los pide.</p></div><div class="prose"><p>Comunicar empieza por la misma pregunta con que empezó el análisis en el capítulo 01: <b>qué decisión depende de la respuesta</b>. Pero ahora se agrega otra: <b>quién la toma</b>. La <b>audiencia</b> (<i>audience</i>) no es «la gerencia»: es una persona con una decisión, poco tiempo y su propio vocabulario. En Almacenes Ejemplo, el mismo hallazgo tiene al menos cuatro lectores:</p><div class="tbl"><table><thead><tr><th>Quién</th><th>Qué decide</th><th>Qué necesita ver</th><th>Cuánto tiempo le dedica</th></tr></thead><tbody><tr><td>Lorena Quintero, gerente comercial</td><td>Si invierte en el Sur y en qué</td><td>Dónde está la caída, cuánto cuesta, qué se propone</td><td>Dos minutos antes del comité</td></tr><tr><td>Hernán Ibáñez, gerente regional del Sur</td><td>Qué cambia en sus tres tiendas</td><td>Que el problema es una tienda, no la región</td><td>Diez minutos</td></tr><tr><td>Octavio Ruiz, encargado de T07</td><td>Qué hace mañana en su tienda</td><td>Qué compras se perdieron y desde cuándo</td><td>Lo que haga falta, pero sin jerga</td></tr><tr><td>Verónica Peña, jefa de mercadeo</td><td>Si arma una campaña y para quién</td><td>Qué clientes dejaron de venir</td><td>Cinco minutos</td></tr></tbody></table></div><p>La consecuencia práctica es una regla que se repite en todo el capítulo: <b>la respuesta va primero</b>. Es el <b>principio de la pirámide</b> (<i>pyramid principle</i>), que Barbara Minto enseñó a los consultores en los años setenta: arriba la conclusión, debajo los argumentos que la sostienen y más abajo la evidencia. El lector decide hasta dónde baja.</p></div><figure class="fig fig-esquema" id="09-diagrama-1"><div class="lienzo"><svg viewBox="0 0 900 400" style="min-width:680px" role="img" aria-label="La pirámide de la respuesta: arriba la conclusión y la decisión, luego tres argumentos, luego la evidencia y abajo el anexo con código y datos; a la derecha, hasta qué nivel lee cada persona: Lorena los dos primeros, Hernán y Octavio hasta la evidencia, otra analista todo">
+<defs>
+<marker id="c9d1-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+</defs>
+<text x="300" y="24" class="t t-xs t-b t-m" text-anchor="middle">LA RESPUESTA PRIMERO, EL DETALLE DESPUÉS</text>
+<path d="M300 40 L380 110 L220 110 Z" class="d-casa"/>
+<text x="300" y="86" class="t t-b k-casa" text-anchor="middle">Conclusión</text>
+<text x="300" y="102" class="t t-xs k-casa" text-anchor="middle">Y DECISIÓN</text>
+<path d="M215 116 L385 116 L460 182 L140 182 Z" class="d-casa" style="opacity:.8"/>
+<text x="300" y="140" class="t t-b" text-anchor="middle">Tres argumentos</text>
+<text x="300" y="158" class="t t-s" text-anchor="middle">solo cae el Sur · solo T07, desde el 3 de agosto</text>
+<text x="300" y="173" class="t t-s" text-anchor="middle">· las reseñas hablan de las obras</text>
+<path d="M135 188 L465 188 L540 254 L60 254 Z" class="caja"/>
+<text x="300" y="214" class="t t-b" text-anchor="middle">Evidencia</text>
+<text x="300" y="232" class="t t-s" text-anchor="middle">un gráfico por argumento, con su título que afirma</text>
+<text x="300" y="246" class="t t-s t-m" text-anchor="middle">y la incertidumbre dicha en palabras</text>
+<path d="M55 260 L545 260 L590 316 L10 316 Z" class="caja" style="stroke-dasharray:5 4"/>
+<text x="300" y="284" class="t t-b" text-anchor="middle">Anexo</text>
+<text x="300" y="302" class="t t-s t-m" text-anchor="middle">método, supuestos, código, datos de origen y registro de limpieza</text>
+<text x="300" y="350" class="t t-s" text-anchor="middle">Conclusión en el título y en la primera frase:</text>
+<text x="300" y="368" class="t t-s" text-anchor="middle">si el lector se detiene ahí, ya sabe qué pasa y qué se propone.</text>
+
+<text x="740" y="24" class="t t-xs t-b t-m" text-anchor="middle">HASTA DÓNDE LEE CADA UNO</text>
+<rect x="640" y="56" width="200" height="40" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="740" y="74" class="t t-b k-warm" text-anchor="middle">Lorena, gerente comercial</text>
+<text x="740" y="89" class="t t-s" text-anchor="middle">decide qué hacer con el Sur</text>
+<line x1="636" y1="76" x2="392" y2="80" class="ln" marker-end="url(#c9d1-m)"/>
+<line x1="636" y1="84" x2="466" y2="150" class="ln" marker-end="url(#c9d1-m)"/>
+<rect x="640" y="190" width="200" height="40" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="740" y="208" class="t t-b k-warm" text-anchor="middle">Hernán y Octavio</text>
+<text x="740" y="223" class="t t-s" text-anchor="middle">región y tienda: qué cambiar</text>
+<line x1="636" y1="210" x2="546" y2="220" class="ln" marker-end="url(#c9d1-m)"/>
+<rect x="640" y="268" width="200" height="40" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="740" y="286" class="t t-b k-warm" text-anchor="middle">Otra analista</text>
+<text x="740" y="301" class="t t-s" text-anchor="middle">revisa y repite el análisis</text>
+<line x1="636" y1="288" x2="594" y2="288" class="ln" marker-end="url(#c9d1-m)"/>
+<text x="740" y="350" class="t t-s t-m" text-anchor="middle">Nadie lee de abajo hacia arriba:</text>
+<text x="740" y="368" class="t t-s t-m" text-anchor="middle">quien decide, casi nunca pasa del segundo nivel.</text>
+</svg></div><figcaption><b>La pirámide de la respuesta.</b> A la izquierda, de arriba abajo: la conclusión con la decisión propuesta (en verde azulado, el color de comunicar), los tres argumentos que la sostienen, la evidencia (un gráfico por argumento) y, con borde punteado, el anexo con el método, el código y los datos. A la derecha, hasta qué nivel lee cada persona: Lorena casi nunca pasa del segundo; Hernán y Octavio llegan a la evidencia; otra analista que quiera repetir el trabajo baja hasta el anexo.</figcaption></figure><div class="prose"><p>El PDF de Mariana estaba escrito en el orden en que ella trabajó: cargar, limpiar, unir, explorar, y al final, la conclusión. Es el orden natural para quien hace el análisis y el peor para quien lo lee. La versión que Mariana mandó el lunes empezaba así:</p><blockquote><p><b>T07 Sur Puerto vende 40 % menos desde que cerraron su estacionamiento por obras; el resto del Sur crece.</b> Propongo probar durante cuatro semanas un convenio con el estacionamiento de la otra cuadra y envío a domicilio para compras grandes, y medir si vuelven.</p></blockquote><p>Dos frases. Si Lorena solo lee eso, ya sabe qué pasa, dónde y qué se le pide. Todo lo demás está debajo, para quien quiera verificarlo.</p></div><div class="ml"><b>En la práctica</b><p><b>Tres preguntas antes de escribir una línea.</b> Mariana pegó en su monitor tres preguntas que se hace antes de preparar cualquier entrega: ¿quién lo va a leer y qué decide? ¿Qué es lo único que tiene que recordar si lee solo el título? ¿Qué espero que haga después de leerlo? Si no puede contestar la tercera, el análisis todavía no está listo para comunicarse: le falta la recomendación.</p></div></section>
+<section><h2>Contar una historia con datos: contexto, conflicto y resolución</h2><div class="analogia"><b>Imagínalo así</b><p>Un chiste mal contado empieza por el final. Uno bien contado prepara la situación, introduce algo que no encaja y lo resuelve en la última frase. Las cifras de un reporte funcionan igual: una cifra sola es un dato; una cifra que contradice lo que el lector esperaba es una noticia.</p></div><div class="prose"><p>Contar una <b>historia con datos</b> (<i>data storytelling</i>) no es adornar los números ni inventar personajes. Es ordenarlos para que el lector vea, en este orden, qué se esperaba, qué no cuadra y qué se propone. Esa estructura de tres actos es tan vieja como el teatro, y funciona porque imita cómo se presta atención: nadie se interesa por una respuesta si no sintió primero la pregunta.</p><ul><li><b>Contexto</b> (<i>setup</i>): lo que el lector ya sabe o da por hecho. Una o dos frases. En el Sur: Norte, Centro y Oriente venden entre 11 % y 14 % más que hace un año, y 6 puntos de eso son el alza de precios de enero.</li><li><b>Conflicto</b> (<i>conflict</i>): lo que no encaja. El Sur cae 23,2 % en el mismo período, y toda la caída es de una tienda: T07 Sur Puerto, que desde la semana del 3 de agosto vende la mitad. T08 y T09 crecen.</li><li><b>Resolución</b> (<i>resolution</i>): la explicación probable y lo que se propone. El 3 de agosto cerraron el estacionamiento de T07 por las obras de la avenida; las compras grandes, las que se hacen en carro, son las que más se perdieron. Se propone una prueba y la métrica que dirá si funcionó.</li></ul></div><figure class="fig fig-esquema" id="09-diagrama-2"><div class="lienzo"><svg viewBox="0 0 900 360" style="min-width:680px" role="img" aria-label="El arco de una historia con datos: la tensión sube del contexto al conflicto y baja en la resolución; con el caso del Sur: la cadena crece, el Sur cae 23,2 por ciento y toda la caída está en T07 desde el cierre del estacionamiento, y la resolución propone un convenio de estacionamiento y envío a domicilio que se mide en cuatro semanas">
+<text x="20" y="24" class="t t-xs t-b t-m">TENSIÓN DEL LECTOR</text>
+<line x1="40" y1="40" x2="40" y2="230" class="ln"/>
+<line x1="40" y1="230" x2="870" y2="230" class="ln"/>
+<path d="M40 210 C180 205 260 170 330 120 S470 52 520 56 S640 150 720 188 S820 205 870 206" class="ln s-warm" style="fill:none;stroke-width:3"/>
+<circle cx="520" cy="56" r="6" style="fill:var(--warm)"/>
+<rect x="52" y="244" width="250" height="100" rx="8" class="d-casa"/>
+<text x="64" y="264" class="t t-xs t-b k-casa">1 · CONTEXTO</text>
+<text x="64" y="284" class="t t-s">Lo que el lector ya sabe o espera:</text>
+<text x="64" y="301" class="t t-s">Norte, Centro y Oriente crecen</text>
+<text x="64" y="318" class="t t-s">entre 11 % y 14 % (6 % es precio).</text>
+<text x="64" y="335" class="t t-s t-m">Una frase, no una lección.</text>
+<rect x="320" y="244" width="270" height="100" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="332" y="264" class="t t-xs t-b k-warm">2 · CONFLICTO</text>
+<text x="332" y="284" class="t t-s">Lo que no cuadra: el Sur cae 23,2 %,</text>
+<text x="332" y="301" class="t t-s">y toda la caída es de T07 desde la</text>
+<text x="332" y="318" class="t t-s">semana del 3 de agosto (−40,8 %).</text>
+<text x="332" y="335" class="t t-s t-m">Aquí va el gráfico más claro.</text>
+<rect x="608" y="244" width="270" height="100" rx="8" class="d-casa"/>
+<text x="620" y="264" class="t t-xs t-b k-casa">3 · RESOLUCIÓN</text>
+<text x="620" y="284" class="t t-s">Causa probable: cerraron el</text>
+<text x="620" y="301" class="t t-s">estacionamiento por las obras. Qué se</text>
+<text x="620" y="318" class="t t-s">propone y cómo se sabrá si funcionó.</text>
+<text x="620" y="335" class="t t-s t-m">Termina en una decisión.</text>
+<text x="528" y="44" class="t t-s k-warm">el punto de máxima tensión: el quiebre de T07</text>
+<text x="170" y="196" class="t t-s t-m">«todo va bien»</text>
+<text x="742" y="176" class="t t-s t-m">«esto es lo que hacemos»</text>
+</svg></div><figcaption><b>El arco de una historia con datos.</b> La línea cálida es la tensión del lector: baja en el contexto («todo va bien»), sube hasta su punto máximo en el conflicto (el quiebre de T07) y baja en la resolución («esto es lo que hacemos»). Debajo, los tres recuadros con lo que va en cada acto para el caso del Sur. El gráfico más claro del análisis va en el conflicto, no en el contexto.</figcaption></figure><div class="prose"><p>Dos herramientas convierten esa estructura en páginas concretas. La primera es el <b>título que afirma</b> (<i>action title</i>): cada gráfico lleva como título la conclusión que muestra, no la descripción de sus ejes. «Ventas semanales de T07, 2025 y 2026» obliga al lector a descubrir qué mirar; «T07 vende la mitad desde el cierre del estacionamiento» se lo dice, y el gráfico pasa a ser la prueba. La segunda es la <b>anotación</b> (<i>annotation</i>): una línea vertical el 3 de agosto con su rótulo, o una franja con el rango de una semana normal, hace más que un párrafo de explicación.</p><p>La historia, además, cambia según quién la lee. Los datos son los mismos, pero la resolución depende de la decisión de cada uno: a Lorena le toca aprobar una prueba; a Octavio, organizar su tienda; a Verónica, escribir a los clientes que se fueron. El laboratorio muestra las tres versiones.</p></div><div class="lab" id="09-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>El mismo hallazgo contado con una tabla, con un gráfico y con una historia</h3></div><p class="hint">El hallazgo es siempre el mismo: las ventas semanales de T07 de julio a octubre, en 2025 y en 2026. Cambia el formato y el título, y mira cuántas de cinco preguntas (¿cae?, ¿desde cuándo?, ¿cuánto?, ¿por qué?, ¿qué hago?) puede responder el lector en unos segundos. En «Historia», cambia quién lo lee y mira qué parte cambia.</p><style>
+[id="09-lab-2"] .c9l2-rot{font:700 .68rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+[id="09-lab-2"] .c9l2-ctl{display:grid;gap:6px}
+[id="09-lab-2"] .c9l2-hoja{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card);display:grid;gap:8px;min-width:0}
+[id="09-lab-2"] .c9l2-hoja h4{margin:0;font:700 1rem/1.3 var(--f-display)}
+[id="09-lab-2"] .c9l2-hoja h4.desc{font-weight:600;color:var(--muted)}
+[id="09-lab-2"] .c9l2-hoja p{margin:0;font:400 .88rem/1.45 var(--f-body)}
+[id="09-lab-2"] .c9l2-hoja p b.m{color:var(--warm)}
+[id="09-lab-2"] .c9l2-arco{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:8px}
+[id="09-lab-2"] .c9l2-arco div{border-left:4px solid var(--d-casa);background:var(--d-casa-s);border-radius:6px;padding:6px 8px;font:400 .84rem/1.4 var(--f-body)}
+[id="09-lab-2"] .c9l2-arco div.cf{border-left-color:var(--warm);background:var(--warm-soft)}
+[id="09-lab-2"] .c9l2-arco b.r{display:block;font:700 .66rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+[id="09-lab-2"] .c9l2-tw{overflow-x:auto;max-height:22em}
+[id="09-lab-2"] .c9l2-tw td,[id="09-lab-2"] .c9l2-tw th{font:500 .76rem var(--f-mono);text-align:right;padding:2px 8px}
+[id="09-lab-2"] .c9l2-g{overflow-x:auto}
+[id="09-lab-2"] svg{width:100%;min-width:440px;height:auto;display:block}
+[id="09-lab-2"] svg text{font-family:var(--f-display);fill:var(--ink)}
+</style>
+<div class="c9l2-ctl">
+  <span class="c9l2-rot">Formato</span>
+  <div class="btns" id="c9l2-fmt" role="group" aria-label="Formato">
+    <button type="button" data-f="tabla" aria-pressed="true">Tabla</button>
+    <button type="button" data-f="grafico" aria-pressed="false">Gráfico</button>
+    <button type="button" data-f="historia" aria-pressed="false">Historia</button>
+  </div>
+  <span class="c9l2-rot">Título</span>
+  <div class="btns" id="c9l2-tit" role="group" aria-label="Título">
+    <button type="button" data-t="desc" aria-pressed="true">Describe el gráfico</button>
+    <button type="button" data-t="afirma" aria-pressed="false">Afirma el hallazgo</button>
+  </div>
+  <div class="opciones"><label>Lo lee <select id="c9l2-aud">
+    <option value="lorena">Lorena Quintero, gerente comercial</option>
+    <option value="octavio">Octavio Ruiz, encargado de T07</option>
+    <option value="veronica">Verónica Peña, jefa de mercadeo</option>
+  </select></label></div>
+</div>
+<div class="c9l2-hoja" id="c9l2-hoja" aria-live="polite"></div>
+<div class="readout texto" id="c9l2-out" aria-live="polite"></div></div><div class="prose"><p>Una historia no es una licencia para elegir solo los datos que convienen. Si T08 y T09 crecen, se dice, aunque complique el titular: precisamente eso es lo que convierte «el Sur cae» en «T07 cae». Si hubiera una explicación alternativa que no se pudo descartar, también va en la historia, como verás en la última sección.</p></div></section>
+<section><h2>Reportes reproducibles con cuadernos y Quarto</h2><div class="analogia"><b>Imagínalo así</b><p>Una receta escrita en un cuaderno de cocina se puede repetir: otro cocinero, otro día, con los mismos ingredientes, obtiene el mismo plato. Un plato que salió bien «a ojo» no se repite nunca igual. Un reporte armado copiando cifras de un análisis a una presentación es un plato a ojo.</p></div><div class="prose"><p>El PDF de 23 páginas tenía otro problema, menos visible. Para armar la versión del lunes, Mariana copió a mano doce cifras del cuaderno a un documento. Al mes siguiente, Lorena pidió el mismo análisis con noviembre: había que rehacer las doce cifras a mano, y en la primera versión dos quedaron con el valor de octubre sin que nadie lo notara. Cualquier cifra copiada a mano es una cifra que puede quedar vieja.</p><p>Un <b>reporte reproducible</b> (<i>reproducible report</i>) resuelve eso juntando en un solo archivo el texto y el código que calcula cada cifra. Al generarlo, el código corre de arriba abajo y escribe los números en el texto. Si los datos cambian, se vuelve a generar y todo se actualiza, incluso el párrafo. Hay dos formas comunes en Python:</p><ul><li>Un <b>cuaderno</b> (<i>notebook</i>) de Jupyter (<code>.ipynb</code>): celdas de código y de texto, con sus resultados guardados. Es cómodo para explorar, pero mezcla el orden en que se ejecutaron las celdas con el orden en que se leen: una celda corrida dos veces o fuera de orden deja resultados que nadie puede repetir. Antes de entregarlo, se reinicia y se ejecuta todo desde cero.</li><li><b>Quarto</b>, un sistema de publicación de código abierto: un archivo <code>.qmd</code> es texto en Markdown con bloques de código. El comando <code>quarto render</code> ejecuta los bloques con Jupyter y produce HTML, PDF o Word. También convierte un <code>.ipynb</code> directamente.</li></ul><p>La pieza que convierte un reporte en una herramienta mensual es el <b>parámetro</b> (<i>parameter</i>): una variable, como la región o el período, que se cambia al generar el reporte sin tocar el código. En Quarto se marca una celda con la etiqueta <code>parameters</code>:</p><div class="code-copia"><pre><code>---
+title: "Ventas por región"
+format: html
+jupyter: python3
+---
+
+Reporte generado con los datos de limpio/.
+
+#| tags: [parameters]
+region = "Sur"</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>En el archivo real, la línea <code>#| tags: [parameters]</code> y la de <code>region</code> van dentro de un bloque de código de Python (abierto con tres acentos graves y <code>{python}</code>, y cerrado con otros tres). Al generar, el valor se cambia desde la terminal, sin abrir el archivo: <code>quarto render reporte.qmd -P region:Norte</code>. La documentación de Quarto explica los parámetros con detalle; el principio es que un mismo archivo produce el reporte de las cuatro regiones.</p></div><figure class="fig fig-esquema" id="09-diagrama-3"><div class="lienzo"><svg viewBox="0 0 920 400" style="min-width:700px" role="img" aria-label="Un reporte reproducible: los datos limpios fijos y el documento con texto, código y parámetros entran a quarto render, que ejecuta el código, corre los controles y produce HTML, PDF o Word; cada mes se repite el mismo comando con datos nuevos y si un control falla el reporte no sale">
+<defs>
+<marker id="c9d3-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+</defs>
+<text x="110" y="26" class="t t-xs t-b t-m" text-anchor="middle">ENTRADAS FIJAS</text>
+<text x="460" y="26" class="t t-xs t-b t-m" text-anchor="middle">UN SOLO COMANDO</text>
+<text x="800" y="26" class="t t-xs t-b t-m" text-anchor="middle">SALIDAS</text>
+
+<rect x="14" y="44" width="200" height="86" rx="8" class="c-enl"/>
+<text x="26" y="66" class="t t-b k-enl">Datos limpios</text>
+<text x="26" y="84" class="t t-s t-mono">limpio/ventas.parquet</text>
+<text x="26" y="101" class="t t-s t-mono">limpio/tiendas.parquet …</text>
+<text x="26" y="119" class="t t-s t-m">sale de limpieza.py (cap. 03)</text>
+
+<rect x="14" y="146" width="200" height="104" rx="8" class="d-casa"/>
+<text x="26" y="168" class="t t-b k-casa">reporte.qmd</text>
+<text x="26" y="186" class="t t-s">texto en Markdown</text>
+<text x="26" y="203" class="t t-s">+ bloques de código Python</text>
+<text x="26" y="220" class="t t-s">+ parámetros: región, período</text>
+<text x="26" y="238" class="t t-s t-m">o un cuaderno .ipynb</text>
+
+<rect x="14" y="266" width="200" height="56" rx="8" class="caja"/>
+<text x="26" y="288" class="t t-b">Entorno fijado</text>
+<text x="26" y="306" class="t t-s t-mono">requirements.txt</text>
+
+<line x1="218" y1="88" x2="320" y2="170" class="ln" marker-end="url(#c9d3-m)"/>
+<line x1="218" y1="198" x2="320" y2="198" class="ln" marker-end="url(#c9d3-m)"/>
+<line x1="218" y1="294" x2="320" y2="226" class="ln" marker-end="url(#c9d3-m)"/>
+
+<rect x="326" y="120" width="270" height="160" rx="10" class="caja"/>
+<text x="461" y="144" class="t t-s t-mono" text-anchor="middle">quarto render reporte.qmd</text>
+<text x="461" y="162" class="t t-s t-mono" text-anchor="middle">-P region:Sur</text>
+<rect x="342" y="176" width="238" height="26" rx="5" class="c-red"/>
+<text x="461" y="194" class="t t-s k-red" text-anchor="middle">① ejecuta el código de arriba abajo</text>
+<rect x="342" y="208" width="238" height="26" rx="5" class="c-red"/>
+<text x="461" y="226" class="t t-s k-red" text-anchor="middle">② escribe cifras y gráficos en el texto</text>
+<rect x="342" y="240" width="238" height="26" rx="5" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="461" y="258" class="t t-s k-warm" text-anchor="middle">③ corre los controles: ¿cuadra todo?</text>
+
+<line x1="600" y1="176" x2="694" y2="98" class="ln" marker-end="url(#c9d3-m)"/>
+<line x1="600" y1="200" x2="694" y2="178" class="ln" marker-end="url(#c9d3-m)"/>
+<line x1="600" y1="224" x2="694" y2="258" class="ln" marker-end="url(#c9d3-m)"/>
+<rect x="700" y="70" width="200" height="50" rx="8" class="d-casa"/>
+<text x="712" y="91" class="t t-b k-casa">reporte.html</text>
+<text x="712" y="108" class="t t-s">se abre en cualquier navegador</text>
+<rect x="700" y="152" width="200" height="50" rx="8" class="d-casa"/>
+<text x="712" y="173" class="t t-b k-casa">PDF o Word</text>
+<text x="712" y="190" class="t t-s">para el comité o el correo</text>
+<rect x="700" y="234" width="200" height="50" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="712" y="255" class="t t-b k-warm">Un control falla</text>
+<text x="712" y="272" class="t t-s">el reporte no sale y avisa</text>
+
+<path d="M800 290 C800 350 470 362 461 300" class="ln ln-d" style="fill:none" marker-end="url(#c9d3-m)"/>
+<text x="640" y="388" class="t t-s t-m" text-anchor="middle">el mes siguiente: el mismo comando, datos nuevos</text>
+<text x="110" y="352" class="t t-s t-m" text-anchor="middle">nada se copia a mano</text>
+<text x="110" y="368" class="t t-s t-m" text-anchor="middle">entre un paso y otro</text>
+</svg></div><figcaption><b>Un reporte reproducible.</b> A la izquierda, las tres entradas fijas: los datos limpios que deja <code>limpieza.py</code> (en verde, el color de limpiar), el documento con texto, código y parámetros (en verde azulado), y el entorno con las versiones fijadas. Al centro, un solo comando que ① ejecuta el código de arriba abajo, ② escribe las cifras y los gráficos en el texto y ③ corre los controles. A la derecha, las salidas: HTML, PDF o Word, o un aviso si un control falla. La flecha punteada de abajo es el mes siguiente: el mismo comando con datos nuevos.</figcaption></figure><div class="prose"><p>El paso ③ es el que se olvida. Un reporte que se genera solo puede publicar sola una cifra equivocada, así que lleva <b>controles</b> (<i>checks</i>): la tabla por tienda suma lo mismo que el total de la región, están todos los meses del período, ninguna tienda quedó sin dato del año anterior. Si un control falla, el reporte no sale. Es mejor un reporte atrasado que uno que nadie puede defender.</p></div><div class="lab" id="09-lab-3"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Un reporte parametrizado que corre en la página</h3></div><p class="hint">Elige la región y el período: el código cambia sus parámetros, como <code>quarto render -P</code>, y el reporte se reescribe solo, con su tabla y su párrafo. Carga Python para ejecutarlo de verdad y cambiar lo que quieras (por ejemplo, la frase del final). En el paso 2, mira los controles que deciden si el reporte se puede publicar.</p><style>
+[id="09-lab-3"] .c9l3-cod{width:100%;box-sizing:border-box;min-height:14em;font:.8rem/1.45 var(--f-mono);padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);resize:vertical;tab-size:4}
+[id="09-lab-3"] .c9l3-sal{font:.8rem var(--f-mono);background:var(--paper);border-radius:8px;padding:8px 10px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+[id="09-lab-3"] .c9l3-sal.err{color:var(--warm)}
+[id="09-lab-3"] .c9l3-est{font:500 .85rem var(--f-display);color:var(--muted);margin:0}
+[id="09-lab-3"] .c9l3-est.ok{color:var(--good)} [id="09-lab-3"] .c9l3-est.warn{color:var(--warm)}
+[id="09-lab-3"] .c9l3-tab{overflow-x:auto}
+[id="09-lab-3"] .c9l3-tab td,[id="09-lab-3"] .c9l3-tab th{font-size:.8rem;padding:4px 8px;white-space:nowrap}
+[id="09-lab-3"] .c9l3-par{border:1px solid var(--d-casa);background:var(--d-casa-s);border-radius:8px;padding:8px 10px;display:grid;gap:6px}
+[id="09-lab-3"] .c9l3-par b{font:700 .68rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+</style>
+<div class="c9l3-par">
+  <b>Parámetros del reporte</b>
+  <div class="opciones">
+    <label>Región <select id="c9l3-reg"><option value="Sur">Sur</option><option value="Norte">Norte</option><option value="Centro">Centro</option><option value="Oriente">Oriente</option></select></label>
+    <label>Período <select id="c9l3-per"><option value="0">agosto a octubre de 2026</option><option value="1">enero a octubre de 2026</option><option value="2">solo octubre de 2026</option></select></label>
+  </div>
+</div>
+<div class="opciones"><label>Paso
+  <select id="c9l3-ej"><option value="0">1. El reporte</option><option value="1">2. Los controles</option></select></label></div>
+<textarea id="c9l3-cod" class="c9l3-cod" spellcheck="false" aria-label="Código de Python que puedes editar"></textarea>
+<div class="btns">
+  <button type="button" class="primary" id="c9l3-cargar">Cargar Python (unos 20 MB · tarda unos segundos)</button>
+  <button type="button" id="c9l3-correr" disabled>Ejecutar (Ctrl+Enter)</button>
+</div>
+<p class="c9l3-est" id="c9l3-est" aria-live="polite">Python sin cargar · mientras tanto ves el resultado guardado</p>
+<pre class="c9l3-sal" id="c9l3-sal" hidden></pre>
+<div class="c9l3-tab" id="c9l3-tab"></div>
+<div class="readout texto" id="c9l3-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Genera el reporte del Sur con un script y repítelo para otra región</h3></div><p>Vas a escribir un reporte reproducible en Python puro: lee <code>limpio/</code>, calcula la tabla por tienda, se comprueba solo, dibuja las ventas semanales y escribe un HTML con un título que afirma. Trabaja en <code>~/datos-cadena</code>, con el entorno del capítulo 02 y la carpeta <code>limpio/</code> del capítulo 03. Instala matplotlib si no lo hiciste en el capítulo 06.</p><p>Guarda esto como <code>reporte.py</code>:</p><div class="code-copia"><pre><code>"""Reporte de ventas por región, reproducible: lee limpio/, se comprueba solo y escribe un HTML.
+
+Uso: python reporte.py --region Sur   (o Norte, Centro, Oriente)
+"""
+import argparse
+import base64
+import hashlib
+import io
+from datetime import datetime
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import pandas as pd
+
+ACTUAL = ("2026-08-01", "2026-11-01")     # agosto a octubre de 2026
+ANTERIOR = ("2025-08-01", "2025-11-01")   # el mismo período, un año antes
+
+
+def es(x, d=0):
+    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+p = argparse.ArgumentParser()
+p.add_argument("--region", default="Sur", choices=["Norte", "Centro", "Sur", "Oriente"])
+REGION = p.parse_args().region
+
+ventas = pd.read_parquet("limpio/ventas.parquet")
+tiendas = pd.read_parquet("limpio/tiendas.parquet")
+v = ventas.merge(tiendas, on="tienda_id", how="left", validate="many_to_one")
+v = v[v["region"] == REGION]
+
+
+def periodo(desde, hasta):
+    return v[(v["fecha_hora"] &gt;= desde) &amp; (v["fecha_hora"] &lt; hasta)]
+
+
+a, b = periodo(*ANTERIOR), periodo(*ACTUAL)
+tabla = pd.DataFrame({"anterior": a.groupby("nombre")["total"].sum(),
+                      "actual": b.groupby("nombre")["total"].sum()})
+tabla["diferencia"] = tabla["actual"] - tabla["anterior"]
+tabla["variacion_%"] = (tabla["actual"] / tabla["anterior"] - 1) * 100
+tabla = tabla.sort_values("diferencia").round(2)
+
+# Controles: si uno falla, el reporte no se escribe
+assert abs(tabla["actual"].sum() - b["total"].sum()) &lt; 0.01, "la tabla no suma lo mismo que la región"
+meses = len(pd.period_range(*ACTUAL, freq="M")) - 1
+assert b["fecha_hora"].dt.to_period("M").nunique() == meses, "falta algún mes en el período"
+assert tabla["anterior"].notna().all(), "una tienda no tiene dato del año anterior"
+
+var = (tabla["actual"].sum() / tabla["anterior"].sum() - 1) * 100
+clave = tabla["diferencia"].abs().idxmax()
+titulo = (f"El {REGION} {'cae' if var &lt; 0 else 'crece'} {es(abs(var), 1)} % y "
+          f"{clave} explica la mayor parte del cambio")
+
+# Gráfico: ventas semanales de la región, 2025 y 2026
+fig, ax = plt.subplots(figsize=(7, 3))
+for desde, hasta, anio, estilo in [(*ANTERIOR, 2025, "--"), (*ACTUAL, 2026, "-")]:
+    s = periodo(desde, hasta).set_index("fecha_hora")["total"].resample("W-SUN").sum().iloc[1:-1]
+    ax.plot(range(len(s)), s.values, estilo, label=str(anio))
+ax.set_ylim(bottom=0)
+ax.set_xlabel("semana del período")
+ax.set_ylabel("US$")
+ax.legend(frameon=False)
+ax.spines[["top", "right"]].set_visible(False)
+buf = io.BytesIO()
+fig.savefig(buf, format="png", dpi=110, bbox_inches="tight")
+png = base64.b64encode(buf.getvalue()).decode()
+
+huella = hashlib.sha256(Path("limpio/ventas.parquet").read_bytes()).hexdigest()[:12]
+filas = "".join(f"&lt;tr&gt;&lt;td&gt;{n}&lt;/td&gt;&lt;td&gt;{es(r.anterior, 2)}&lt;/td&gt;&lt;td&gt;{es(r.actual, 2)}&lt;/td&gt;"
+                f"&lt;td&gt;{es(r.diferencia, 2)}&lt;/td&gt;&lt;td&gt;{es(r['variacion_%'], 1)} %&lt;/td&gt;&lt;/tr&gt;"
+                for n, r in tabla.iterrows())
+html = f"""&lt;!doctype html&gt;&lt;html lang="es"&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;{titulo}&lt;/title&gt;
+&lt;body style="font-family:sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem"&gt;
+&lt;h1 style="font-size:1.4rem"&gt;{titulo}&lt;/h1&gt;
+&lt;p&gt;El {REGION} vendió &lt;b&gt;US$ {es(tabla['actual'].sum(), 2)}&lt;/b&gt; de agosto a octubre de 2026,
+un {es(abs(var), 1)} % {'menos' if var &lt; 0 else 'más'} que en el mismo período de 2025.
+La tienda que más pesa en el cambio es {clave}
+({es(tabla.loc[clave, 'diferencia'], 2)} US$, {es(tabla.loc[clave, 'variacion_%'], 1)} %).&lt;/p&gt;
+&lt;img alt="Ventas semanales de la región en 2025 y 2026" src="data:image/png;base64,{png}" style="max-width:100%"&gt;
+&lt;table border="1" cellpadding="4" style="border-collapse:collapse"&gt;
+&lt;tr&gt;&lt;th&gt;Tienda&lt;/th&gt;&lt;th&gt;ago-oct 2025&lt;/th&gt;&lt;th&gt;ago-oct 2026&lt;/th&gt;&lt;th&gt;Diferencia&lt;/th&gt;&lt;th&gt;Variación&lt;/th&gt;&lt;/tr&gt;{filas}&lt;/table&gt;
+&lt;p style="color:#666;font-size:.85rem"&gt;Ventas = suma de cantidad × precio del detalle, sin impuestos.
+Datos: limpio/ventas.parquet (huella {huella}). Generado el {datetime.now():%Y-%m-%d %H:%M} con reporte.py.&lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;"""
+salida = Path(f"reporte-{REGION.lower()}.html")
+salida.write_text(html, encoding="utf-8")
+print(titulo)
+print(f"Escrito {salida}, huella de los datos {huella}")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps"><li><span>Activa el entorno, instala matplotlib si hace falta y genera el reporte del Sur:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install matplotlib</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python reporte.py --region Sur</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install matplotlib</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python3 reporte.py --region Sur</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Abre <code>reporte-sur.html</code> en el navegador. Lee solo el título y la primera frase: ¿sabrías qué pasa sin mirar el gráfico?</span></li><li><span>Genera el del Norte con <code>--region Norte</code> y compara los dos títulos. Ninguna palabra del título está escrita a mano.</span></li><li><span>Rompe un control a propósito: cambia <code>ACTUAL</code> a <code>("2026-08-01", "2026-12-01")</code> y vuelve a correrlo. Después déjalo como estaba.</span></li><li><span>Opcional, con Quarto (se instala desde quarto.org, no con pip): pasa el mismo código a un <code>reporte.qmd</code> con una celda <code>parameters</code> y genera <code>quarto render reporte.qmd -P region:Norte</code>.</span></li></ol><p><b>Qué observar:</b> el Sur da «El Sur cae 23,2 % y Sur Puerto explica la mayor parte del cambio» y el Norte, «El Norte crece 14,2 % y Norte Mirador explica la mayor parte del cambio»: el mismo script escribe dos conclusiones distintas porque cada palabra sale de los datos. Con el período hasta diciembre, el script se detiene con <code>AssertionError: falta algún mes en el período</code> y no escribe nada: no hay datos de noviembre. La huella al pie identifica la versión exacta de los datos; si alguien vuelve a correr la limpieza y algo cambia, la huella cambia y se nota qué reporte es más nuevo.</p></div></section>
+<section><h2>Tableros: qué poner, en qué orden y qué dejar afuera</h2><div class="analogia"><b>Imagínalo así</b><p>El tablero de un auto tiene pocas cosas: velocidad, combustible, temperatura y unas luces que solo se encienden si algo anda mal. No muestra la presión de cada inyector, aunque el auto la mida. Quien diseñó ese tablero decidió qué necesita saber un conductor mientras maneja, y dejó lo demás para el mecánico.</p></div><div class="prose"><p>Un reporte cuenta una historia una vez. Un <b>tablero</b> (<i>dashboard</i>) responde la misma pregunta cada semana: es una página que se actualiza sola y que alguien mira para saber si tiene que actuar. Lorena quería uno para no tener que pedir otro análisis el mes siguiente.</p><p>La tentación es poner todo lo que se puede calcular. El primer borrador de Mariana tenía catorce gráficos: ventas por tienda, por medio de pago, por hora, por categoría, ventas acumuladas desde 2025, porcentaje de tickets anónimos. Cada uno era correcto y entre todos escondían lo único que importaba. Para decidir qué entra se pregunta por cada elemento: ¿cambia lo que Lorena va a hacer? Si no, se va.</p><p>Algunas reglas que funcionan:</p><ul><li><b>Pocos indicadores, cada uno con su comparación.</b> Un <b>indicador clave</b> (<i>KPI, key performance indicator</i>) es una cifra que se sigue en el tiempo porque mide algo que importa para una decisión. Tres a cinco por tablero. Y cada uno con una referencia: «US$ 72.907,69» no dice nada; «US$ 72.907,69, −23,2 % interanual» dice que hay un problema. La comparación es interanual, como se acordó en el capítulo 01, por la estacionalidad.</li><li><b>Sin métricas de vanidad.</b> Una <b>métrica de vanidad</b> (<i>vanity metric</i>) es una cifra que siempre se ve bien y no lleva a ninguna decisión: las ventas acumuladas desde 2025 solo pueden crecer.</li><li><b>Una idea por gráfico</b>, con el gráfico que corresponde a la pregunta (capítulo 06): una línea para cuándo, barras para dónde.</li><li><b>Orden de lectura.</b> Se lee de arriba abajo y de izquierda a derecha. Lo más importante va arriba a la izquierda; el detalle, abajo y a pedido.</li><li><b>Fecha de los datos y definiciones a la vista.</b> «Datos al 31 de octubre de 2026» evita que alguien decida con cifras viejas sin saberlo. Y «ventas = suma del detalle, sin impuestos» evita que dos gerentes discutan con números distintos que miden cosas distintas.</li></ul></div><figure class="fig fig-esquema" id="09-diagrama-4"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:680px" role="img" aria-label="Anatomía del tablero de Lorena: arriba el título que afirma, la fecha de los datos y los filtros; una fila de tres indicadores con su comparación interanual; debajo, a la izquierda la tendencia mensual del Sur y a la derecha la variación por tienda; abajo la tabla de detalle y el pie con definiciones y fuente; los números marcan el orden de lectura">
+<rect x="20" y="20" width="600" height="430" rx="12" class="caja"/>
+<rect x="36" y="34" width="568" height="44" rx="6" class="d-casa"/>
+<text x="50" y="54" class="t t-b k-casa">El Sur cae 23,2 %: toda la caída es de T07 desde el 3 de agosto</text>
+<text x="50" y="70" class="t t-xs t-m">DATOS AL 31 DE OCTUBRE DE 2026 · REGIÓN ▾ · PERÍODO ▾</text>
+<circle cx="604" cy="34" r="11" style="fill:var(--warm)"/><text x="604" y="38" class="t t-s t-b" text-anchor="middle" style="fill:var(--card)">1</text>
+
+<rect x="36" y="92" width="180" height="70" rx="6" class="caja"/>
+<text x="48" y="112" class="t t-xs t-m">VENTAS DEL SUR, AGO-OCT</text>
+<text x="48" y="134" class="t t-b">US$ 72.907,69</text>
+<text x="48" y="152" class="t t-s k-warm">−23,2 % interanual</text>
+<rect x="230" y="92" width="180" height="70" rx="6" class="caja"/>
+<text x="242" y="112" class="t t-xs t-m">VENTAS DE T07, AGO-OCT</text>
+<text x="242" y="134" class="t t-b">US$ 37.847,28</text>
+<text x="242" y="152" class="t t-s k-warm">−40,8 % interanual</text>
+<rect x="424" y="92" width="180" height="70" rx="6" class="caja"/>
+<text x="436" y="112" class="t t-xs t-m">RESEÑAS DE T07 SOBRE OBRAS</text>
+<text x="436" y="134" class="t t-b">60 de 65</text>
+<text x="436" y="152" class="t t-s t-m">desde el 3 de agosto</text>
+<circle cx="604" cy="92" r="11" style="fill:var(--warm)"/><text x="604" y="96" class="t t-s t-b" text-anchor="middle" style="fill:var(--card)">2</text>
+
+<rect x="36" y="176" width="300" height="150" rx="6" class="caja"/>
+<text x="48" y="196" class="t t-xs t-m">VENTAS MENSUALES DEL SUR</text>
+<polyline points="56,250 86,262 116,246 146,250 176,232 206,248 236,242 266,236 296,240 320,236" class="ln" style="fill:none;stroke-dasharray:4 3"/>
+<polyline points="56,240 86,256 116,238 146,234 176,222 206,232 236,222 266,286 296,300 320,290" class="ln" style="fill:none;stroke:var(--d-casa);stroke-width:2.5"/>
+<text x="266" y="312" class="t t-xs k-warm" text-anchor="middle">AGOSTO</text>
+<rect x="350" y="176" width="254" height="150" rx="6" class="caja"/>
+<text x="362" y="196" class="t t-xs t-m">VARIACIÓN POR TIENDA DEL SUR</text>
+<text x="362" y="232" class="t t-s">T07</text>
+<rect x="392" y="220" width="120" height="16" rx="2" style="fill:var(--warm)"/>
+<text x="518" y="232" class="t t-s">−40,8 %</text>
+<text x="362" y="264" class="t t-s">T08</text>
+<rect x="392" y="252" width="31" height="16" rx="2" style="fill:var(--d-casa)"/>
+<text x="429" y="264" class="t t-s">+10,3 %</text>
+<text x="362" y="296" class="t t-s">T09</text>
+<rect x="392" y="284" width="48" height="16" rx="2" style="fill:var(--d-casa)"/>
+<text x="446" y="296" class="t t-s">+16,4 %</text>
+<circle cx="604" cy="176" r="11" style="fill:var(--warm)"/><text x="604" y="180" class="t t-s t-b" text-anchor="middle" style="fill:var(--card)">3</text>
+
+<rect x="36" y="340" width="568" height="62" rx="6" class="caja" style="stroke-dasharray:5 4"/>
+<text x="48" y="360" class="t t-xs t-m">DETALLE (SE ABRE A PEDIDO)</text>
+<text x="48" y="380" class="t t-s t-mono">tienda · semana · tickets · ventas · ticket promedio · compras de 7+ unidades</text>
+<circle cx="604" cy="340" r="11" style="fill:var(--warm)"/><text x="604" y="344" class="t t-s t-b" text-anchor="middle" style="fill:var(--card)">4</text>
+<text x="48" y="426" class="t t-xs t-m">VENTAS = SUMA DEL DETALLE, SIN IMPUESTOS · FUENTE: LIMPIO/ · DUEÑA DE LA MÉTRICA: LORENA</text>
+<circle cx="604" cy="420" r="11" style="fill:var(--warm)"/><text x="604" y="424" class="t t-s t-b" text-anchor="middle" style="fill:var(--card)">5</text>
+
+<text x="640" y="44" class="t t-s"><tspan class="t-b">1 · Título que afirma</tspan></text>
+<text x="640" y="60" class="t t-s t-m">la conclusión, la fecha de los datos</text>
+<text x="640" y="76" class="t t-s t-m">y los filtros, a la vista</text>
+<text x="640" y="104" class="t t-s"><tspan class="t-b">2 · Tres indicadores</tspan></text>
+<text x="640" y="120" class="t t-s t-m">cada uno con su comparación:</text>
+<text x="640" y="136" class="t t-s t-m">una cifra sola no dice si es buena</text>
+<text x="640" y="188" class="t t-s"><tspan class="t-b">3 · Cuándo y dónde</tspan></text>
+<text x="640" y="204" class="t t-s t-m">una idea por gráfico: la tendencia</text>
+<text x="640" y="220" class="t t-s t-m">ubica agosto, las barras ubican T07</text>
+<text x="640" y="352" class="t t-s"><tspan class="t-b">4 · Detalle a pedido</tspan></text>
+<text x="640" y="368" class="t t-s t-m">para quien quiere verificar</text>
+<text x="640" y="420" class="t t-s"><tspan class="t-b">5 · Definiciones y fuente</tspan></text>
+<text x="640" y="436" class="t t-s t-m">qué se cuenta y de dónde sale</text>
+<text x="640" y="270" class="t t-s t-m">Se lee de arriba abajo y de</text>
+<text x="640" y="286" class="t t-s t-m">izquierda a derecha: lo más</text>
+<text x="640" y="302" class="t t-s t-m">importante va arriba a la izquierda.</text>
+</svg></div><figcaption><b>Anatomía del tablero de Lorena.</b> El recuadro grande es la pantalla; los círculos numerados marcan el orden en que se lee. ① Arriba, el título que afirma, la fecha de los datos y los filtros de región y período. ② Una fila de tres indicadores, cada uno con su comparación interanual. ③ Dos gráficos, uno por idea: la tendencia mensual del Sur (¿cuándo?) y la variación por tienda (¿dónde?). ④ El detalle, que se abre a pedido. ⑤ Al pie, la definición de la métrica, la fuente y quién es la dueña de la cifra.</figcaption></figure><div class="prose"><p>No todos los tableros son iguales. Uno <b>operativo</b> (<i>operational</i>) se mira cada día para actuar rápido: las cajas abiertas, las ventas de hoy. Uno <b>estratégico</b> (<i>strategic</i>) se mira cada mes para decidir hacia dónde ir: el de Lorena. Uno <b>analítico</b> (<i>analytical</i>) sirve para explorar, con muchos filtros y desgloses, y su usuario es otra analista. Mezclar los tres en una sola página es la causa más común de tableros que nadie abre.</p></div><div class="lab" id="09-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Arma un tablero mínimo: elige tres indicadores y su gráfico, y mira el resultado</h3></div><p class="hint">Empiezas con un tablero que parece completo: ventas de la cadena, ventas acumuladas y una torta con las doce tiendas. Cambia los indicadores (hasta tres) y el gráfico de cada uno, y mira si el tablero responde las tres preguntas de Lorena: dónde está el problema, desde cuándo y en qué tienda, y si hay una pista del porqué. Prueba también una torta para una variación negativa.</p><style>
+[id="09-lab-1"] .c9l1-ind{display:grid;gap:6px}
+[id="09-lab-1"] .c9l1-fila{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--card)}
+[id="09-lab-1"] .c9l1-fila.sel{border-color:var(--d-casa);background:var(--d-casa-s)}
+[id="09-lab-1"] .c9l1-fila label{font:500 .82rem/1.3 var(--f-display);cursor:pointer}
+[id="09-lab-1"] .c9l1-fila select{font:500 .78rem var(--f-display);max-width:7.5em}
+[id="09-lab-1"] .c9l1-rot{font:700 .68rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:4px 0 2px}
+[id="09-lab-1"] .c9l1-tab{border:2px solid var(--d-casa);border-radius:12px;padding:10px;display:grid;gap:8px;background:var(--paper)}
+[id="09-lab-1"] .c9l1-tab h4{margin:0;font:700 .92rem var(--f-display)}
+[id="09-lab-1"] .c9l1-tab .sub{font:500 .72rem var(--f-display);color:var(--muted)}
+[id="09-lab-1"] .c9l1-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:8px}
+[id="09-lab-1"] .c9l1-t{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card);display:grid;gap:4px;align-content:start;min-width:0}
+[id="09-lab-1"] .c9l1-t .n{font:600 .76rem/1.3 var(--f-display)}
+[id="09-lab-1"] .c9l1-t .k{font:700 1.2rem var(--f-mono);color:var(--ink);overflow-wrap:anywhere}
+[id="09-lab-1"] .c9l1-t .k.malo{color:var(--warm)}
+[id="09-lab-1"] .c9l1-t .c{font:500 .72rem/1.3 var(--f-display);color:var(--muted)}
+[id="09-lab-1"] .c9l1-t .av{font:600 .72rem/1.3 var(--f-display);color:var(--warm);border-left:3px solid var(--warm);padding-left:6px}
+[id="09-lab-1"] .c9l1-t svg{width:100%;height:auto;display:block}
+[id="09-lab-1"] .c9l1-vacio{font:500 .8rem var(--f-display);color:var(--muted);padding:18px;text-align:center;border:1px dashed var(--line);border-radius:10px}
+[id="09-lab-1"] svg text{font-family:var(--f-display);fill:var(--ink)}
+</style>
+<div class="c9l1-rot">Indicadores disponibles</div>
+<div class="c9l1-ind" id="c9l1-ind"></div>
+<div class="btns" style="margin-top:6px">
+  <button type="button" id="c9l1-ej">Ver una propuesta que responde</button>
+  <button type="button" id="c9l1-ini">Vaciar el tablero</button>
+</div>
+<div class="c9l1-tab">
+  <h4 id="c9l1-tit">Tablero comercial: ventas del Sur</h4>
+  <div class="sub">Datos al 31 de octubre de 2026 · comparación interanual · fuente: limpio/ventas.parquet</div>
+  <div class="c9l1-grid" id="c9l1-grid"></div>
+</div>
+<div class="readout texto" id="c9l1-out" aria-live="polite"></div></div><div class="caso"><b>Un caso real</b><p><b>El tablero que nadie miraba.</b> Una cadena minorista de la región tenía un tablero corporativo con más de cuarenta indicadores, actualizado cada noche. El equipo de datos revisó los registros de uso del sistema y encontró que la mayoría de las visitas duraban menos de un minuto y que casi nadie usaba los filtros. Las preguntas reales seguían llegando por correo. Lo reemplazaron por tableros pequeños, uno por decisión, cada uno con un dueño que respondía por sus cifras. Medir cuánto se usa un tablero es parte de diseñarlo: un tablero sin visitas es un costo, no una herramienta.</p></div></section>
+<section><h2>Herramientas del mercado: Power BI, Looker Studio, Metabase y Streamlit</h2><div class="analogia"><b>Imagínalo así</b><p>Para hacer una mesa puedes comprar una armada, comprar las piezas y armarla con un manual, o cortar la madera tú mismo. La armada es rápida y se parece a todas; la que cortas tú queda exactamente como la quieres, pero necesitas herramientas y tiempo. Ninguna es mejor: depende de quién la va a usar y por cuánto tiempo.</p></div><div class="prose"><p>Las herramientas de <b>inteligencia de negocios</b> (<i>BI, business intelligence</i>) se conectan a los datos, guardan las definiciones de las métricas y publican tableros para que otros los usen sin programar. Cuatro ejemplos del mercado, muy distintos entre sí (descritos a noviembre de 2026; cambian rápido):</p><div class="tbl"><table><thead><tr><th>Herramienta</th><th>Cómo se arma</th><th>Dónde corre</th><th>Lo que la distingue</th></tr></thead><tbody><tr><td><b>Power BI</b> (Microsoft)</td><td>Con clics en una aplicación de escritorio; las métricas, en el lenguaje DAX</td><td>Se publica en el servicio en la nube de Microsoft</td><td>Muy extendida en empresas que ya usan sus productos; modelo de datos y permisos detallados</td></tr><tr><td><b>Looker Studio</b> (Google)</td><td>Con clics, en el navegador</td><td>En la nube de Google; se entra con una cuenta</td><td>Rápido para empezar y con muchos conectores; menos control sobre el modelo de datos</td></tr><tr><td><b>Metabase</b></td><td>Preguntas con clics o en SQL</td><td>De código abierto: en un servidor propio, o en su servicio en la nube</td><td>Pensada para que cualquier área haga sus propias preguntas sobre la base de datos</td></tr><tr><td><b>Streamlit</b></td><td>Un script de Python</td><td>De código abierto: en el equipo, en un servidor o en servicios en la nube</td><td>El tablero es código: se versiona en git, se prueba y puede usar cualquier biblioteca de Python</td></tr></tbody></table></div><p>Hay muchas más: Tableau, Apache Superset, Grafana (pensada para monitorear sistemas), Dash de Plotly o Evidence (tableros escritos en Markdown y SQL). La elección depende menos de la herramienta que de tres preguntas: quién va a mantener el tablero (un área de negocio con clics o un equipo con código), dónde están los datos y quién puede verlos, y dónde vive la definición de cada métrica.</p><p>La última pregunta es la más importante. Si «ventas» se define dentro de un tablero de Power BI, otra vez en una consulta de Metabase y otra en un script, tarde o temprano darán cifras distintas. Una <b>capa semántica</b> (<i>semantic layer</i>) guarda la definición una sola vez (ventas es la suma de cantidad por precio del detalle, sin impuestos; la dueña es Lorena) y todas las herramientas la usan. Cómo se construye esa capa en una plataforma de datos está en <a href="https://aaramirez.github.io/ingenieria-de-datos/temario.html" target="_blank" rel="noopener">Ingeniería de datos</a>. En Almacenes Ejemplo, la definición vive en <code>limpieza.py</code> y en un glosario de una página.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Levanta el tablero mínimo de Lorena con Streamlit</h3></div><p>Vas a convertir el tablero de la sección anterior en una página que corre en tu equipo: tres indicadores con su comparación interanual, la tendencia mensual y la variación por tienda, con un selector de región. Trabaja en <code>~/datos-cadena</code>, con el entorno activo y la carpeta <code>limpio/</code>.</p><p>Guarda esto como <code>tablero.py</code>:</p><div class="code-copia"><pre><code>"""Tablero mínimo de ventas por región con Streamlit. Uso: streamlit run tablero.py"""
+import pandas as pd
+import streamlit as st
+
+
+def es(x, d=0):
+    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+@st.cache_data
+def cargar():
+    v = pd.read_parquet("limpio/ventas.parquet")
+    t = pd.read_parquet("limpio/tiendas.parquet")
+    v = v.merge(t, on="tienda_id", how="left", validate="many_to_one")
+    v["mes"] = v["fecha_hora"].dt.to_period("M").dt.to_timestamp()
+    return v
+
+
+v = cargar()
+region = st.sidebar.selectbox("Región", ["Sur", "Norte", "Centro", "Oriente"])
+r = v[v["region"] == region]
+a = r[(r["fecha_hora"] &gt;= "2025-08-01") &amp; (r["fecha_hora"] &lt; "2025-11-01")]
+b = r[(r["fecha_hora"] &gt;= "2026-08-01") &amp; (r["fecha_hora"] &lt; "2026-11-01")]
+var = (b["total"].sum() / a["total"].sum() - 1) * 100
+
+st.title(f"{region}: ventas {'−' if var &lt; 0 else '+'}{es(abs(var), 1)} % interanual (ago-oct)")
+st.caption("Datos al 31 de octubre de 2026 · ventas = suma del detalle · fuente: limpio/")
+
+c1, c2, c3 = st.columns(3)
+c1.metric("Ventas ago-oct 2026", f"US$ {es(b['total'].sum())}", f"{es(var, 1)} %")
+c2.metric("Tickets", es(len(b)), f"{es((len(b) / len(a) - 1) * 100, 1)} %")
+tp_a, tp_b = a["total"].mean(), b["total"].mean()
+c3.metric("Ticket promedio", f"US$ {es(tp_b, 2)}", f"{es((tp_b / tp_a - 1) * 100, 1)} %")
+
+st.subheader("Ventas mensuales")
+st.line_chart(r.groupby("mes")["total"].sum())
+
+st.subheader("Variación por tienda, ago-oct")
+por_tienda = pd.DataFrame({"2025": a.groupby("nombre")["total"].sum(),
+                           "2026": b.groupby("nombre")["total"].sum()})
+por_tienda["variación %"] = ((por_tienda["2026"] / por_tienda["2025"] - 1) * 100).round(1)
+st.bar_chart(por_tienda["variación %"], horizontal=True)
+with st.expander("Ver el detalle"):
+    st.dataframe(por_tienda.round(2))</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps"><li><span>Instala Streamlit y levanta el tablero. Se abre solo en el navegador, en <code>http://localhost:8501</code>:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install streamlit</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>streamlit run tablero.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install streamlit</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>streamlit run tablero.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Cambia la región en el selector de la izquierda y mira cómo cambian el título y los tres indicadores.</span></li><li><span>Con el tablero abierto, edita <code>tablero.py</code>: cambia el título del gráfico mensual por uno que afirme algo. Guarda y pulsa «Rerun» en la página.</span></li><li><span>Cuando termines, vuelve a la terminal y detén el servidor con Ctrl+C.</span></li></ol><p><b>Qué observar:</b> en el Sur, el título dice «Sur: ventas −23,2 % interanual (ago-oct)» y los indicadores muestran US$ 72.908, 5.117 tickets (−17,9 %) y un ticket promedio de US$ 14,25 (−6,4 %): caen tanto las visitas como el tamaño de la compra, una pista que el capítulo 10 sigue. En el Norte todo sube. El gráfico mensual muestra el pico de diciembre y la caída de agosto de 2026 sin que nadie los marque: Streamlit no pone anotaciones solo, y por eso el paso 3 importa. El tablero es un archivo de 44 líneas que se puede guardar en git y revisar como cualquier código; el precio es que alguien que no programa no puede cambiarlo.</p></div></section>
+<section><h2>Decir la incertidumbre sin perder al lector</h2><div class="analogia"><b>Imagínalo así</b><p>El pronóstico del tiempo no dice «mañana llueve». Dice «70 % de probabilidad de lluvia». Nadie se confunde, nadie deja de salir de su casa por eso, y todos llevan paraguas. Dar la incertidumbre de forma clara no paraliza a nadie: ayuda a decidir cuánto preparar.</p></div><div class="prose"><p>Todo lo que Mariana sabe del Sur tiene distinto grado de certeza, y el error común es decirlo todo con el mismo tono. Hay cosas medidas: el Sur vendió US$ 72.907,69 de agosto a octubre, 23,2 % menos que un año antes. Eso no es una opinión ni una estimación; es una suma de tickets, y se dice sin rodeos. Hay cosas probables: que la causa sea el cierre del estacionamiento. Y hay cosas posibles: que un convenio con otro estacionamiento recupere las ventas.</p></div><figure class="fig fig-esquema" id="09-diagrama-5"><div class="lienzo"><svg viewBox="0 0 900 330" style="min-width:680px" role="img" aria-label="Una escala de certeza, de lo medido a lo que hay que probar: que el Sur cae y que la caída está en T07 son hechos medidos; que la causa es el cierre del estacionamiento es probable; que un convenio de estacionamiento recupere las ventas es posible y hay que probarlo; cada afirmación lleva la palabra que le corresponde y lo que la respalda">
+<text x="20" y="26" class="t t-xs t-b t-m">DE LO MEDIDO A LO QUE HAY QUE PROBAR</text>
+<rect x="20" y="44" width="860" height="18" rx="9" class="caja"/>
+<rect x="20" y="44" width="300" height="18" rx="9" class="d-casa"/>
+<rect x="520" y="44" width="360" height="18" rx="9" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="30" y="80" class="t t-xs k-casa">MEDIDO</text>
+<text x="420" y="80" class="t t-xs t-m" text-anchor="middle">PROBABLE</text>
+<text x="870" y="80" class="t t-xs k-warm" text-anchor="end">POSIBLE: HAY QUE PROBARLO</text>
+
+<rect x="20" y="96" width="200" height="120" rx="8" class="d-casa"/>
+<text x="32" y="118" class="t t-b k-casa">«El Sur cae 23,2 %»</text>
+<text x="32" y="138" class="t t-s">Se dice sin rodeos.</text>
+<text x="32" y="158" class="t t-s t-m">Respaldo: suma del detalle,</text>
+<text x="32" y="174" class="t t-s t-m">ago-oct 2026 frente a 2025,</text>
+<text x="32" y="190" class="t t-s t-m">datos completos (con el</text>
+<text x="32" y="206" class="t t-s t-m">reenvío de T09).</text>
+
+<rect x="236" y="96" width="200" height="120" rx="8" class="d-casa"/>
+<text x="248" y="118" class="t t-b k-casa">«Toda la caída es T07»</text>
+<text x="248" y="138" class="t t-s">Medido y con su rango:</text>
+<text x="248" y="158" class="t t-s t-m">una semana normal de 2025</text>
+<text x="248" y="174" class="t t-s t-m">vendía de 4.140 a 5.082 US$;</text>
+<text x="248" y="190" class="t t-s t-m">desde el 3 de agosto, ninguna</text>
+<text x="248" y="206" class="t t-s t-m">pasó de 3.273.</text>
+
+<rect x="452" y="96" width="210" height="120" rx="8" class="caja"/>
+<text x="464" y="118" class="t t-b">«Causa probable: obras»</text>
+<text x="464" y="138" class="t t-s">«Probable», no «la causa»:</text>
+<text x="464" y="158" class="t t-s t-m">fecha, tienda, compras grandes</text>
+<text x="464" y="174" class="t t-s t-m">y reseñas coinciden, pero los</text>
+<text x="464" y="190" class="t t-s t-m">datos son observacionales:</text>
+<text x="464" y="206" class="t t-s t-m">no hubo experimento.</text>
+
+<rect x="678" y="96" width="202" height="120" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="690" y="118" class="t t-b k-warm">«El convenio ayudará»</text>
+<text x="690" y="138" class="t t-s">Es una apuesta: se propone</text>
+<text x="690" y="158" class="t t-s t-m">como prueba de 4 semanas,</text>
+<text x="690" y="174" class="t t-s t-m">con la métrica que dirá si</text>
+<text x="690" y="190" class="t t-s t-m">funcionó (compras de 7 o</text>
+<text x="690" y="206" class="t t-s t-m">más unidades en T07).</text>
+
+<text x="20" y="252" class="t t-s"><tspan class="t-b">La regla:</tspan> cada afirmación lleva la palabra que le corresponde y, al lado, lo que la respalda.</text>
+<text x="20" y="274" class="t t-s t-m">Decir «probable» no debilita el reporte: le dice al lector cuánto puede apostar en cada frase.</text>
+<text x="20" y="296" class="t t-s t-m">Lo que se pierde al exagerar es la confianza: basta una predicción fallida dicha como certeza.</text>
+</svg></div><figcaption><b>Una escala de certeza.</b> La barra de arriba va de lo medido (verde azulado) a lo que hay que probar (cálido). Debajo, cuatro afirmaciones del caso del Sur, cada una con la palabra que le corresponde y lo que la respalda: la caída del Sur y su concentración en T07 están medidas; el cierre del estacionamiento es la causa probable, porque fecha, tienda, tipo de compra y reseñas coinciden pero no hubo experimento; el efecto del convenio es posible y se propone como una prueba con su métrica.</figcaption></figure><div class="prose"><p>Tres técnicas que sirven en cualquier reporte:</p><ol class="steps"><li><span><b>Palabras calibradas.</b> «Probable», «muy probable», «posible» y «no lo sabemos» no son debilidad: le dicen al lector cuánto puede apostar en cada frase. La regla es usar siempre la misma palabra para el mismo grado, y decir en qué se basa. «Causa probable» va con sus cuatro coincidencias al lado.</span></li><li><span><b>Rangos en lugar de puntos.</b> En lugar de «T07 vendía 4.800 por semana», «una semana normal de 2025 vendía entre US$ 4.140 y US$ 5.082; desde el 3 de agosto, ninguna pasó de US$ 3.273». El rango muestra cuánto varía una semana cualquiera y deja ver que la caída no es una mala racha. En un gráfico, el rango es una franja sombreada, como la del laboratorio de la segunda sección. Cuando hace falta un <b>intervalo de confianza</b> (<i>confidence interval</i>) calculado con rigor, la teoría está en <a href="https://aaramirez.github.io/mate-inferencia/temario.html" target="_blank" rel="noopener">Inferencia estadística</a>.</span></li><li><span><b>Precisión que corresponde.</b> «−23,2 %» es razonable; «−23,1604 %» sugiere una exactitud que nadie necesita y que ningún dato tiene. En una proyección, lo honesto es redondear más: «unos US$ 25.000 por trimestre» si se habla de lo que T07 dejaría de vender.</span></li></ol><p>Y una regla para lo que no se sabe: decirlo, con lo que haría falta para saberlo. Mariana escribió en su anexo: «No tenemos datos de la competencia en la zona de T07. Si abrió otro supermercado cerca en agosto, explicaría parte de la caída. Octavio dice que no; lo verificamos con una visita». Una explicación alternativa nombrada y descartada fortalece la conclusión mucho más que una omitida.</p></div><div class="ml"><b>En la práctica</b><p><b>El reporte del lunes, en una página.</b> La versión final que Mariana llevó al comité tenía una sola página: el titular con la propuesta, tres argumentos con un gráfico cada uno (las regiones, la semana del quiebre en T07, las reseñas), un recuadro «Lo que no sabemos» con la competencia y el tiempo que durarán las obras, y un enlace al reporte reproducible y al tablero. Lorena aprobó la prueba de cuatro semanas en diez minutos. La pregunta que hizo fue sobre lo que no se sabía: cuándo terminan las obras. Nadie preguntó por los números, porque estaban donde tenían que estar.</p></div></section>
+<section><h2>La idea clave</h2><div class="prose"><p>Un análisis termina cuando alguien decide con él, no cuando el código corre. Para eso, la respuesta va primero (la pirámide), los datos se ordenan como una historia con contexto, conflicto y resolución, cada gráfico lleva una sola idea y un título que la afirma, y cada tablero sirve a una decisión con pocos indicadores comparados. El reporte se genera con código, con sus parámetros y sus controles, para que ninguna cifra se copie a mano. Y la incertidumbre se dice con la palabra justa: lo medido sin rodeos, lo probable como probable y lo posible como una prueba.</p></div></section>
+<section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué el PDF de 23 páginas de Mariana no sirvió, si todo lo que tenía era correcto?</summary><p>Porque estaba ordenado como ella trabajó (cargar, limpiar, explorar y al final la conclusión) y no como lee quien decide: la respuesta estaba en la página 17 y nadie llegó hasta ahí.</p></details><details><summary>¿Qué diferencia hay entre «Ventas semanales de T07, 2025 y 2026» y «T07 vende la mitad desde el cierre del estacionamiento» como títulos de un gráfico?</summary><p>El primero describe los ejes y obliga al lector a descubrir la conclusión; el segundo la afirma y convierte el gráfico en su prueba.</p></details><details><summary>¿Qué gana un reporte parametrizado frente a uno escrito a mano con cifras copiadas?</summary><p>Que un mismo archivo genera el reporte de cualquier región o período, y que si los datos cambian se vuelve a generar sin que ninguna cifra quede vieja.</p></details><details><summary>¿Para qué sirven los controles de un reporte que se genera solo?</summary><p>Para impedir que publique una cifra que no cuadra: si la tabla no suma lo mismo que la región o falta un mes, el reporte no sale.</p></details><details><summary>¿Por qué «ventas acumuladas desde enero de 2025» no debería estar en el tablero de Lorena?</summary><p>Porque es una métrica de vanidad: solo puede crecer y no lleva a ninguna decisión.</p></details><details><summary>¿Por qué Mariana escribe «causa probable» y no «la causa» para el cierre del estacionamiento?</summary><p>Porque los datos son observacionales: fecha, tienda, tipo de compra y reseñas coinciden, pero no hubo un experimento que descarte otras explicaciones.</p></details></div></section>
+<section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué son las «palabras de probabilidad estimativa» que usan los servicios de inteligencia y qué porcentaje asocian a «probable» o «casi seguro»?<small>Pista: busca «Sherman Kent words of estimative probability».</small></li><li>¿Qué es el «data-ink ratio» que propuso Edward Tufte y qué críticas ha recibido?</li><li>¿Cómo funcionan los parámetros de un cuaderno con papermill y en qué se diferencian de los de Quarto?<small>Pista: busca la documentación de papermill, «parameterize».</small></li><li>¿Qué es una capa semántica «sin interfaz» (<i>headless BI</i>) y qué herramientas de código abierto la ofrecen?<small>Pista: busca «headless BI semantic layer open source».</small></li><li>¿Qué recomiendan las pautas de accesibilidad web (WCAG) para que un tablero se pueda usar con un lector de pantalla?</li></ol></div></section>
+<section><h2>Para saber más</h2><div class="vids"><span>Para saber más</span><a class="vid" href="https://quarto.org/docs/computations/parameters.html" target="_blank" rel="noopener">Quarto: parámetros <small>cómo se declara y se cambia un parámetro en un reporte de Python, en inglés</small></a><a class="vid" href="https://docs.streamlit.io/get-started" target="_blank" rel="noopener">Streamlit: primeros pasos <small>documentación oficial, en inglés</small></a><a class="vid" href="https://www.metabase.com/docs/latest/" target="_blank" rel="noopener">Metabase: documentación <small>la herramienta de código abierto de la sección de herramientas, en inglés</small></a><a class="vid" href="https://www.storytellingwithdata.com/" target="_blank" rel="noopener">Storytelling with Data <small>el sitio de Cole Nussbaumer Knaflic sobre gráficos y narrativa, con ejemplos antes y después, en inglés</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/ciencia-de-datos" target="_blank" rel="noopener">github.com/aaramirez/ciencia-de-datos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="09-lab-2"]');
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  // Ventas semanales de T07 Sur Puerto (semanas ISO 27 a 43), datos limpios, semilla 42
+  const A=[5060,4140,4625,4785,4914,4829,4782,4624,4646,4922,5010,4797,4564,4948,4855,5082,4991];
+  const B=[5102,5342,5230,5135,5787,2769,2971,2754,2221,3065,3111,2738,2550,2392,2702,2881,3273];
+  const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const semana=k=>{const d=new Date(Date.UTC(2026,5,29+7*k));return d.getUTCDate()+' '+MES[d.getUTCMonth()];};
+  let f='tabla',ti='desc';
+  const RES={
+    lorena:['Qué decidir','Probar un convenio con el estacionamiento de la otra cuadra y envío a domicilio para compras grandes en T07 durante cuatro semanas, y medir si vuelven las compras de 7 o más unidades.'],
+    octavio:['Qué hacer en la tienda','Señalizar la entrada peatonal que dejan las obras, ofrecer llevar las compras hasta el paradero y anotar cada día cuántos clientes preguntan por el estacionamiento.'],
+    veronica:['Qué campaña','Escribir a los socios del Club Ejemplo de T07 que dejaron de venir desde agosto (como Gloria Méndez, la clienta con más compras) con envío gratis mientras duren las obras.']};
+  function tabla(){
+    let h='<div class="c9l2-tw"><table class="tbl"><thead><tr><th>Semana del</th><th>2025</th><th>2026</th></tr></thead><tbody>';
+    A.forEach((a,k)=>{h+='<tr><td>'+semana(k)+'</td><td>'+nf(a)+'</td><td>'+nf(B[k])+'</td></tr>';});
+    return h+'</tbody></table></div>';
+  }
+  function grafico(mini){
+    const W=520,H=mini?170:220,n=A.length,X=k=>48+k*(W-62)/(n-1),Y=v=>12+(6000-v)/6000*(H-40);
+    let s='<div class="c9l2-g"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Ventas semanales de T07 en 2025 y 2026: en 2026 caen a la mitad desde la semana del 3 de agosto">';
+    s+='<rect x="'+X(0)+'" y="'+Y(5082)+'" width="'+(X(n-1)-X(0))+'" height="'+(Y(4140)-Y(5082))+'" fill="var(--grid)" opacity=".7"/>';
+    [0,2000,4000,6000].forEach(v=>{s+='<line x1="48" x2="'+(W-10)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--grid)"/><text x="40" y="'+(Y(v)+4)+'" font-size="11" text-anchor="end">'+nf(v)+'</text>';});
+    s+='<polyline fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4" points="'+A.map((v,k)=>X(k)+','+Y(v)).join(' ')+'"/>';
+    s+='<polyline fill="none" stroke="var(--d-casa)" stroke-width="2.6" points="'+B.map((v,k)=>X(k)+','+Y(v)).join(' ')+'"/>';
+    if(ti==='afirma'){s+='<line x1="'+X(5)+'" x2="'+X(5)+'" y1="10" y2="'+(H-28)+'" stroke="var(--warm)" stroke-dasharray="3 3"/><text x="'+(X(5)+5)+'" y="'+Y(900)+'" font-size="11" fill="var(--warm)">3 de agosto: cierran el estacionamiento</text>';
+      s+='<text x="'+(X(0)+4)+'" y="'+(Y(4140)+13)+'" font-size="10.5" fill="var(--muted)">rango normal en 2025</text>';}
+    [0,4,8,12,16].forEach(k=>{s+='<text x="'+X(k)+'" y="'+(H-10)+'" font-size="11" text-anchor="middle">'+semana(k)+'</text>';});
+    s+='</svg></div><p class="hint">Línea continua: 2026 · punteada: 2025 · franja gris: entre la peor y la mejor semana de 2025 (US$ 4.140 a 5.082). Ventas en US$.</p>';
+    return s;
+  }
+  function pintar(){
+    raiz.querySelectorAll('#c9l2-fmt button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===f));
+    raiz.querySelectorAll('#c9l2-tit button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===ti));
+    const aud=$('#c9l2-aud').value;
+    const tDesc='Ventas semanales de T07, 2025 y 2026';
+    const tAf='T07 Sur Puerto vende 40 % menos desde que cerraron su estacionamiento; el resto del Sur crece';
+    let h='<h4 class="'+(ti==='desc'?'desc':'')+'">'+(ti==='desc'?tDesc:tAf)+'</h4>';
+    if(f==='tabla')h+=tabla();
+    else if(f==='grafico')h+=grafico(false);
+    else{
+      h+='<div class="c9l2-arco"><div><b class="r">Contexto</b>Norte, Centro y Oriente venden entre 11 % y 14 % más que hace un año (6 % es el alza de precios).</div>'+
+        '<div class="cf"><b class="r">Conflicto</b>El Sur cae <b>23,2 %</b>, y toda la caída es de T07: desde la semana del 3 de agosto vende la mitad, cuando cerraron su estacionamiento por las obras de la avenida. T08 y T09 crecen.</div>'+
+        '<div><b class="r">'+RES[aud][0]+'</b>'+RES[aud][1]+'</div></div>'+grafico(true);
+    }
+    $('#c9l2-hoja').innerHTML=h;
+    // qué responde cada formato en unos segundos
+    const P=[['¿Cae?',true,true,true],['¿Desde cuándo?',false,ti==='afirma',true],['¿Cuánto?',false,ti==='afirma',true],['¿Por qué?',false,ti==='afirma',true],['¿Qué hago?',false,false,true]];
+    const col=f==='tabla'?1:f==='grafico'?2:3;
+    const ok=P.filter(p=>p[col]).length;
+    let t='<span class="big">En unos segundos, el lector responde '+ok+' de 5 preguntas</span>';
+    t+='<span>'+P.map(p=>(p[col]?'✓ ':'✗ ')+p[0]).join(' · ')+'</span>';
+    if(f==='tabla')t+='<span class="warn">Treinta y cuatro números: la caída está ahí, pero hay que encontrarla comparando fila por fila. Una tabla sirve para buscar un valor exacto, no para ver un cambio.</span>';
+    else if(f==='grafico'&&ti==='desc')t+='<span class="warn">El quiebre se ve, pero el título solo dice qué hay en el gráfico: el lector tiene que adivinar qué pasó la semana del 3 de agosto. Prueba «Afirma el hallazgo».</span>';
+    else if(f==='grafico')t+='<span>El título dice la conclusión y la anotación explica el quiebre. Falta decir qué hacer: eso depende de quién lo lee.</span>';
+    else t+='<span class="ok">Contexto, conflicto y resolución en tres recuadros, con el gráfico como prueba. Cambia quién lo lee: los datos son los mismos, la resolución cambia según la decisión que toma cada uno.</span>';
+    $('#c9l2-out').innerHTML=t;
+  }
+  raiz.querySelectorAll('#c9l2-fmt button').forEach(b=>b.addEventListener('click',()=>{f=b.dataset.f;pintar();}));
+  raiz.querySelectorAll('#c9l2-tit button').forEach(b=>b.addEventListener('click',()=>{ti=b.dataset.t;pintar();}));
+  $('#c9l2-aud').addEventListener('change',pintar);
+  pintar();
+})();
+</script>
+<script>
+(function(){
+  /* ---- Componente Pyodide común del curso «Ciencia de datos» (copiar tal cual) ----
+     Pyodide 314.0.7 (Python 3.14.2; pandas 3.0.2, polars 1.33.1, numpy 2.4.6, duckdb 1.5.1).
+     Se descarga solo al pulsar el botón y se comparte entre todos los labs de la página. */
+  const PY=window.cdatosPy||(window.cdatosPy=(function(){
+    const VER='314.0.7',BASE='https://cdn.jsdelivr.net/pyodide/v'+VER+'/full/';
+    let base=null;const listos={};
+    const AYUDA=[
+      'import ast, io, json, sys',
+      '_cdatos_espacios = {}',
+      'def _cdatos_limpio(v):',
+      '    if v is None: return None',
+      '    if hasattr(v, "item") and not isinstance(v, (str, bytes)):',
+      '        try: v = v.item()',
+      '        except Exception: v = str(v)',
+      '    if isinstance(v, float) and v != v: return None',
+      '    if isinstance(v, (bool, int, float, str)): return v',
+      '    return str(v)',
+      'def _cdatos_tabla(x, n=12):',
+      '    mod = type(x).__module__.split(".")[0]',
+      '    if mod == "polars":',
+      '        import polars as pl',
+      '        if isinstance(x, pl.LazyFrame): x = x.collect()',
+      '        if isinstance(x, pl.Series): x = x.to_frame()',
+      '        if not isinstance(x, pl.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.rows(); indice = None',
+      '        cols = list(h.columns); tipos = [str(t) for t in h.dtypes]',
+      '    elif mod == "pandas":',
+      '        import pandas as pd',
+      '        if isinstance(x, pd.Series): x = x.to_frame()',
+      '        if not isinstance(x, pd.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.astype(object).values.tolist()',
+      '        indice = [str(i) for i in h.index]',
+      '        cols = [str(c) for c in h.columns]; tipos = [str(t) for t in h.dtypes]',
+      '    elif x is None: return None',
+      '    else: return {"valor": repr(x)}',
+      '    return {"columnas": cols, "tipos": tipos, "indice": indice, "forma": list(x.shape), "motor": mod,',
+      '            "filas": [[_cdatos_limpio(v) for v in f] for f in filas]}',
+      'def _cdatos_correr(lab, codigo):',
+      '    ns = _cdatos_espacios.setdefault(lab, {"__name__": "__main__"})',
+      '    buf, viejo = io.StringIO(), sys.stdout',
+      '    sys.stdout = buf',
+      '    try:',
+      '        arbol = ast.parse(codigo); ultimo = None',
+      '        if arbol.body and isinstance(arbol.body[-1], ast.Expr):',
+      '            exp = ast.Expression(arbol.body.pop().value)',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '            ultimo = eval(compile(exp, "<lab>", "eval"), ns)',
+      '        else:',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '        return json.dumps({"salida": buf.getvalue(), "tabla": _cdatos_tabla(ultimo)})',
+      '    except BaseException as e:',
+      '        return json.dumps({"salida": buf.getvalue(), "error": type(e).__name__ + ": " + str(e)})',
+      '    finally:',
+      '        sys.stdout = viejo'].join('\n');
+    function script(){return new Promise((ok,mal)=>{
+      if(window.loadPyodide)return ok();
+      const s=document.createElement('script');s.src=BASE+'pyodide.js';
+      s.onload=ok;s.onerror=()=>mal(new Error('No se pudo descargar Pyodide'));document.head.appendChild(s);});}
+    return {VER,
+      /* paquetes: ['pandas'] o ['pandas','polars']; aviso(texto) recibe el estado */
+      cargar(paquetes,aviso){
+        if(!base){aviso&&aviso('Descargando Python (Pyodide '+VER+')…');
+          base=script().then(()=>loadPyodide({indexURL:BASE})).then(py=>{py.runPython(AYUDA);return py;});
+          base.catch(()=>{base=null;});}
+        return base.then(async py=>{
+          const faltan=paquetes.filter(p=>!listos[p]);
+          if(faltan.length){aviso&&aviso('Instalando '+faltan.join(' y ')+'…');
+            await py.loadPackage(faltan);faltan.forEach(p=>listos[p]=1);}
+          return py;});
+      },
+      /* archivos: {'ventas.csv': 'texto…'}; se escriben en la carpeta de trabajo de Python */
+      archivos(py,archivos){for(const k in archivos)py.FS.writeFile(k,archivos[k]);},
+      async correr(py,lab,codigo){
+        py.globals.set('_cdatos_codigo',codigo);
+        const r=JSON.parse(py.runPython('_cdatos_correr('+JSON.stringify(lab)+', _cdatos_codigo)'));
+        return r;}
+    };
+  })());
+  /* Dibuja la tabla que devuelve PY.correr (r.tabla) dentro de un elemento */
+  function pintarTabla(el,t){
+    const nfx=(v,dec)=>{if(typeof v!=='number')return v===null?'<i>nulo</i>':String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const d=dec?2:(Number.isInteger(v)?0:2);const s=Math.abs(v).toFixed(d).split('.');
+      s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (v<0?'−':'')+s.join(',');};
+    if(!t){el.innerHTML='';return;}
+    if(t.valor!==undefined){el.innerHTML='<pre class="cdatos-valor">'+nfx(t.valor)+'</pre>';return;}
+    const idx=t.indice&&!t.indice.every((v,i)=>v===String(i));
+    let h='<table class="tbl"><thead><tr>'+(idx?'<th></th>':'')+t.columnas.map((c,i)=>'<th>'+nfx(c)+'<br><small>'+t.tipos[i]+'</small></th>').join('')+'</tr></thead><tbody>';
+    t.filas.forEach((f,j)=>{h+='<tr>'+(idx?'<th>'+nfx(t.indice[j])+'</th>':'')+f.map((v,i)=>'<td'+(typeof v==='number'?' style="text-align:right"':'')+'>'+(/(^|_)id$|^año$|^anio$/i.test(String(t.columnas[i]))&&typeof v==='number'?String(v):nfx(v,/float/i.test(t.tipos[i])))+'</td>').join('')+'</tr>';});
+    const n=t.forma[0];
+    el.innerHTML=h+'</tbody></table><p class="hint">'+(n>t.filas.length?'Primeras '+t.filas.length+' de ':'')+nfx(n)+' filas × '+t.forma[1]+' columnas · '+t.motor+'</p>';
+  }
+  /* ---- fin del componente ---- */
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="09-lab-3"]');
+  const LAB='09-lab-3', PAQ=['pandas'];
+  const ARCH={"mensual_tienda.csv": "tienda_id,mes,ventas,tickets\nT01,2025-01,18343.35,1091\nT01,2025-02,16445.7,985\nT01,2025-03,20200.2,1198\nT01,2025-04,18630.8,1151\nT01,2025-05,21609.8,1270\nT01,2025-06,20683.8,1197\nT01,2025-07,20483.9,1216\nT01,2025-08,20967.6,1240\nT01,2025-09,19198.05,1162\nT01,2025-10,21639.45,1262\nT01,2025-11,21069.25,1288\nT01,2025-12,30068.55,1757\nT01,2026-01,20367.22,1152\nT01,2026-02,17937.29,1016\nT01,2026-03,22580.16,1225\nT01,2026-04,21898.6,1185\nT01,2026-05,24044.03,1364\nT01,2026-06,21013.69,1212\nT01,2026-07,23508.55,1318\nT01,2026-08,24654.61,1357\nT01,2026-09,22301.44,1236\nT01,2026-10,24150.88,1341\nT02,2025-01,16367.1,964\nT02,2025-02,13982.75,837\nT02,2025-03,17571.6,1043\nT02,2025-04,17255.55,1028\nT02,2025-05,17633.3,1137\nT02,2025-06,17031.6,1028\nT02,2025-07,18500.9,1104\nT02,2025-08,18957.8,1113\nT02,2025-09,16710.2,1000\nT02,2025-10,18786.05,1082\nT02,2025-11,19045.3,1120\nT02,2025-12,26129.4,1531\nT02,2026-01,19391.2,1025\nT02,2026-02,15444.99,900\nT02,2026-03,18784.77,1047\nT02,2026-04,18734.86,1005\nT02,2026-05,20941.53,1182\nT02,2026-06,19225.41,1040\nT02,2026-07,20224.73,1144\nT02,2026-08,21317.72,1213\nT02,2026-09,18809.47,1064\nT02,2026-10,21371.24,1187\nT03,2025-01,4538.6,414\nT03,2025-02,4112.05,374\nT03,2025-03,4934.15,458\nT03,2025-04,5070.9,444\nT03,2025-05,5538.45,489\nT03,2025-06,4547.1,428\nT03,2025-07,4925.8,471\nT03,2025-08,5355.5,487\nT03,2025-09,4758.2,444\nT03,2025-10,5226.3,480\nT03,2025-11,5010.05,477\nT03,2025-12,6912.7,645\nT03,2026-01,5258.85,444\nT03,2026-02,4646.88,383\nT03,2026-03,5201.62,449\nT03,2026-04,5750.44,472\nT03,2026-05,6104.27,521\nT03,2026-06,5234.6,453\nT03,2026-07,5252.01,492\nT03,2026-08,5996.41,505\nT03,2026-09,5376.6,474\nT03,2026-10,6278.18,514\nT04,2025-01,19401.85,1191\nT04,2025-02,18745.55,1053\nT04,2025-03,21291.25,1304\nT04,2025-04,20032.3,1218\nT04,2025-05,23051.2,1356\nT04,2025-06,21810.55,1285\nT04,2025-07,22668.1,1363\nT04,2025-08,24589.7,1415\nT04,2025-09,20891.95,1274\nT04,2025-10,23474.95,1369\nT04,2025-11,24329.35,1424\nT04,2025-12,30857.55,1897\nT04,2026-01,23091.55,1286\nT04,2026-02,20777.07,1122\nT04,2026-03,23521.43,1289\nT04,2026-04,23903.82,1304\nT04,2026-05,25765.35,1459\nT04,2026-06,23886.26,1358\nT04,2026-07,24632.36,1405\nT04,2026-08,26471.23,1448\nT04,2026-09,24392.96,1355\nT04,2026-10,26742.42,1472\nT05,2025-01,4759.35,444\nT05,2025-02,4113.95,393\nT05,2025-03,5069.95,475\nT05,2025-04,5461.65,463\nT05,2025-05,5309.95,514\nT05,2025-06,5251.25,477\nT05,2025-07,5645.3,494\nT05,2025-08,5570.1,507\nT05,2025-09,5086.4,476\nT05,2025-10,5703.65,516\nT05,2025-11,5408.75,522\nT05,2025-12,7884.35,703\nT05,2026-01,5161.73,461\nT05,2026-02,4674.51,404\nT05,2026-03,5947.64,496\nT05,2026-04,5221.54,479\nT05,2026-05,6217.06,551\nT05,2026-06,5842.33,499\nT05,2026-07,5703.59,517\nT05,2026-08,6110.28,527\nT05,2026-09,5661.78,501\nT05,2026-10,6174.07,542\nT06,2025-01,5507.85,499\nT06,2025-02,4926.25,451\nT06,2025-03,6010.5,544\nT06,2025-04,5729.55,544\nT06,2025-05,6467.75,586\nT06,2025-06,5996.15,539\nT06,2025-07,6457.85,571\nT06,2025-08,6402.45,587\nT06,2025-09,5586.9,547\nT06,2025-10,6424.5,578\nT06,2025-11,6783.45,619\nT06,2025-12,9162.4,812\nT06,2026-01,6357.82,539\nT06,2026-02,5491.08,474\nT06,2026-03,6284.57,545\nT06,2026-04,6656.99,572\nT06,2026-05,7566.89,633\nT06,2026-06,6389.25,562\nT06,2026-07,6522.75,585\nT06,2026-08,7165.07,612\nT06,2026-09,6746.02,562\nT06,2026-10,7171.29,610\nT07,2025-01,18260.6,1029\nT07,2025-02,16980.6,926\nT07,2025-03,19851.8,1125\nT07,2025-04,18848.95,1081\nT07,2025-05,22582.05,1242\nT07,2025-06,19972.95,1136\nT07,2025-07,20448.65,1137\nT07,2025-08,21305.1,1215\nT07,2025-09,20494.15,1130\nT07,2025-10,22098.1,1184\nT07,2025-11,20850.3,1209\nT07,2025-12,29847.15,1669\nT07,2026-01,20495.39,1088\nT07,2026-02,19108.37,971\nT07,2026-03,20873.3,1156\nT07,2026-04,21829.85,1157\nT07,2026-05,23913.84,1310\nT07,2026-06,22240.17,1135\nT07,2026-07,23293.93,1257\nT07,2026-08,13083.26,806\nT07,2026-09,11937.65,711\nT07,2026-10,12826.37,777\nT08,2025-01,4761.55,401\nT08,2025-02,4108.9,362\nT08,2025-03,5472.3,452\nT08,2025-04,5028.2,442\nT08,2025-05,5529.05,479\nT08,2025-06,5173.1,440\nT08,2025-07,5402.65,472\nT08,2025-08,5679.2,491\nT08,2025-09,5271.6,446\nT08,2025-10,5444.05,473\nT08,2025-11,5528.45,495\nT08,2025-12,7601.05,642\nT08,2026-01,5447.49,442\nT08,2026-02,4469.29,376\nT08,2026-03,5650.18,464\nT08,2026-04,5894.97,452\nT08,2026-05,5764.2,519\nT08,2026-06,5884.0,456\nT08,2026-07,6345.54,492\nT08,2026-08,6315.43,486\nT08,2026-09,5740.28,463\nT08,2026-10,6023.48,501\nT09,2025-01,4277.4,386\nT09,2025-02,4029.55,335\nT09,2025-03,4521.45,412\nT09,2025-04,4823.35,410\nT09,2025-05,5485.6,472\nT09,2025-06,4826.1,408\nT09,2025-07,4740.8,431\nT09,2025-08,5079.65,446\nT09,2025-09,4778.5,410\nT09,2025-10,4734.2,436\nT09,2025-11,5183.15,452\nT09,2025-12,7038.85,617\nT09,2026-01,4976.2,407\nT09,2026-02,4457.54,353\nT09,2026-03,5271.39,428\nT09,2026-04,5096.56,420\nT09,2026-05,5947.99,473\nT09,2026-06,5180.49,433\nT09,2026-07,6103.43,454\nT09,2026-08,5952.82,470\nT09,2026-09,5189.34,422\nT09,2026-10,5839.06,481\nT10,2025-01,14091.0,869\nT10,2025-02,12715.3,778\nT10,2025-03,16900.8,955\nT10,2025-04,15199.0,936\nT10,2025-05,16686.8,1009\nT10,2025-06,15622.6,953\nT10,2025-07,17266.3,998\nT10,2025-08,18141.9,1034\nT10,2025-09,16241.3,937\nT10,2025-10,16853.1,1007\nT10,2025-11,17072.55,1012\nT10,2025-12,23723.05,1375\nT10,2026-01,16805.15,927\nT10,2026-02,14780.73,809\nT10,2026-03,17717.2,995\nT10,2026-04,17711.74,968\nT10,2026-05,20308.42,1105\nT10,2026-06,18475.35,1004\nT10,2026-07,18035.14,1054\nT10,2026-08,19477.29,1090\nT10,2026-09,18750.26,1014\nT10,2026-10,18784.68,1057\nT11,2025-01,4129.3,364\nT11,2025-02,3413.3,318\nT11,2025-03,4281.85,377\nT11,2025-04,4359.2,365\nT11,2025-05,4253.1,416\nT11,2025-06,4260.25,391\nT11,2025-07,4484.85,403\nT11,2025-08,4566.05,401\nT11,2025-09,4114.95,374\nT11,2025-10,4199.9,405\nT11,2025-11,4963.65,429\nT11,2025-12,6455.05,570\nT11,2026-01,4533.72,376\nT11,2026-02,3660.51,324\nT11,2026-03,4621.77,400\nT11,2026-04,4792.4,384\nT11,2026-05,4864.17,447\nT11,2026-06,4711.67,392\nT11,2026-07,5332.24,421\nT11,2026-08,5022.49,430\nT11,2026-09,4298.18,392\nT11,2026-10,4985.05,437\nT12,2025-01,3516.95,327\nT12,2025-02,3155.5,294\nT12,2025-03,3763.1,349\nT12,2025-04,3669.85,345\nT12,2025-05,4154.6,389\nT12,2025-06,3563.95,346\nT12,2025-07,3909.25,366\nT12,2025-08,3992.45,377\nT12,2025-09,4010.15,354\nT12,2025-10,4089.95,370\nT12,2025-11,4354.15,397\nT12,2025-12,5396.5,503\nT12,2026-01,4035.69,357\nT12,2026-02,3482.66,308\nT12,2026-03,4058.15,352\nT12,2026-04,4146.64,360\nT12,2026-05,4989.87,408\nT12,2026-06,4140.32,364\nT12,2026-07,4507.99,379\nT12,2026-08,4209.75,397\nT12,2026-09,4588.37,371\nT12,2026-10,4660.73,394\n", "tiendas.csv": "tienda_id,nombre,region,formato,m2\nT01,Norte Mirador,Norte,grande,1800\nT02,Norte Estación,Norte,grande,1500\nT03,Norte Los Pinos,Norte,express,300\nT04,Centro Plaza Mayor,Centro,grande,2000\nT05,Centro Alameda,Centro,express,350\nT06,Centro Universidad,Centro,express,280\nT07,Sur Puerto,Sur,grande,1700\nT08,Sur Las Colinas,Sur,express,320\nT09,Sur Mercado Viejo,Sur,express,300\nT10,Oriente Río Claro,Oriente,grande,1600\nT11,Oriente La Loma,Oriente,express,300\nT12,Oriente Nuevo Sol,Oriente,express,260\n"};
+  const COD=["import pandas as pd\n\n# Parámetros del reporte: en Quarto irían en el encabezado y se cambian con -P\n{params}\n\ndef es(x, d=0):\n    \"\"\"Número con punto de miles y coma decimal.\"\"\"\n    return f\"{x:,.{d}f}\".replace(\",\", \"X\").replace(\".\", \",\").replace(\"X\", \".\")\n\ndef un_anio_antes(mes):\n    return str(int(mes[:4]) - 1) + mes[4:]\n\nm = pd.read_csv(\"mensual_tienda.csv\").merge(pd.read_csv(\"tiendas.csv\"), on=\"tienda_id\")\nm = m[m[\"region\"] == REGION]\ndef ventas(desde, hasta):\n    return m[m[\"mes\"].between(desde, hasta)].groupby(\"nombre\")[\"ventas\"].sum()\n\ntabla = pd.DataFrame({\"anterior\": ventas(un_anio_antes(DESDE), un_anio_antes(HASTA)),\n                      \"actual\": ventas(DESDE, HASTA)})\ntabla[\"diferencia\"] = tabla[\"actual\"] - tabla[\"anterior\"]\ntabla[\"variacion_%\"] = (tabla[\"actual\"] / tabla[\"anterior\"] - 1) * 100\ntabla = tabla.sort_values(\"diferencia\").round(2)\n\nvar = (tabla[\"actual\"].sum() / tabla[\"anterior\"].sum() - 1) * 100\nclave = tabla[\"diferencia\"].abs().idxmax()\nprint(f\"Ventas de la región {REGION}, {DESDE} a {HASTA}\")\nprint(f\"El {REGION} vendió US$ {es(tabla['actual'].sum(), 2)}, un {es(abs(var), 1)} % \"\n      f\"{'menos' if var < 0 else 'más'} que un año antes.\")\nprint(f\"La tienda que más explica el cambio es {clave} \"\n      f\"({es(tabla.loc[clave, 'diferencia'], 2)} US$, {es(tabla.loc[clave, 'variacion_%'], 1)} %).\")\ntabla", "# Antes de publicar: el reporte se comprueba solo (usa la tabla del ejemplo 1)\n{params}\n\nperiodo = m[m[\"mes\"].between(DESDE, HASTA)]\nmeses_esperados = (int(HASTA[:4]) - int(DESDE[:4])) * 12 + int(HASTA[5:]) - int(DESDE[5:]) + 1\ncontroles = pd.DataFrame({\n    \"control\": [\"la tabla suma lo mismo que la región\",\n                \"están todos los meses del período\",\n                \"todas las tiendas tienen dato del año anterior\",\n                \"ninguna venta negativa\"],\n    \"resultado\": [abs(tabla[\"actual\"].sum() - periodo[\"ventas\"].sum()) < 0.01,\n                  periodo[\"mes\"].nunique() == meses_esperados,\n                  bool(tabla[\"anterior\"].notna().all()),\n                  bool((periodo[\"ventas\"] >= 0).all())]})\nprint(\"Meses en el período:\", periodo[\"mes\"].nunique(), \"de\", meses_esperados)\nprint(\"Se puede publicar.\" if controles[\"resultado\"].all() else \"NO publicar: revisa los controles en falso.\")\ncontroles"], PARAMS="REGION = \"{r}\"\nDESDE, HASTA = \"{d}\", \"{h}\"", PER=[["2026-08", "2026-10"], ["2026-01", "2026-10"], ["2026-10", "2026-10"]], G={"Sur|2026-08|2026-10": [{"salida": "Ventas de la región Sur, 2026-08 a 2026-10\nEl Sur vendió US$ 72.907,69, un 23,2 % menos que un año antes.\nLa tienda que más explica el cambio es Sur Puerto (-26.050,07 US$, -40,8 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Sur Puerto", "Sur Las Colinas", "Sur Mercado Viejo"], "forma": [3, 4], "motor": "pandas", "filas": [[63897.35, 37847.28, -26050.07, -40.77], [16394.85, 18079.19, 1684.34, 10.27], [14592.35, 16981.22, 2388.87, 16.37]]}}, {"salida": "Meses en el período: 3 de 3\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Sur|2026-01|2026-10": [{"salida": "Ventas de la región Sur, 2026-01 a 2026-10\nEl Sur vendió US$ 301.151,81, un 0,4 % más que un año antes.\nLa tienda que más explica el cambio es Sur Puerto (-11.240,82 US$, -5,6 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Sur Puerto", "Sur Las Colinas", "Sur Mercado Viejo"], "forma": [3, 4], "motor": "pandas", "filas": [[200842.95, 189602.13, -11240.82, -5.6], [51870.6, 57534.86, 5664.26, 10.92], [47296.6, 54014.82, 6718.22, 14.2]]}}, {"salida": "Meses en el período: 10 de 10\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Sur|2026-10|2026-10": [{"salida": "Ventas de la región Sur, 2026-10 a 2026-10\nEl Sur vendió US$ 24.688,91, un 23,5 % menos que un año antes.\nLa tienda que más explica el cambio es Sur Puerto (-9.271,73 US$, -42,0 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Sur Puerto", "Sur Las Colinas", "Sur Mercado Viejo"], "forma": [3, 4], "motor": "pandas", "filas": [[22098.1, 12826.37, -9271.73, -41.96], [5444.05, 6023.48, 579.43, 10.64], [4734.2, 5839.06, 1104.86, 23.34]]}}, {"salida": "Meses en el período: 1 de 1\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Norte|2026-08|2026-10": [{"salida": "Ventas de la región Norte, 2026-08 a 2026-10\nEl Norte vendió US$ 150.256,55, un 14,2 % más que un año antes.\nLa tienda que más explica el cambio es Norte Mirador (9.301,83 US$, 15,1 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Norte Los Pinos", "Norte Estación", "Norte Mirador"], "forma": [3, 4], "motor": "pandas", "filas": [[15340.0, 17651.19, 2311.19, 15.07], [54454.05, 61498.43, 7044.38, 12.94], [61805.1, 71106.93, 9301.83, 15.05]]}}, {"salida": "Meses en el período: 3 de 3\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Norte|2026-01|2026-10": [{"salida": "Ventas de la región Norte, 2026-01 a 2026-10\nEl Norte vendió US$ 471.802,25, un 12,3 % más que un año antes.\nLa tienda que más explica el cambio es Norte Mirador (24.253,82 US$, 12,2 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Norte Los Pinos", "Norte Estación", "Norte Mirador"], "forma": [3, 4], "motor": "pandas", "filas": [[49007.05, 55099.86, 6092.81, 12.43], [172796.85, 194245.92, 21449.07, 12.41], [198202.65, 222456.47, 24253.82, 12.24]]}}, {"salida": "Meses en el período: 10 de 10\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Norte|2026-10|2026-10": [{"salida": "Ventas de la región Norte, 2026-10 a 2026-10\nEl Norte vendió US$ 51.800,30, un 13,5 % más que un año antes.\nLa tienda que más explica el cambio es Norte Estación (2.585,19 US$, 13,8 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Norte Los Pinos", "Norte Mirador", "Norte Estación"], "forma": [3, 4], "motor": "pandas", "filas": [[5226.3, 6278.18, 1051.88, 20.13], [21639.45, 24150.88, 2511.43, 11.61], [18786.05, 21371.24, 2585.19, 13.76]]}}, {"salida": "Meses en el período: 1 de 1\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Centro|2026-08|2026-10": [{"salida": "Ventas de la región Centro, 2026-08 a 2026-10\nEl Centro vendió US$ 116.635,12, un 12,4 % más que un año antes.\nLa tienda que más explica el cambio es Centro Plaza Mayor (8.650,01 US$, 12,5 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Centro Alameda", "Centro Universidad", "Centro Plaza Mayor"], "forma": [3, 4], "motor": "pandas", "filas": [[16360.15, 17946.13, 1585.98, 9.69], [18413.85, 21082.38, 2668.53, 14.49], [68956.6, 77606.61, 8650.01, 12.54]]}}, {"salida": "Meses en el período: 3 de 3\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Centro|2026-01|2026-10": [{"salida": "Ventas de la región Centro, 2026-01 a 2026-10\nEl Centro vendió US$ 366.250,71, un 11,9 % más que un año antes.\nLa tienda que más explica el cambio es Centro Plaza Mayor (27.227,05 US$, 12,6 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Centro Alameda", "Centro Universidad", "Centro Plaza Mayor"], "forma": [3, 4], "motor": "pandas", "filas": [[51971.55, 56714.53, 4742.98, 9.13], [59509.75, 66351.73, 6841.98, 11.5], [215957.4, 243184.45, 27227.05, 12.61]]}}, {"salida": "Meses en el período: 10 de 10\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Centro|2026-10|2026-10": [{"salida": "Ventas de la región Centro, 2026-10 a 2026-10\nEl Centro vendió US$ 40.087,78, un 12,6 % más que un año antes.\nLa tienda que más explica el cambio es Centro Plaza Mayor (3.267,47 US$, 13,9 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Centro Alameda", "Centro Universidad", "Centro Plaza Mayor"], "forma": [3, 4], "motor": "pandas", "filas": [[5703.65, 6174.07, 470.42, 8.25], [6424.5, 7171.29, 746.79, 11.62], [23474.95, 26742.42, 3267.47, 13.92]]}}, {"salida": "Meses en el período: 1 de 1\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Oriente|2026-08|2026-10": [{"salida": "Ventas de la región Oriente, 2026-08 a 2026-10\nEl Oriente vendió US$ 84.776,80, un 11,2 % más que un año antes.\nLa tienda que más explica el cambio es Oriente Río Claro (5.775,93 US$, 11,3 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Oriente Nuevo Sol", "Oriente La Loma", "Oriente Río Claro"], "forma": [3, 4], "motor": "pandas", "filas": [[12092.55, 13458.85, 1366.3, 11.3], [12880.9, 14305.72, 1424.82, 11.06], [51236.3, 57012.23, 5775.93, 11.27]]}}, {"salida": "Meses en el período: 3 de 3\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Oriente|2026-01|2026-10": [{"salida": "Ventas de la región Oriente, 2026-01 a 2026-10\nEl Oriente vendió US$ 270.488,33, un 12,9 % más que un año antes.\nLa tienda que más explica el cambio es Oriente Río Claro (21.127,86 US$, 13,2 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Oriente La Loma", "Oriente Nuevo Sol", "Oriente Río Claro"], "forma": [3, 4], "motor": "pandas", "filas": [[42062.75, 46822.2, 4759.45, 11.32], [37825.75, 42820.17, 4994.42, 13.2], [159718.1, 180845.96, 21127.86, 13.23]]}}, {"salida": "Meses en el período: 10 de 10\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}], "Oriente|2026-10|2026-10": [{"salida": "Ventas de la región Oriente, 2026-10 a 2026-10\nEl Oriente vendió US$ 28.430,46, un 13,1 % más que un año antes.\nLa tienda que más explica el cambio es Oriente Río Claro (1.931,58 US$, 11,5 %).\n", "tabla": {"columnas": ["anterior", "actual", "diferencia", "variacion_%"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Oriente Nuevo Sol", "Oriente La Loma", "Oriente Río Claro"], "forma": [3, 4], "motor": "pandas", "filas": [[4089.95, 4660.73, 570.78, 13.96], [4199.9, 4985.05, 785.15, 18.69], [16853.1, 18784.68, 1931.58, 11.46]]}}, {"salida": "Meses en el período: 1 de 1\nSe puede publicar.\n", "tabla": {"columnas": ["control", "resultado"], "tipos": ["str", "bool"], "indice": ["0", "1", "2", "3"], "forma": [4, 2], "motor": "pandas", "filas": [["la tabla suma lo mismo que la región", true], ["están todos los meses del período", true], ["todas las tiendas tienen dato del año anterior", true], ["ninguna venta negativa", true]]}}]};
+  const LEE=['El código no tiene ninguna cifra escrita a mano: la tabla, el porcentaje y el nombre de la tienda salen de los datos. Cambia la región o el período y el párrafo se reescribe solo; eso es un reporte parametrizado.',
+    'Cuatro controles que corren cada vez que se genera el reporte. Si uno da falso, el reporte no sale: es mejor un reporte atrasado que uno con una cifra que no cuadra.'];
+  const q=s=>raiz.querySelector(s);
+  const sel=q('#c9l3-ej'),reg=q('#c9l3-reg'),per=q('#c9l3-per'),cod=q('#c9l3-cod'),bc=q('#c9l3-cargar'),br=q('#c9l3-correr'),est=q('#c9l3-est'),sal=q('#c9l3-sal'),tab=q('#c9l3-tab'),out=q('#c9l3-out');
+  let py=null;
+  function params(){const p=PER[+per.value];return PARAMS.replace('{r}',reg.value).replace('{d}',p[0]).replace('{h}',p[1]);}
+  function codigo(i){return COD[i].split('{params}').join(params());}
+  function clave(){const p=PER[+per.value];return reg.value+'|'+p[0]+'|'+p[1];}
+  function estado(t,c){est.textContent=t;est.className='c9l3-est'+(c?' '+c:'');}
+  function mostrar(r,lee,guardado){
+    sal.hidden=!(r.salida||r.error);sal.textContent=(r.salida||'')+(r.error?(r.salida?'\n':'')+r.error:'');sal.classList.toggle('err',!!r.error);
+    pintarTabla(tab,r.error?null:r.tabla);
+    out.innerHTML=r.error?'<span class="warn">El código falló.</span><span>Lee la última línea del error: dice qué tipo de problema es. Si dice que <code>tabla</code> no existe, ejecuta primero el paso 1.</span>'
+      :(guardado?'<span class="hint">Resultado guardado (calculado con el mismo código). Carga Python para ejecutarlo y editarlo.</span>':'')+'<span>'+lee+'</span>';
+  }
+  function elegir(){const i=+sel.value;cod.value=codigo(i);if(py)correr();else mostrar(G[clave()][i],LEE[i],true);}
+  async function correr(){
+    if(!py)return;br.disabled=true;estado('Ejecutando…');
+    try{
+      const i=+sel.value;
+      if(i===1)await PY.correr(py,LAB,codigo(0));
+      const r=await PY.correr(py,LAB,cod.value);
+      mostrar(r,cod.value===codigo(i)?LEE[i]:'Ejecutaste tu versión del código: compara el párrafo y la tabla con los del ejemplo.',false);
+      estado(r.error?'El código falló: lee el error abajo.':'Listo: Python 3.14 con pandas.',r.error?'warn':'ok');
+    }catch(err){estado('Algo falló al ejecutar: '+err.message,'warn');}
+    br.disabled=false;
+  }
+  bc.addEventListener('click',async()=>{
+    bc.disabled=true;
+    try{py=await PY.cargar(PAQ,t=>estado(t));PY.archivos(py,ARCH);bc.hidden=true;br.disabled=false;correr();}
+    catch(err){bc.disabled=false;estado('No se pudo cargar Python. Revisa tu conexión y vuelve a intentar; el resultado guardado sigue abajo.','warn');}
+  });
+  br.addEventListener('click',correr);
+  cod.addEventListener('keydown',ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key==='Enter'){ev.preventDefault();correr();}});
+  sel.addEventListener('change',elegir);reg.addEventListener('change',elegir);per.addEventListener('change',elegir);
+  elegir();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="09-lab-1"]');
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  const usd=n=>'US$ '+nf(n,2);
+  const pct=n=>(n>0?'+':'')+nf(n,1)+' %';
+  const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct'];
+  const IND=[
+    {id:'cadena',n:'Ventas de la cadena, ago-oct',tipo:'num',v:424576.16,ant:406424.05,fmt:'usd',rol:'contexto'},
+    {id:'region',n:'Variación interanual por región',tipo:'cat',cat:['Norte','Centro','Oriente','Sur'],val:[14.2,12.4,11.2,-23.2],fmt:'pct',rol:'donde'},
+    {id:'surmes',n:'Ventas mensuales del Sur, 2025 y 2026',tipo:'ts',a:[27300,25119,29846,28700,33597,29972,30592,32064,30544,32276],b:[30919,28035,31795,32821,35626,33305,35743,25352,22867,24689],rol:'cuando'},
+    {id:'tienda',n:'Variación por tienda del Sur',tipo:'cat',cat:['T07 Sur Puerto','T08 Las Colinas','T09 Mercado Viejo'],val:[-40.8,10.3,16.4],fmt:'pct',rol:'tienda'},
+    {id:'resenas',n:'Reseñas de T07 sobre obras o estacionamiento',tipo:'num',v:60,de:65,rol:'porque'},
+    {id:'ticket',n:'Ticket promedio de la cadena, octubre',tipo:'num',v:15.57,ant:15.14,fmt:'usd',rol:'neutro'},
+    {id:'anon',n:'Tickets anónimos (sin tarjeta del Club), octubre',tipo:'num',v:37.5,fmt:'pctabs',rol:'ruido'},
+    {id:'acum',n:'Ventas acumuladas desde enero de 2025',tipo:'num',v:3027430.10,fmt:'usd',rol:'vanidad'},
+    {id:'doce',n:'Ventas por tienda (las 12), ago-oct 2026',tipo:'cat',cat:['T01','T02','T03','T04','T05','T06','T07','T08','T09','T10','T11','T12'],val:[71107,61498,17651,77607,17946,21082,37847,18079,16981,57012,14306,13459],fmt:'usd0',rol:'ruido'}
+  ];
+  const GRAF=[['cifra','Cifra'],['barras','Barras'],['linea','Línea'],['torta','Torta']];
+  let sel={}; // id -> gráfico
+  function fmtv(i,x){return i.fmt==='usd'?usd(x):i.fmt==='usd0'?'US$ '+nf(x):i.fmt==='pct'?pct(x):i.fmt==='pctabs'?nf(x,1)+' %':nf(x);}
+  function filas(){
+    $('#c9l1-ind').innerHTML=IND.map(i=>'<div class="c9l1-fila'+(sel[i.id]?' sel':'')+'"><input type="checkbox" id="c9l1-k-'+i.id+'"'+(sel[i.id]?' checked':'')+'><label for="c9l1-k-'+i.id+'">'+i.n+'</label><select id="c9l1-g-'+i.id+'" aria-label="Gráfico para '+i.n+'"'+(sel[i.id]?'':' disabled')+'>'+GRAF.map(g=>'<option value="'+g[0]+'"'+((sel[i.id]||def(i))===g[0]?' selected':'')+'>'+g[1]+'</option>').join('')+'</select></div>').join('');
+    IND.forEach(i=>{
+      raiz.querySelector('#c9l1-k-'+i.id).addEventListener('change',e=>{
+        if(e.target.checked){if(Object.keys(sel).length>=3){e.target.checked=false;aviso='Un tablero mínimo tiene tres indicadores: quita uno antes de agregar otro.';pintar();return;}sel[i.id]=raiz.querySelector('#c9l1-g-'+i.id).value;}
+        else delete sel[i.id];
+        aviso='';filas();pintar();});
+      raiz.querySelector('#c9l1-g-'+i.id).addEventListener('change',e=>{if(sel[i.id]){sel[i.id]=e.target.value;pintar();}});
+    });
+  }
+  function def(i){return i.tipo==='num'?'cifra':i.tipo==='ts'?'linea':'barras';}
+  let aviso='';
+  // ---- dibujos ----
+  function barras(i){
+    const n=i.val.length,W=300,fila=n>6?13:22,H=n*fila+8,max=Math.max(...i.val.map(Math.abs)),neg=i.val.some(v=>v<0);
+    const fs=n>6?9.5:10.5,lab=Math.max(...i.cat.map(c=>c.length))*fs*0.56+8,txt=46;
+    const ancho=neg?(W-lab-2*txt)/2:W-lab-txt,c0=neg?lab+txt+ancho:lab;
+    let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Barras: '+i.n+'">';
+    if(neg)s+='<line x1="'+c0+'" y1="0" x2="'+c0+'" y2="'+H+'" stroke="var(--muted)" stroke-width="1"/>';
+    i.val.forEach((v,k)=>{const y=4+k*fila,w=Math.abs(v)/max*ancho,x=v<0?c0-w:c0;
+      s+='<text x="2" y="'+(y+fila*.68)+'" font-size="'+fs+'">'+i.cat[k]+'</text>';
+      s+='<rect x="'+x+'" y="'+(y+2)+'" width="'+Math.max(w,1)+'" height="'+(fila-5)+'" rx="2" fill="'+(v<0?'var(--warm)':'var(--d-casa)')+'"/>';
+      s+='<text x="'+(v<0?x-3:x+w+3)+'" y="'+(y+fila*.68)+'" font-size="'+(n>6?9:10)+'"'+(v<0?' text-anchor="end"':'')+'>'+fmtv(i,v)+'</text>';});
+    return s+'</svg>';
+  }
+  function lineaCat(i){
+    const W=220,H=110,n=i.val.length,mn=Math.min(0,...i.val),mx=Math.max(...i.val);
+    const X=k=>20+k*(W-40)/(n-1),Y=v=>12+(mx-v)/(mx-mn||1)*(H-34);
+    let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Línea: '+i.n+'"><polyline fill="none" stroke="var(--d-casa)" stroke-width="2" points="'+i.val.map((v,k)=>X(k)+','+Y(v)).join(' ')+'"/>';
+    i.val.forEach((v,k)=>{s+='<circle cx="'+X(k)+'" cy="'+Y(v)+'" r="3" fill="'+(v<0?'var(--warm)':'var(--d-casa)')+'"/>';if(n<=4)s+='<text x="'+X(k)+'" y="'+(H-6)+'" font-size="9.5" text-anchor="middle">'+i.cat[k].split(' ')[0]+'</text>';});
+    return s+'</svg>';
+  }
+  function serie(i,tipo){
+    const W=220,H=120,mx=36000,mn=20000,X=k=>26+k*(W-34)/9,Y=v=>8+(mx-v)/(mx-mn)*(H-30);
+    let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Ventas mensuales del Sur 2025 y 2026">';
+    [20000,28000,36000].forEach(v=>{s+='<line x1="26" x2="'+W+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--grid)"/><text x="0" y="'+(Y(v)+3)+'" font-size="8.5">'+(v/1000)+' mil</text>';});
+    if(tipo==='linea'){
+      s+='<polyline fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="4 3" points="'+i.a.map((v,k)=>X(k)+','+Y(v)).join(' ')+'"/>';
+      s+='<polyline fill="none" stroke="var(--d-casa)" stroke-width="2.2" points="'+i.b.map((v,k)=>X(k)+','+Y(v)).join(' ')+'"/>';
+      s+='<circle cx="'+X(7)+'" cy="'+Y(i.b[7])+'" r="3.5" fill="var(--warm)"/><text x="'+(X(7)-4)+'" y="'+(Y(i.b[7])+14)+'" font-size="9" text-anchor="end" fill="var(--warm)">agosto</text>';
+    }else{
+      const bw=(W-34)/10/2-1;
+      i.b.forEach((v,k)=>{s+='<rect x="'+(X(k)-bw-1)+'" y="'+Y(i.a[k])+'" width="'+bw+'" height="'+(Y(mn)-Y(i.a[k]))+'" fill="var(--muted)" opacity=".55"/><rect x="'+(X(k))+'" y="'+Y(v)+'" width="'+bw+'" height="'+(Y(mn)-Y(v))+'" fill="'+(k>=7?'var(--warm)':'var(--d-casa)')+'"/>';});
+    }
+    MESES.forEach((m,k)=>{if(k%3===0||k===9)s+='<text x="'+X(k)+'" y="'+(H-4)+'" font-size="8.5" text-anchor="middle">'+m+'</text>';});
+    return s+'</svg><div class="c">'+(tipo==='linea'?'<span style="color:var(--d-casa)">━</span> 2026 · <span>┅</span> 2025':'Gris: 2025 · color: 2026')+' · el eje empieza en 20 mil</div>';
+  }
+  function torta(i){
+    const tot=i.val.reduce((a,b)=>a+b,0);let a0=-Math.PI/2,s='<svg viewBox="0 0 220 120" role="img" aria-label="Torta: '+i.n+'">';
+    i.val.forEach((v,k)=>{const a1=a0+v/tot*2*Math.PI,l=a1-a0>Math.PI?1:0;
+      s+='<path d="M110 60 L'+(110+52*Math.cos(a0))+' '+(60+52*Math.sin(a0))+' A52 52 0 '+l+' 1 '+(110+52*Math.cos(a1))+' '+(60+52*Math.sin(a1))+'Z" fill="'+(k===6?'var(--warm)':'var(--d-casa)')+'" opacity="'+(0.35+0.65*((k%4)/3))+'" stroke="var(--card)" stroke-width="1"/>';a0=a1;});
+    return s+'</svg>';
+  }
+  function tile(i){
+    const g=sel[i.id];let cuerpo='',av='';
+    if(i.tipo==='num'){
+      if(i.id==='resenas')cuerpo='<div class="k malo">'+i.v+' de '+i.de+'</div><div class="c">desde el 3 de agosto · estrellas promedio de T07: 2,23 (el año anterior, 3,51)</div>';
+      else{cuerpo='<div class="k">'+fmtv(i,i.v)+'</div>';
+        cuerpo+=i.ant?'<div class="c">'+pct((i.v/i.ant-1)*100)+' frente al mismo período de 2025</div>':'<div class="c">sin comparación</div>';}
+      if(g!=='cifra')av='Una sola cifra no necesita '+(g==='torta'?'una torta':g==='linea'?'una línea':'barras')+': se muestra como cifra.';
+    }else if(i.tipo==='cat'){
+      if(g==='barras')cuerpo=barras(i);
+      else if(g==='linea'){cuerpo=lineaCat(i);av='Una línea une puntos que siguen un orden (meses, días). Entre regiones o tiendas no hay nada «entre medio»: la línea sugiere una tendencia que no existe.';}
+      else if(g==='cifra'){const k=i.val.indexOf(Math.min(...i.val));cuerpo='<div class="k'+(i.val[k]<0?' malo':'')+'">'+fmtv(i,i.val[k])+'</div><div class="c">'+i.cat[k]+(i.fmt==='usd0'?' (la tienda que menos vende)':' (el peor caso)')+'</div>';av='La cifra sola muestra un caso y pierde la comparación con los demás.';}
+      else{ if(i.val.some(v=>v<0)){cuerpo='<div class="c9l1-vacio">No se puede dibujar</div>';av='Una torta reparte un total en partes: no puede mostrar una variación de −23,2 % ni comparar cambios.';}
+        else{cuerpo=torta(i);av='Doce porciones parecidas no se comparan a ojo: el ángulo y el área se leen mucho peor que la longitud de una barra.';}}
+    }else{
+      if(g==='linea'||g==='barras')cuerpo=serie(i,g);
+      else if(g==='cifra'){const v=(i.b[9]/i.a[9]-1)*100;cuerpo='<div class="k malo">'+pct(v)+'</div><div class="c">octubre de 2026 frente a octubre de 2025 · pierdes desde cuándo cae</div>';av='Con una cifra no se ve que la caída empieza en agosto.';}
+      else{cuerpo='<div class="c9l1-vacio">No se puede dibujar</div>';av='Una torta no muestra una evolución en el tiempo.';}
+    }
+    return '<div class="c9l1-t"><div class="n">'+i.n+'</div>'+cuerpo+(av?'<div class="av">'+av+'</div>':'')+'</div>';
+  }
+  function pintar(){
+    const ids=Object.keys(sel),is=ids.map(id=>IND.find(i=>i.id===id));
+    $('#c9l1-grid').innerHTML=is.length?is.map(tile).join(''):'<div class="c9l1-vacio">El tablero está vacío: marca un indicador.</div>';
+    const roto=i=>sel[i.id]==='torta'&&(i.tipo==='ts'||(i.tipo==='cat'&&i.val.some(v=>v<0)));
+    const roles=new Set(is.filter(i=>!roto(i)).map(i=>i.rol));
+    const preg=[
+      ['¿Dónde está el problema?',roles.has('donde')||(roles.has('cuando')),'la variación por región (o la serie del Sur) muestra que solo el Sur cae'],
+      ['¿Desde cuándo y en qué tienda?',roles.has('cuando')||roles.has('tienda'),'la serie mensual o la variación por tienda ubican la caída en agosto y en T07'],
+      ['¿Hay una pista del porqué?',roles.has('porque'),'las reseñas de T07 hablan de las obras y del estacionamiento']];
+    const ok=preg.filter(p=>p[1]).length;
+    const malos=is.filter(i=>i.rol==='vanidad'||i.rol==='ruido');
+    const mal=is.filter(i=>{const g=sel[i.id];return (i.tipo==='cat'&&g!=='barras')||(i.tipo==='ts'&&g!=='linea'&&g!=='barras');});
+    let t='';
+    if(aviso)t+='<span class="warn">'+aviso+'</span>';
+    t+='<span class="big">Responde '+ok+' de 3 preguntas de Lorena</span>';
+    preg.forEach(p=>{t+='<span class="'+(p[1]?'ok':'warn')+'">'+(p[1]?'✓ ':'✗ ')+p[0]+(p[1]?' Sí: '+p[2]+'.':' Falta.')+'</span>';});
+    malos.forEach(i=>{t+='<span>«'+i.n+'» ocupa un lugar sin ayudar a decidir: '+(i.rol==='vanidad'?'una cifra que solo crece y no se compara con nada (métrica de vanidad).':i.id==='anon'?'es un dato operativo del Club, no de la caída.':'doce valores absolutos esconden lo que cambió: el Sur ya era chico antes de caer.')+'</span>';});
+    if(roles.has('contexto')&&!roles.has('donde'))t+='<span>La cadena crece +4,5 %: la cifra total tapa la caída del Sur. Sirve como contexto si otro indicador la muestra.</span>';
+    if(mal.length)t+='<span>'+mal.length+' gráfico'+(mal.length>1?'s no son':' no es')+' el adecuado para su pregunta: mira el aviso en el recuadro.</span>';
+    if(ok===3&&!malos.length&&!mal.length)t+='<span class="ok">Tres indicadores, tres preguntas, ningún adorno: Lorena puede pasar del tablero a la decisión.</span>';
+    $('#c9l1-out').innerHTML=t;
+  }
+  $('#c9l1-ej').addEventListener('click',()=>{sel={region:'barras',surmes:'linea',resenas:'cifra'};aviso='';filas();pintar();});
+  $('#c9l1-ini').addEventListener('click',()=>{sel={};aviso='';filas();pintar();});
+  sel={cadena:'cifra',acum:'cifra',doce:'torta'};
+  filas();pintar();
+})();
+</script>
+</body>
+</html>

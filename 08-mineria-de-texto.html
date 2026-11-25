@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minería de texto · Ciencia de datos · Ciencia de datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Del dato crudo a la decisión: hacer buenas preguntas, limpiar, explorar, visualizar, minar datos y texto y comunicar resultados con pandas y Polars, con código que corre en la página.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="mineria-de-texto">
+<header class="topbar"><a class="brand" href="index.html">Ciencia de <b>datos</b></a><span class="eyebrow">Curso visual e interactivo · Datos e inteligencia artificial</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 08 DE 10</span><h1>Minería de texto clásica</h1><p class="lede">Las 1.112 reseñas de Almacenes Ejemplo dicen cosas que ninguna columna de ventas registra. Este capítulo las convierte en números con las técnicas clásicas: limpiar y cortar el texto, contar palabras en una bolsa, pesarlas con TF-IDF para ver qué distingue a cada tienda y medir el sentimiento con un diccionario, sabiendo dónde se equivoca.</p></header>
+<section><h2>El texto como dato: documentos, corpus y tokens</h2><div class="prose"><p>La tercera pregunta de Verónica Peña llegó con la segunda: «Y las reseñas, ¿qué dicen? Tenemos más de mil y nadie las lee». Almacenes Ejemplo junta las opiniones que los clientes dejan en la web y en el kiosco de cada tienda: un texto corto en español, la tienda, la fecha y, casi siempre, de una a cinco estrellas. Después de quitar los 18 duplicados del capítulo 03 quedan 1.112 reseñas.</p><p>Mariana Solís podría leerlas en una tarde. Pero en un año serán diez mil, y Verónica no quiere una impresión: quiere saber de qué se queja cada tienda, si eso cambia en el tiempo y si las estrellas cuentan toda la historia. Para eso el texto tiene que convertirse en una tabla. Ese es el trabajo de la <b>minería de texto</b> (<i>text mining</i>): sacar números de textos escritos por personas, para poder contarlos, compararlos y graficarlos como cualquier otra columna.</p></div><div class="analogia"><b>Imagínalo así</b><p>Una encuestadora que recibe mil respuestas abiertas a «¿qué mejoraría de la tienda?» no las memoriza. Lee algunas, inventa casillas («precios», «filas», «limpieza») y pone una marca por cada respuesta que las menciona. Al final tiene una tabla de conteos. La minería de texto clásica hace lo mismo, con la diferencia de que las casillas son todas las palabras y las marcas las pone un programa.</p></div><div class="prose"><p>Tres palabras ordenan el resto del capítulo:</p><ul><li>Un <b>documento</b> (<i>document</i>) es la unidad de texto que se analiza. Puede ser una reseña, todas las reseñas de una tienda juntas o todas las de un mes: la elección depende de la pregunta.</li><li>El <b>corpus</b> (<i>corpus</i>, cuerpo de textos) es la colección completa de documentos. Aquí, las 1.112 reseñas.</li><li>Un <b>token</b> (<i>token</i>, ficha) es cada pedazo en que se corta el texto, casi siempre una palabra. «Las cajas fueron rápidas» tiene cuatro tokens. Al conjunto de tokens distintos de todo el corpus se le llama <b>vocabulario</b> (<i>vocabulary</i>).</li></ul><p>El camino es siempre el mismo: limpiar el texto, cortarlo en tokens, contar y, sobre los conteos, calcular lo que la pregunta pida. La figura lo muestra con la reseña de Gloria Méndez, la clienta del capítulo 07 que dejó de comprar en agosto.</p></div><figure class="fig fig-flujo" id="08-diagrama-1"><div class="lienzo"><svg viewBox="0 0 900 520" style="min-width:760px" role="img" aria-label="Flujo de la minería de texto con la reseña de Gloria Méndez: el texto crudo se normaliza, se corta en 16 tokens, pierde las palabras vacías y queda en 7, se recorta a la raíz y se convierte en una fila de la bolsa de palabras, de la que salen el TF-IDF y el sentimiento">
+<defs>
+<marker id="c8d1-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="k-tra"/></marker>
+</defs>
+<text x="16" y="28" class="t t-b">DEL TEXTO A LOS NÚMEROS: LA RESEÑA 964 (GLORIA MÉNDEZ, T07, 1 ESTRELLA)</text>
+
+<rect x="16" y="44" width="868" height="48" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="30" y="64" class="t t-xs t-b k-warm">TEXTO CRUDO (UN DOCUMENTO)</text>
+<text x="30" y="82" class="t t-s">«Compro aquí hace años, pero cerraron el estacionamiento por las obras y ya no puedo venir.»</text>
+<path d="M60 94V110" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d1-m)"/>
+
+<rect x="16" y="114" width="868" height="48" rx="8" class="caja"/>
+<text x="30" y="134" class="t t-xs t-b t-m">1 · NORMALIZAR: MINÚSCULAS Y SIN TILDES (LA Ñ SE QUEDA)</text>
+<text x="30" y="152" class="t t-s t-mono">compro aqui hace años, pero cerraron el estacionamiento por las obras y ya no puedo venir.</text>
+<path d="M60 164V180" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d1-m)"/>
+
+<rect x="16" y="184" width="868" height="48" rx="8" class="caja"/>
+<text x="30" y="204" class="t t-xs t-b t-m">2 · TOKENIZAR: CORTAR EN PALABRAS (16 TOKENS)</text>
+<text x="30" y="222" class="t t-s t-mono">compro · aqui · hace · años · pero · cerraron · el · estacionamiento · por · las · obras · y · ya · no · puedo · venir</text>
+<path d="M60 234V250" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d1-m)"/>
+
+<rect x="16" y="254" width="868" height="48" rx="8" class="caja"/>
+<text x="30" y="274" class="t t-xs t-b t-m">3 · QUITAR PALABRAS VACÍAS (QUEDAN 7)</text>
+<text x="30" y="292" class="t t-s t-mono">compro · años · cerraron · estacionamiento · obras · puedo · venir      <tspan class="t-m">(se fueron aqui, hace, pero, el, por, las, y, ya, no)</tspan></text>
+<path d="M60 304V320" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d1-m)"/>
+
+<rect x="16" y="324" width="868" height="48" rx="8" class="caja"/>
+<text x="30" y="344" class="t t-xs t-b t-m">4 · RECORTAR A LA RAÍZ (OPCIONAL)</text>
+<text x="30" y="362" class="t t-s t-mono">compr · años · cerraron · estacionamient · obra · pued · venir      <tspan class="t-m">(«obras» y «obra» cuentan juntas)</tspan></text>
+<path d="M60 374V390" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d1-m)"/>
+
+<rect x="16" y="394" width="430" height="110" rx="8" class="c-tra"/>
+<text x="30" y="414" class="t t-xs t-b k-tra">5 · BOLSA DE PALABRAS: UNA FILA DE LA MATRIZ</text>
+<text x="30" y="440" class="t t-s t-mono">obras 1 · estacionamiento 1 · cerraron 1</text>
+<text x="30" y="458" class="t t-s t-mono">años 1 · compro 1 · puedo 1 · venir 1</text>
+<text x="30" y="484" class="t t-s">y 0 en las otras 78 columnas del vocabulario</text>
+<path d="M448 430H476" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d1-m)"/>
+<path d="M448 470H476" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d1-m)"/>
+<rect x="480" y="394" width="198" height="110" rx="8" class="c-tra"/>
+<text x="494" y="414" class="t t-xs t-b k-tra">TF-IDF</text>
+<text x="494" y="438" class="t t-s">«obras» pesa mucho:</text>
+<text x="494" y="456" class="t t-s">solo T07 la usa</text>
+<text x="494" y="486" class="t t-s t-m">→ qué distingue</text>
+<rect x="686" y="394" width="198" height="110" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="700" y="414" class="t t-xs t-b k-warm">SENTIMIENTO</text>
+<text x="700" y="438" class="t t-s">cerraron −1</text>
+<text x="700" y="456" class="t t-s">«no puedo» −1 → −2</text>
+<text x="700" y="486" class="t t-s t-m">→ negativa (ojo: usa el «no»)</text>
+</svg></div><figcaption><b>Del texto a los números, con la reseña 964.</b> De arriba abajo: el texto crudo de Gloria, normalizado, cortado en 16 tokens, sin palabras vacías (quedan 7) y recortado a la raíz. Abajo, la fila que esa reseña aporta a la matriz de la bolsa de palabras y los dos caminos que salen de ella: TF-IDF, para saber qué distingue a un documento, y sentimiento, para saber si es positivo o negativo. Fíjate en el detalle de la caja de sentimiento: usa el «no» que el paso 3 había quitado.</figcaption></figure></section>
+<section><h2>Limpieza: minúsculas, acentos, palabras vacías y raíces</h2><div class="prose"><p>Para un programa, «Obras», «obras» y «OBRAS» son tres palabras distintas, igual que «atención» y «atencion». Antes de contar hay que <b>normalizar</b> (<i>normalize</i>): llevar el texto a una forma común para que lo que significa lo mismo se cuente junto.</p><ol class="steps"><li><span><b>Minúsculas</b> (<i>lowercasing</i>). El paso más simple y casi siempre correcto.</span></li><li><span><b>Quitar tildes</b> (<i>accent stripping</i>). Las reseñas reales vienen con y sin tildes, según el teclado y el apuro. Quitarlas une «atención» con «atencion». En español hay que cuidar la eñe: «año» y «ano» no son la misma palabra. La técnica habitual descompone cada letra en su base y su marca (la norma Unicode NFD) y borra las marcas, salvo la virgulilla de la ñ.</span></li><li><span><b>Tokenizar</b> (<i>tokenize</i>). Una expresión regular como <code>[a-zñ0-9]+</code> corta el texto en secuencias de letras y números, y descarta comas, puntos y signos.</span></li><li><span><b>Quitar palabras vacías</b> (<i>stop words</i>). «De», «la», «el», «que», «y» son las palabras más frecuentes de cualquier texto en español y no dicen de qué trata. En las reseñas de la cadena, quitar una lista de 55 palabras vacías deja 5.469 de los 10.858 tokens: la mitad del texto era pegamento.</span></li><li><span><b>Recortar a la raíz</b> (<i>stemming</i>) o <b>lematizar</b> (<i>lemmatization</i>). «Fresco», «frescas» y «frescos» hablan de lo mismo. Un recortador de raíces corta terminaciones con reglas fijas («frescas» → «fresc»); el más usado para el español es el de Snowball. Un lematizador lleva cada palabra a su forma de diccionario («fueron» → «ser»), lo que es más preciso y bastante más caro.</span></li></ol></div><div class="analogia"><b>Imagínalo así</b><p>Limpiar texto es como preparar papas para un puré: lavarlas, pelarlas y cortarlas parejo. Si te saltas un paso, el puré queda con grumos. Si te pasas pelando, tiras parte de la papa. Con el texto pasa igual: cada paso de limpieza une lo que es igual, pero también puede borrar algo que importaba.</p></div><div class="prose"><p>Ese «algo que importaba» tiene nombre en este capítulo: la palabra «no». Está en todas las listas estándar de palabras vacías, y para contar temas sobra. Para medir sentimiento es esencial: «el pan no estaba fresco» sin el «no» dice lo contrario. <b>La limpieza depende de la pregunta</b>: no hay una limpieza correcta para todo, y conviene guardar el texto original junto al limpio.</p><p>Con cada paso el vocabulario se achica. Las reseñas de la cadena tienen 144 palabras distintas tal como vienen, 132 en minúsculas y sin tildes, 85 sin palabras vacías y 82 con la raíz recortada. Es un vocabulario chico porque las reseñas se repiten mucho; en textos reales, como correos o conversaciones de atención, el vocabulario llega a decenas de miles de palabras y la limpieza ahorra mucho más.</p></div></section>
+<section><h2>Bolsa de palabras y matriz de términos</h2><div class="prose"><p>Con el texto limpio, la idea central de la minería clásica es casi brutal: olvidar el orden de las palabras y quedarse con cuántas veces aparece cada una. Es la <b>bolsa de palabras</b> (<i>bag of words</i>): como si cada documento se recortara en palabras sueltas, se metiera en una bolsa y se contara lo que hay adentro.</p><p>Si cada documento es una bolsa, el corpus es una tabla: una fila por documento, una columna por palabra del vocabulario y, en cada celda, cuántas veces aparece. Se llama <b>matriz documento-término</b> (<i>document-term matrix</i>, DTM). Con un documento por tienda, la de Almacenes Ejemplo tiene 12 filas y 85 columnas. Es una tabla como cualquiera del curso: se puede sumar, filtrar, agrupar y graficar con pandas.</p><p>La mayoría de sus celdas son cero, porque cada documento usa una parte chica del vocabulario: en la matriz por tienda, el 40 %; en una matriz con una fila por reseña, más del 90 %. Por eso las bibliotecas la guardan como <b>matriz dispersa</b> (<i>sparse matrix</i>), que anota solo las celdas distintas de cero.</p></div><figure class="fig fig-esquema" id="08-diagrama-2"><div class="lienzo"><svg viewBox="0 0 870 474" style="min-width:760px" role="img" aria-label="Matriz de bolsa de palabras con cuatro tiendas y seis palabras, la frecuencia de documento y el idf de cada palabra, y la fila de TF-IDF de la tienda T07, donde obras pesa más y precios vale cero"><text x="16" y="28" class="t t-b">LA BOLSA DE PALABRAS Y EL PESO TF-IDF (6 DE LAS 85 COLUMNAS)</text><text x="16" y="48" class="t t-s t-m">filas: documentos (todas las reseñas de una tienda) · celdas: cuántas veces aparece la palabra</text><text x="209.0" y="88" text-anchor="middle" class="t t-s t-b t-mono ">precios</text><text x="327.0" y="88" text-anchor="middle" class="t t-s t-b t-mono ">amable</text><text x="445.0" y="88" text-anchor="middle" class="t t-s t-b t-mono ">fila</text><text x="563.0" y="88" text-anchor="middle" class="t t-s t-b t-mono k-tra">obras</text><text x="681.0" y="88" text-anchor="middle" class="t t-s t-b t-mono k-tra">estacionamiento</text><text x="799.0" y="88" text-anchor="middle" class="t t-s t-b t-mono k-tra">carro</text><rect x="16" y="100" width="842" height="26" rx="5" class="caja"/><text x="28" y="118" class="t t-s t-b">T01</text><text x="209.0" y="118" text-anchor="middle" class="t t-s t-mono">26</text><text x="327.0" y="118" text-anchor="middle" class="t t-s t-mono">27</text><text x="445.0" y="118" text-anchor="middle" class="t t-s t-mono">14</text><text x="563.0" y="118" text-anchor="middle" class="t t-s t-mono t-m">0</text><text x="681.0" y="118" text-anchor="middle" class="t t-s t-mono t-m">0</text><text x="799.0" y="118" text-anchor="middle" class="t t-s t-mono t-m">0</text><rect x="16" y="130" width="842" height="26" rx="5" class="caja"/><text x="28" y="148" class="t t-s t-b">T04</text><text x="209.0" y="148" text-anchor="middle" class="t t-s t-mono">37</text><text x="327.0" y="148" text-anchor="middle" class="t t-s t-mono">38</text><text x="445.0" y="148" text-anchor="middle" class="t t-s t-mono">14</text><text x="563.0" y="148" text-anchor="middle" class="t t-s t-mono t-m">0</text><text x="681.0" y="148" text-anchor="middle" class="t t-s t-mono t-m">0</text><text x="799.0" y="148" text-anchor="middle" class="t t-s t-mono t-m">0</text><rect x="16" y="160" width="842" height="26" rx="5" class="c-tra"/><text x="28" y="178" class="t t-s t-b">T07 Sur Puerto</text><text x="209.0" y="178" text-anchor="middle" class="t t-s t-mono">39</text><text x="327.0" y="178" text-anchor="middle" class="t t-s t-mono">32</text><text x="445.0" y="178" text-anchor="middle" class="t t-s t-mono">8</text><text x="563.0" y="178" text-anchor="middle" class="t t-s t-mono">57</text><text x="681.0" y="178" text-anchor="middle" class="t t-s t-mono">17</text><text x="799.0" y="178" text-anchor="middle" class="t t-s t-mono">15</text><rect x="16" y="190" width="842" height="26" rx="5" class="caja"/><text x="28" y="208" class="t t-s t-b">T09</text><text x="209.0" y="208" text-anchor="middle" class="t t-s t-mono">7</text><text x="327.0" y="208" text-anchor="middle" class="t t-s t-mono">5</text><text x="445.0" y="208" text-anchor="middle" class="t t-s t-mono">2</text><text x="563.0" y="208" text-anchor="middle" class="t t-s t-mono t-m">0</text><text x="681.0" y="208" text-anchor="middle" class="t t-s t-mono t-m">0</text><text x="799.0" y="208" text-anchor="middle" class="t t-s t-mono t-m">0</text><text x="28" y="234" class="t t-s t-m">… y 8 tiendas más</text><rect x="16" y="246" width="842" height="90" rx="6" class="caja"/><text x="28" y="266" class="t t-xs t-b t-m">DF (TIENDAS CON LA PALABRA)</text><text x="209.0" y="266" text-anchor="middle" class="t t-s t-mono">12</text><text x="327.0" y="266" text-anchor="middle" class="t t-s t-mono">12</text><text x="445.0" y="266" text-anchor="middle" class="t t-s t-mono">12</text><text x="563.0" y="266" text-anchor="middle" class="t t-s t-mono">1</text><text x="681.0" y="266" text-anchor="middle" class="t t-s t-mono">1</text><text x="799.0" y="266" text-anchor="middle" class="t t-s t-mono">1</text><text x="28" y="294" class="t t-xs t-b t-m">IDF CLÁSICO LN(12/DF)</text><text x="209.0" y="294" text-anchor="middle" class="t t-s t-mono">0,00</text><text x="327.0" y="294" text-anchor="middle" class="t t-s t-mono">0,00</text><text x="445.0" y="294" text-anchor="middle" class="t t-s t-mono">0,00</text><text x="563.0" y="294" text-anchor="middle" class="t t-s t-mono">2,48</text><text x="681.0" y="294" text-anchor="middle" class="t t-s t-mono">2,48</text><text x="799.0" y="294" text-anchor="middle" class="t t-s t-mono">2,48</text><text x="28" y="322" class="t t-xs t-b t-m">IDF SCIKIT-LEARN</text><text x="209.0" y="322" text-anchor="middle" class="t t-s t-mono">1,00</text><text x="327.0" y="322" text-anchor="middle" class="t t-s t-mono">1,00</text><text x="445.0" y="322" text-anchor="middle" class="t t-s t-mono">1,00</text><text x="563.0" y="322" text-anchor="middle" class="t t-s t-mono">2,87</text><text x="681.0" y="322" text-anchor="middle" class="t t-s t-mono">2,87</text><text x="799.0" y="322" text-anchor="middle" class="t t-s t-mono">2,87</text><rect x="16" y="354" width="842" height="34" rx="6" class="c-tra"/><text x="28" y="375" class="t t-xs t-b k-tra">TF-IDF DE T07</text><text x="209.0" y="376" text-anchor="middle" class="t t-s t-mono t-b t-m">0</text><text x="327.0" y="376" text-anchor="middle" class="t t-s t-mono t-b t-m">0</text><text x="445.0" y="376" text-anchor="middle" class="t t-s t-mono t-b t-m">0</text><text x="563.0" y="376" text-anchor="middle" class="t t-s t-mono t-b">0,74</text><text x="681.0" y="376" text-anchor="middle" class="t t-s t-mono t-b">0,22</text><text x="799.0" y="376" text-anchor="middle" class="t t-s t-mono t-b">0,19</text><text x="16" y="402" class="t t-s">«precios» aparece 39 veces en T07, pero está en las 12 tiendas: con el idf clásico vale 0.</text><text x="16" y="420" class="t t-s">«obras» aparece 57 veces y solo en T07: es la que más pesa.</text><text x="16" y="442" class="t t-s t-m">Fila con el idf clásico, normalizada a largo 1 sobre las 85 columnas. Con scikit-learn</text><text x="16" y="460" class="t t-s t-m">el orden no cambia: obras 0,63 · estacionamiento 0,19 · carro 0,17.</text></svg></div><figcaption><b>La bolsa de palabras y el peso TF-IDF.</b> Arriba, seis columnas de la matriz por tienda, con conteos reales: «precios» y «amable» aparecen en todas las tiendas; «obras», «estacionamiento» y «carro», solo en T07 Sur Puerto. Al medio, en cuántas tiendas aparece cada palabra (df) y su idf con las dos fórmulas del texto. Abajo, la fila de TF-IDF de T07: «precios», que aparece 39 veces, vale cero; «obras», que aparece 57 veces y en ninguna otra tienda, es la que más pesa. Lee la figura de arriba abajo: conteo, rareza, peso.</figcaption></figure><div class="prose"><p>Contar ya responde algo. Las palabras más frecuentes de las reseñas, sin palabras vacías, son «precios» (258), «personal» (242), «productos» (237) y «frutas» (227): de eso habla la gente en un supermercado. Pero si la pregunta es qué distingue a una tienda de las otras, la frecuencia sola no sirve, porque «precios» encabeza la lista de casi todas.</p></div></section>
+<section><h2>TF-IDF: palabras frecuentes aquí y raras en el resto</h2><div class="prose"><p><b>TF-IDF</b> (<i>term frequency–inverse document frequency</i>, frecuencia del término por frecuencia inversa en los documentos) le da a cada palabra de un documento un peso que combina dos ideas:</p><ul><li><b>TF</b> (<i>term frequency</i>, frecuencia del término): cuántas veces aparece la palabra en este documento. Más veces, más peso.</li><li><b>IDF</b> (<i>inverse document frequency</i>, frecuencia inversa en los documentos): qué tan rara es la palabra en el corpus. Si aparece en todos los documentos, no distingue a ninguno y pesa poco; si aparece en pocos, pesa mucho.</li></ul></div><div class="analogia"><b>Imagínalo así</b><p>En una reunión de ex compañeros de colegio, que alguien diga «me acuerdo del colegio» no dice nada de esa persona: lo dicen todos. Que alguien diga tres veces «mi velero» sí dice mucho. TF es cuántas veces lo dijo; IDF, qué tan pocos más lo dijeron. Una palabra pesa cuando es frecuente aquí y rara en el resto.</p></div><div class="prose"><p>La fórmula clásica multiplica las dos: tfidf(t, d) = tf(t, d) × log(N / df(t)), donde N es el número de documentos y df(t), en cuántos de ellos aparece la palabra t. Con 12 tiendas, una palabra que está en las 12 tiene idf = log(12/12) = 0 y desaparece; una que está en una sola tiene idf = log(12) ≈ 2,48. Después se <b>normaliza</b> cada fila para que tenga largo 1, de modo que una tienda con más reseñas no gane solo por tener más texto.</p><p>Las bibliotecas usan variantes. scikit-learn, por omisión, <b>suaviza</b> el idf: ln((1 + N) / (1 + df)) + 1. Así ninguna palabra vale cero: las comunes pesan 1 y las raras, hasta 2,87. El orden de las palabras más distintivas casi nunca cambia; lo que cambia es si las palabras comunes desaparecen o solo bajan.</p><p>En T07 Sur Puerto, con cualquiera de las dos fórmulas, las palabras con más peso son «obras», «avenida», «estacionamiento», «entrada» y «carro». Ninguna otra tienda tiene un tema propio: sus listas son las palabras comunes de la cadena, en distinto orden. TF-IDF no dice que algo ande mal en T07; dice que en T07 se habla de algo que en ningún otro lado aparece, y eso basta para ir a mirar.</p></div><div class="lab" id="08-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>TF-IDF de las reseñas de la cadena: elige un documento y mira qué palabras lo distinguen</h3></div><p class="hint">Las 1.112 reseñas, agrupadas en un documento por tienda o por número de estrellas. Elige un documento y compara tres pesos: la frecuencia sola, el TF-IDF clásico y el de scikit-learn. Activa y desactiva la limpieza para ver cómo cambia el vocabulario, pasa a bigramas y cambia a la vista de nube. Empieza por T07 y después prueba una tienda cualquiera del Norte.</p><style>
+[id="08-lab-1"] .c8l1-chk{display:flex;flex-wrap:wrap;gap:6px 16px;font:500 .85rem var(--f-display)}
+[id="08-lab-1"] .c8l1-chk label{display:flex;gap:6px;align-items:center}
+[id="08-lab-1"] .c8l1-barras{display:grid;gap:4px}
+[id="08-lab-1"] .c8l1-fila{display:grid;grid-template-columns:minmax(6.5em,9em) 1fr 4.2em;gap:8px;align-items:center;font:500 .8rem var(--f-display)}
+[id="08-lab-1"] .c8l1-fila span:first-child{font-family:var(--f-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[id="08-lab-1"] .c8l1-fila i{display:block;height:14px;border-radius:4px;background:var(--c-tra);transition:width .35s}
+[id="08-lab-1"] .c8l1-fila i.comun{background:var(--muted);opacity:.55}
+[id="08-lab-1"] .c8l1-fila span:last-child{font-family:var(--f-mono);text-align:right;color:var(--muted)}
+[id="08-lab-1"] .c8l1-nube{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;justify-content:center;min-height:150px;padding:12px;background:var(--paper);border-radius:10px;line-height:1.1}
+[id="08-lab-1"] .c8l1-nube span{font-family:var(--f-display);font-weight:700;color:var(--c-tra)}
+[id="08-lab-1"] .c8l1-nube span.comun{color:var(--muted);font-weight:500}
+[id="08-lab-1"] .c8l1-ej{font:.8rem/1.5 var(--f-mono);background:var(--paper);border-radius:8px;padding:8px 10px;overflow-wrap:anywhere}
+[id="08-lab-1"] .c8l1-ej s{color:var(--muted)}
+[id="08-lab-1"] .c8l1-rot{font:700 .68rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){[id="08-lab-1"] .c8l1-fila i{transition:none}}
+</style>
+<div class="opciones">
+  <label>Cómo se arman los documentos
+    <select id="c8l1-g">
+      <option value="t">Un documento por tienda (12)</option>
+      <option value="e">Un documento por estrellas (5)</option>
+    </select></label>
+  <label>Documento
+    <select id="c8l1-d"></select></label>
+  <label>Peso de cada palabra
+    <select id="c8l1-w">
+      <option value="sk">TF-IDF de scikit-learn (suavizado)</option>
+      <option value="cl">TF-IDF clásico: tf × log(N / df)</option>
+      <option value="tf">Solo frecuencia (bolsa de palabras)</option>
+    </select></label>
+  <label>Vista
+    <select id="c8l1-v">
+      <option value="b">Barras</option>
+      <option value="n">Nube de palabras</option>
+    </select></label>
+</div>
+<div class="c8l1-chk">
+  <label><input type="checkbox" id="c8l1-sw" checked> Quitar palabras vacías</label>
+  <label><input type="checkbox" id="c8l1-st"> Recortar a la raíz</label>
+  <label><input type="checkbox" id="c8l1-bi"> Pares de palabras (bigramas)</label>
+</div>
+<div class="c8l1-rot">Una reseña de ese documento, después de la limpieza</div>
+<div class="c8l1-ej" id="c8l1-ej"></div>
+<div class="c8l1-rot" id="c8l1-tit"></div>
+<div id="c8l1-res"></div>
+<div class="readout texto" id="c8l1-out" aria-live="polite"></div></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Bolsa de palabras, TF-IDF, bigramas y sentimiento de las reseñas</h3></div><p>Vas a usar <b>scikit-learn</b>, la biblioteca de aprendizaje automático de Python, solo por sus herramientas de texto: <code>CountVectorizer</code> arma la bolsa de palabras y <code>TfidfVectorizer</code>, la matriz TF-IDF. Necesitas <code>limpio/resenas.parquet</code> del capítulo 03 y el entorno del capítulo 02. scikit-learn ocupa unos 40 MB con sus dependencias.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install scikit-learn</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install scikit-learn</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Guarda este script como <code>resenas.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia"><pre><code>"""Minería de texto clásica sobre las reseñas de Almacenes Ejemplo."""
+import re
+import unicodedata
+from pathlib import Path
+
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+resenas = pd.read_parquet(Path.home() / "datos-cadena" / "limpio" / "resenas.parquet")
+VACIAS = set("de la el los las que y a en por para con su sus lo no se un una es esta estaba era fue muy "
+             "pero me mi al del como mas ya hay habia otra otro uno todo aqui asi cuando cada solo nada "
+             "donde le les yo tengo hace ser estan estaban fueron".split())
+
+def normalizar(texto):
+    """Minúsculas y sin tildes, conservando la ñ."""
+    t = unicodedata.normalize("NFD", texto.lower())
+    t = "".join(c for c in t if unicodedata.category(c) != "Mn" or c == "\u0303")
+    return unicodedata.normalize("NFC", t)
+
+# 1. Bolsa de palabras: cuántas palabras distintas quedan con cada paso de limpieza
+for nombre, vec in [("en bruto", CountVectorizer(lowercase=False, token_pattern=r"\w+")),
+                    ("normalizado", CountVectorizer(preprocessor=normalizar, token_pattern=r"[a-zñ0-9]+")),
+                    ("sin palabras vacías", CountVectorizer(preprocessor=normalizar, token_pattern=r"[a-zñ0-9]+",
+                                                            stop_words=sorted(VACIAS)))]:
+    X = vec.fit_transform(resenas["texto"])
+    print(f"{nombre:&gt;20}: {X.shape[1]:&gt;3} palabras distintas, {X.sum():&gt;6} tokens")
+
+# 2. TF-IDF con un documento por tienda: las tres palabras que distinguen a cada una
+docs = resenas.groupby("tienda_id")["texto"].apply(" ".join)
+tfidf = TfidfVectorizer(preprocessor=normalizar, token_pattern=r"[a-zñ0-9]+", stop_words=sorted(VACIAS))
+pesos = pd.DataFrame(tfidf.fit_transform(docs).toarray(), index=docs.index,
+                     columns=tfidf.get_feature_names_out())
+print("\nLas tres palabras con más peso TF-IDF en cada tienda:")
+for tienda, fila in pesos.iterrows():
+    top = fila.nlargest(3)
+    print(f"  {tienda}: " + ", ".join(f"{p} ({v:.2f})" for p, v in top.items()))
+
+# 3. Bigramas de T07 antes y después del cierre del estacionamiento (3 de agosto de 2026)
+t07 = resenas[resenas["tienda_id"] == "T07"]
+for nombre, parte in [("antes", t07[t07["fecha_hora"] &lt; "2026-08-03"]),
+                      ("después", t07[t07["fecha_hora"] &gt;= "2026-08-03"])]:
+    bi = CountVectorizer(preprocessor=normalizar, token_pattern=r"[a-zñ0-9]+", ngram_range=(2, 2))
+    X = bi.fit_transform(parte["texto"])
+    conteo = pd.Series(X.sum(axis=0).A1, index=bi.get_feature_names_out()).nlargest(4)
+    print(f"\nT07 {nombre} ({len(parte)} reseñas):", ", ".join(f"{b} ({n})" for b, n in conteo.items()))
+
+# 4. Sentimiento con un diccionario mínimo, comparado con las estrellas
+LEX = {"amable": 1, "bien": 1, "buena": 1, "frescas": 1, "fresco": 1, "limpia": 1, "rapidas": 1,
+       "excelente": 2, "genial": 2, "maravilla": 2, "encanta": 2, "buenisimo": 2, "gracias": 1,
+       "faltaban": -1, "golpeadas": -1, "eterna": -2, "desordenada": -1, "subieron": -1}
+
+def puntaje(texto):
+    ws = re.findall(r"[a-zñ0-9]+", normalizar(texto))
+    total = 0
+    for i, w in enumerate(ws):
+        v = LEX.get(w, 0)
+        if v and "no" in ws[max(0, i - 3):i]:
+            v = -v
+        total += v
+    return total
+
+r = resenas.dropna(subset=["estrellas"]).copy()
+r["puntaje"] = r["texto"].map(puntaje)
+r["segun_estrellas"] = pd.cut(r["estrellas"], [0, 2, 3, 5], labels=["negativa", "mixta", "positiva"])
+r["segun_diccionario"] = pd.cut(r["puntaje"], [-99, -0.5, 0.5, 99], labels=["negativa", "neutra", "positiva"])
+print("\n", pd.crosstab(r["segun_estrellas"], r["segun_diccionario"]), sep="")
+print("\nLas que más engañan (1 estrella, puntaje más alto):")
+for t in r[r["estrellas"] == 1].nlargest(3, "puntaje")["texto"]:
+    print("  ·", t)</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python resenas.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 resenas.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Agrega <code>"obras": -1, "tapan": -1, "cerraron": -1</code> al diccionario <code>LEX</code>, vuelve a correrlo y compara la fila «negativa» de la tabla final.</span></li></ol><p><b>Qué observar:</b> el vocabulario baja de 144 a 132 y a 85 palabras, y los tokens de 10.858 a 5.469. En el TF-IDF, T07 tiene «obras (0,63)», «avenida (0,33)» y «entrada (0,19)»; las demás tiendas repiten «precios», «personal» y «frutas». Los bigramas de T07 cambian de tema el 3 de agosto: antes, «las frutas» y «el personal»; después, «las obras» y «la avenida». En la tabla de sentimiento, 38 reseñas negativas salen positivas (casi todas irónicas) y 37 salen neutras. Con las tres palabras nuevas, buena parte de esas neutras pasa a negativa: un diccionario mejora cuando se le enseña el vocabulario del negocio.</p></div><div class="ml"><b>En la práctica</b><p><b>Lo que Mariana le mostró a Verónica.</b> No le llevó una nube de palabras de toda la cadena: «precios, personal, productos» no le decía nada nuevo. Le llevó una tabla con las tres palabras de mayor TF-IDF por tienda y una línea marcada: T07, «obras, avenida, estacionamiento». Después contó las reseñas de T07 que mencionan obras o estacionamiento: ninguna antes de agosto, 60 de 65 desde el 3 de agosto. Verónica pidió que ese conteo semanal quedara en el tablero de mercadeo, y le reenvió la tabla a Hernán Ibáñez junto con lo que el capítulo 07 había encontrado sobre los clientes de T07.</p></div></section>
+<section><h2>Nubes de palabras y n-gramas</h2><div class="prose"><p>La <b>nube de palabras</b> (<i>word cloud</i>) es el gráfico más reconocible de la minería de texto: las palabras de un documento, con un tamaño proporcional a su frecuencia o a su peso. Sirve para una primera mirada y para una portada, pero tiene los problemas que el capítulo 06 contó de los gráficos de área: el ojo compara mal tamaños de letra, las palabras largas parecen más importantes que las cortas y la posición no significa nada. Para comparar, unas barras ordenadas dicen lo mismo con más precisión. El lab de este capítulo tiene las dos vistas: la nube dibujada con TF-IDF es bastante más informativa que la dibujada con conteos.</p><p>La bolsa de palabras pierde el orden, y con él frases enteras. Una forma barata de recuperar parte del orden es contar <b>n-gramas</b> (<i>n-grams</i>): secuencias de n palabras seguidas. Un <b>bigrama</b> (<i>bigram</i>) es un par: «no estaba», «muy amable», «las obras». Un trigrama, un trío: «valen la pena». Se agregan como columnas de la misma matriz, y la bolsa pasa a contar frases cortas además de palabras.</p></div><div class="analogia"><b>Imagínalo así</b><p>Si recortas una carta en palabras sueltas, «no» y «volveré» quedan en la bolsa, pero nadie sabe si la carta decía «no volveré» o «volveré, no lo dudes». Si en cambio la recortas de a dos palabras, el trozo «no volveré» sobrevive. Los n-gramas son tijeras que cortan más ancho.</p></div><div class="prose"><p>En las reseñas, los bigramas más frecuentes son artículos con su sustantivo («los precios», «el personal»), pero los que empiezan con «no» guardan algo que las palabras sueltas perdían: «no sabía» aparece 69 veces y «no estaba», 64. Por eso los n-gramas se calculan antes de quitar las palabras vacías. El costo es el tamaño: el vocabulario de bigramas es varias veces el de palabras y la matriz se vuelve todavía más dispersa.</p></div></section>
+<section><h2>Sentimiento con diccionarios y sus límites</h2><div class="prose"><p>El <b>análisis de sentimiento</b> (<i>sentiment analysis</i>) busca decir si un texto es positivo, negativo o neutro. La forma clásica usa un <b>diccionario de sentimiento</b> (<i>sentiment lexicon</i>): una lista de palabras con un valor, como «excelente» +2, «amable» +1, «golpeadas» −1, «eterna» −2. El puntaje de un texto es la suma de los valores de sus palabras; si es mayor que cero, el texto es positivo.</p><p>Sumar palabras sueltas falla de formas previsibles, y cada falla tiene su regla:</p><ul><li><b>Negación</b>: «no estaba fresco» suma «fresco». La regla: si «no», «sin» o «nunca» aparecen poco antes de una palabra con valor, el signo se invierte.</li><li><b>Intensificadores</b>: «muy amable» es más que «amable». La regla: «muy» o «mucho» multiplican el valor, por ejemplo por 1,5.</li><li><b>Expresiones</b>: «valen la pena» contiene «pena», que en el diccionario resta. La regla: buscar primero expresiones de varias palabras con su propio valor.</li></ul><p>Diccionarios de este tipo existen para muchos idiomas, de uso libre, con miles de palabras; el de la práctica y el del lab son mínimos y están hechos para estas reseñas. Sobre las 930 reseñas de la cadena con 1, 2, 4 o 5 estrellas, el diccionario del lab acierta el signo en el 79,4 % con palabras sueltas, y en el 95,3 % con las tres reglas. Parece casi resuelto. Lo interesante son los errores que quedan.</p></div><figure class="fig fig-flujo" id="08-diagrama-3"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:760px" role="img" aria-label="Cómo puntúa un diccionario de sentimiento: busca cada palabra, aplica reglas de negación, intensificadores y expresiones, suma y decide. A la derecha, tres reseñas donde falla: ironía, una palabra que el diccionario no conoce y la negación. Abajo, el acierto sobre las reseñas de la cadena sube de 79 a 95 por ciento con cada regla">
+<defs>
+<marker id="c8d3-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="k-tra"/></marker>
+</defs>
+<text x="16" y="28" class="t t-b">SENTIMIENTO CON DICCIONARIO: SUMAR PALABRAS</text>
+
+<rect x="16" y="44" width="420" height="40" rx="8" class="caja"/>
+<text x="28" y="69" class="t t-s">«La atención fue <tspan class="t-b">muy amable</tspan>, pero los precios <tspan class="t-b">subieron mucho</tspan>.»</text>
+<path d="M60 86V100" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d3-m)"/>
+<rect x="16" y="104" width="420" height="56" rx="8" class="c-tra"/>
+<text x="28" y="124" class="t t-xs t-b k-tra">1 · BUSCAR CADA PALABRA EN EL DICCIONARIO</text>
+<text x="28" y="146" class="t t-s t-mono">amable +1 · subieron −1 · el resto vale 0</text>
+<path d="M60 162V176" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d3-m)"/>
+<rect x="16" y="180" width="420" height="74" rx="8" class="c-tra"/>
+<text x="28" y="200" class="t t-xs t-b k-tra">2 · APLICAR REGLAS</text>
+<text x="28" y="222" class="t t-s">«muy» amable → +1,5 · subieron «mucho» → −1,5</text>
+<text x="28" y="242" class="t t-s t-m">negación: «no», «sin» invierten · expresiones: «valen la pena»</text>
+<path d="M60 256V270" class="ln s-tra" style="stroke-width:2" marker-end="url(#c8d3-m)"/>
+<rect x="16" y="274" width="420" height="50" rx="8" class="caja"/>
+<text x="28" y="294" class="t t-xs t-b t-m">3 · SUMAR Y DECIDIR</text>
+<text x="28" y="314" class="t t-s">+1,5 − 1,5 = 0 → neutra (tenía 3 estrellas: acierta)</text>
+
+<text x="464" y="58" class="t t-xs t-b t-m">DONDE SE EQUIVOCA</text>
+<rect x="464" y="68" width="420" height="78" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="476" y="88" class="t t-xs t-b k-warm">IRONÍA · 1 ESTRELLA, SALE POSITIVA</text>
+<text x="476" y="108" class="t t-s">«Excelente servicio: solo 40 minutos en la fila.»</text>
+<text x="476" y="128" class="t t-s t-m">excelente +2 → +2: las palabras dicen lo contrario de la intención</text>
+<rect x="464" y="156" width="420" height="78" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="476" y="176" class="t t-xs t-b k-warm">PALABRA DEL NEGOCIO · 1 ESTRELLA, SALE NEUTRA</text>
+<text x="476" y="196" class="t t-s">«Las obras de la avenida tapan la entrada.»</text>
+<text x="476" y="216" class="t t-s t-m">«obras» no está en ningún diccionario general; solo «tapan» resta</text>
+<rect x="464" y="244" width="420" height="80" rx="8" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="476" y="264" class="t t-xs t-b k-warm">NEGACIÓN SIN REGLA · SE LEE AL REVÉS</text>
+<text x="476" y="284" class="t t-s">«El pan no estaba fresco.»</text>
+<text x="476" y="304" class="t t-s t-m">fresco +1 → +1, salvo que «no» invierta el signo</text>
+
+<rect x="16" y="340" width="868" height="116" rx="10" class="caja"/>
+<text x="30" y="362" class="t t-xs t-b t-m">ACIERTO EN LAS 930 RESEÑAS CON 1-2 O 4-5 ESTRELLAS (SIGNO CORRECTO)</text>
+<text x="30" y="388" class="t t-s">solo palabras</text>
+<rect x="250" y="377" width="397" height="14" rx="3" class="c-tra"/><text x="656" y="389" class="t t-s t-mono">79,4 %</text>
+<text x="30" y="408" class="t t-s">+ negación</text>
+<rect x="250" y="397" width="414" height="14" rx="3" class="c-tra"/><text x="673" y="409" class="t t-s t-mono">82,8 %</text>
+<text x="30" y="428" class="t t-s">+ intensificadores</text>
+<rect x="250" y="417" width="425" height="14" rx="3" class="c-tra"/><text x="684" y="429" class="t t-s t-mono">84,9 %</text>
+<text x="30" y="448" class="t t-s">+ expresiones</text>
+<rect x="250" y="437" width="477" height="14" rx="3" class="c-tra" style="fill:var(--c-tra)"/><text x="736" y="449" class="t t-s t-mono t-b">95,3 %</text>
+</svg></div><figcaption><b>Sentimiento con diccionario: sumar palabras.</b> A la izquierda, el recorrido de una reseña de 3 estrellas: buscar cada palabra, aplicar las reglas y sumar; aquí da cero y acierta. A la derecha, tres formas de equivocarse: la ironía, una palabra del negocio que ningún diccionario conoce y la negación sin su regla. Abajo, el acierto sobre las reseñas de la cadena con cada regla agregada. Lee las cajas naranjas como el límite del método, no como errores de programación.</figcaption></figure><div class="prose"><p>El primer error que queda es la <b>ironía</b> (<i>irony</i>). «Excelente servicio: solo 40 minutos en la fila» suma +2 con una estrella. «Genial, otra vez sin leche» suma +1. Alrededor del 3,5 % de las reseñas de la cadena son irónicas, y casi todas engañan al diccionario: usan palabras positivas para quejarse. Detectarlas exige entender la intención, y eso está fuera del alcance de contar palabras.</p><p>El segundo es el <b>vocabulario del dominio</b> (<i>domain vocabulary</i>). «Las obras de la avenida tapan la entrada» es una queja, pero «obras», «avenida» y «entrada» no están en ningún diccionario general: no son buenas ni malas fuera de contexto. Varias reseñas sobre el estacionamiento de T07 salen neutras, justo las que más le importan a la cadena. Un problema nuevo trae palabras nuevas, y un diccionario fijo no las ve.</p><p>El tercero, más sutil, es que las estrellas tampoco son la verdad. Una reseña de 3 estrellas como «la atención fue muy amable, pero los precios subieron mucho» es mixta de verdad; el diccionario da cero y se cuenta como acierto, pero otro con «pero» que pese más la segunda parte daría negativa y también tendría razón. Medir sentimiento es medir algo que las personas tampoco ponen de acuerdo del todo.</p></div><div class="lab" id="08-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Sentimiento con diccionario: escribe una reseña con ironía y mira cómo se equivoca</h3></div><p class="hint">Elige una reseña o escribe la tuya y mira cómo la lee el diccionario: cada palabra con su valor, las reglas que se aplican y la suma final. Activa y desactiva la negación, los intensificadores y las expresiones, y mira cómo cambia el acierto sobre todas las reseñas con estrellas. Después escribe una queja irónica que el diccionario lea como elogio.</p><style>
+[id="08-lab-2"] .c8l2-txt{width:100%;box-sizing:border-box;min-height:4.5em;font:.9rem/1.45 var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);resize:vertical}
+[id="08-lab-2"] .c8l2-chk{display:flex;flex-wrap:wrap;gap:6px 16px;font:500 .85rem var(--f-display)}
+[id="08-lab-2"] .c8l2-chk label{display:flex;gap:6px;align-items:center}
+[id="08-lab-2"] .c8l2-tok{display:flex;flex-wrap:wrap;gap:4px;font:.82rem var(--f-mono)}
+[id="08-lab-2"] .c8l2-tok span{padding:2px 6px;border-radius:5px;border:1px solid var(--line);background:var(--card)}
+[id="08-lab-2"] .c8l2-tok span.pos{border-color:var(--good);background:var(--good-soft)}
+[id="08-lab-2"] .c8l2-tok span.neg{border-color:var(--warm);background:var(--warm-soft)}
+[id="08-lab-2"] .c8l2-tok span.mod{border-style:dashed;border-color:var(--c-tra)}
+[id="08-lab-2"] .c8l2-tok sup{font-size:.68rem;margin-left:2px}
+[id="08-lab-2"] .c8l2-mat{overflow-x:auto}
+[id="08-lab-2"] .c8l2-mat table{border-collapse:collapse;font-size:.8rem}
+[id="08-lab-2"] .c8l2-mat th,[id="08-lab-2"] .c8l2-mat td{padding:4px 8px;border:1px solid var(--line);text-align:center}
+[id="08-lab-2"] .c8l2-mat td.ok{background:var(--good-soft)}
+[id="08-lab-2"] .c8l2-rot{font:700 .68rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+</style>
+<div class="opciones">
+  <label>Empieza con una reseña
+    <select id="c8l2-ej">
+      <option value="La atención fue muy amable. Las frutas estaban frescas.">Positiva (5 estrellas)</option>
+      <option value="La fila de la caja era eterna. Faltaban productos básicos.">Negativa (1 estrella)</option>
+      <option value="El pan no estaba fresco.">Con negación</option>
+      <option value="La atención fue muy amable, pero los precios subieron mucho.">Mixta, con «pero» (3 estrellas)</option>
+      <option value="Excelente servicio: solo 40 minutos en la fila. Volveré cuando tenga el día libre.">Irónica (1 estrella)</option>
+      <option value="Genial, otra vez sin leche. Muy buena estrategia para que uno camine más.">Irónica con «sin» (1 estrella)</option>
+      <option value="Compro aquí hace años, pero cerraron el estacionamiento por las obras y ya no puedo venir.">La de Gloria Méndez (1 estrella)</option>
+      <option value="Las ofertas valen la pena. Los precios están bien.">«Valen la pena» (4 estrellas)</option>
+    </select></label>
+</div>
+<textarea id="c8l2-txt" class="c8l2-txt" spellcheck="false" aria-label="Reseña que puedes editar"></textarea>
+<div class="c8l2-chk">
+  <label><input type="checkbox" id="c8l2-n" checked> Negación («no», «sin», «nunca» invierten)</label>
+  <label><input type="checkbox" id="c8l2-i" checked> Intensificadores («muy», «mucho» × 1,5)</label>
+  <label><input type="checkbox" id="c8l2-f" checked> Expresiones de varias palabras</label>
+</div>
+<div class="c8l2-rot">Cómo la lee el diccionario (verde suma, naranja resta, punteado: expresión)</div>
+<div class="c8l2-tok" id="c8l2-tok" aria-live="polite"></div>
+<div class="readout texto" id="c8l2-out" aria-live="polite"></div>
+<div class="c8l2-rot">El mismo diccionario sobre las reseñas de la cadena que tienen estrellas (filas: estrellas · columnas: lo que dice el diccionario)</div>
+<div class="c8l2-mat" id="c8l2-mat"></div>
+<div class="readout texto" id="c8l2-out2" aria-live="polite"></div></div><div class="caso"><b>Un caso real</b><p><b>El spam y la bolsa de palabras.</b> A comienzos de los años 2000 el correo no deseado amenazaba con volver inútil el correo electrónico. Uno de los enfoques que mejor funcionó, popularizado por un ensayo de 2002 de Paul Graham, no entendía ningún mensaje: contaba palabras. Con miles de correos ya marcados como spam o como legítimos, calculaba qué tan probable era cada palabra en cada grupo y combinaba esas probabilidades para un correo nuevo. Era bolsa de palabras con un clasificador simple, y bajó el spam que llegaba a la bandeja a una fracción. Los filtros actuales usan modelos mucho más complejos, pero la idea de convertir el texto en conteos sigue debajo de muchos de ellos.</p></div><div class="lab" id="08-lab-3"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Minería de texto con pandas y scikit-learn, en la página</h3></div><p class="hint">Las mismas 1.112 reseñas con pandas en tu navegador: tokenizar y limpiar, armar la matriz tienda × palabra, calcular TF-IDF a mano y con scikit-learn, contar bigramas y comparar un diccionario de sentimiento con las estrellas. Antes de cargar Python ves el resultado guardado. El ejemplo de scikit-learn descarga unos 19 MB más la primera vez que lo ejecutas.</p><style>
+[id="08-lab-3"] .c8l3-cod{width:100%;box-sizing:border-box;min-height:13em;font:.82rem/1.45 var(--f-mono);padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);resize:vertical;tab-size:4}
+[id="08-lab-3"] .c8l3-sal{font:.8rem var(--f-mono);background:var(--paper);border-radius:8px;padding:8px 10px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+[id="08-lab-3"] .c8l3-sal.err{color:var(--warm)}
+[id="08-lab-3"] .c8l3-est{font:500 .85rem var(--f-display);color:var(--muted);margin:0}
+[id="08-lab-3"] .c8l3-est.ok{color:var(--good)} [id="08-lab-3"] .c8l3-est.warn{color:var(--warm)}
+[id="08-lab-3"] .c8l3-tab{overflow-x:auto}
+[id="08-lab-3"] .c8l3-tab td,[id="08-lab-3"] .c8l3-tab th{font-size:.8rem;padding:4px 8px;white-space:nowrap}
+</style>
+<div class="opciones"><label>Ejemplo
+  <select id="c8l3-ej"><option value="0">Del texto a los tokens</option><option value="1">Bolsa de palabras: la matriz tienda × palabra</option><option value="2">TF-IDF a mano, con la fórmula clásica</option><option value="3">TF-IDF con scikit-learn</option><option value="4">Bigramas: las palabras que van juntas</option><option value="5">Sentimiento con un diccionario mínimo</option></select></label></div>
+<textarea id="c8l3-cod" class="c8l3-cod" spellcheck="false" aria-label="Código de Python que puedes editar"></textarea>
+<div class="btns">
+  <button type="button" class="primary" id="c8l3-cargar">Cargar Python (unos 20 MB · tarda unos segundos)</button>
+  <button type="button" id="c8l3-correr" disabled>Ejecutar (Ctrl+Enter)</button>
+</div>
+<p class="c8l3-est" id="c8l3-est" aria-live="polite">Python sin cargar · mientras tanto ves el resultado guardado</p>
+<pre class="c8l3-sal" id="c8l3-sal" hidden></pre>
+<div class="c8l3-tab" id="c8l3-tab"></div>
+<div class="readout texto" id="c8l3-out" aria-live="polite"></div></div></section>
+<section><h2>Hasta dónde llega lo clásico</h2><div class="prose"><p>Bolsa de palabras, TF-IDF y diccionarios tienen virtudes que no hay que despreciar: son rápidos, corren en cualquier computador, cada número se puede explicar y no necesitan datos etiquetados. Para buscar temas que distinguen a un grupo, contar menciones de algo en el tiempo o filtrar textos por palabras clave siguen siendo la primera herramienta, y muchas veces la última.</p><p>Sus límites también son claros, y todos vienen de la misma decisión: tratar cada palabra como una columna independiente.</p></div><figure class="fig fig-comparacion" id="08-diagrama-4"><div class="lienzo"><svg viewBox="0 0 900 342" style="min-width:720px" role="img" aria-label="Límites de la bolsa de palabras: dos frases con sentido opuesto producen la misma bolsa, y dos palabras con el mismo sentido, carro y auto, quedan en columnas distintas; los embeddings resuelven las dos cosas">
+<defs>
+<marker id="c8d4-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+</defs>
+<text x="16" y="28" class="t t-b">LO QUE LA BOLSA DE PALABRAS NO VE</text>
+
+<rect x="16" y="44" width="430" height="200" rx="10" class="caja"/>
+<text x="30" y="66" class="t t-xs t-b t-m">1 · EL ORDEN SE PIERDE</text>
+<rect x="30" y="78" width="190" height="32" rx="6" style="fill:var(--good-soft);stroke:var(--good)"/>
+<text x="40" y="99" class="t t-s">«No es malo, es bueno.»</text>
+<rect x="240" y="78" width="190" height="32" rx="6" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="250" y="99" class="t t-s">«No es bueno, es malo.»</text>
+<path d="M125 114L215 150" class="ln" marker-end="url(#c8d4-m)"/>
+<path d="M335 114L245 150" class="ln" marker-end="url(#c8d4-m)"/>
+<rect x="110" y="154" width="240" height="40" rx="6" class="c-tra"/>
+<text x="230" y="179" text-anchor="middle" class="t t-s t-mono">no 1 · es 2 · bueno 1 · malo 1</text>
+<text x="30" y="216" class="t t-s">Sentido opuesto, la misma fila de la matriz.</text>
+<text x="30" y="234" class="t t-s t-m">Los bigramas ayudan un poco: «no es» no alcanza.</text>
+
+<rect x="460" y="44" width="424" height="200" rx="10" class="caja"/>
+<text x="474" y="66" class="t t-xs t-b t-m">2 · LOS SINÓNIMOS NO SE TOCAN</text>
+<rect x="474" y="80" width="396" height="66" rx="6" class="c-tra"/>
+<text x="488" y="100" class="t t-s t-mono" xml:space="preserve" style="white-space:pre">        carro  auto  coche  estacionar</text>
+<text x="488" y="120" class="t t-s t-mono" xml:space="preserve" style="white-space:pre">reseña A   1     0      0       1</text>
+<text x="488" y="138" class="t t-s t-mono" xml:space="preserve" style="white-space:pre">reseña B   0     1      0       1</text>
+<text x="474" y="172" class="t t-s">«carro», «auto» y «coche» son tres columnas sin relación:</text>
+<text x="474" y="190" class="t t-s">para la matriz se parecen tanto como «carro» y «leche».</text>
+<text x="474" y="216" class="t t-s t-m">Un diccionario de sentimiento tiene el mismo problema:</text>
+<text x="474" y="234" class="t t-s t-m">conoce «excelente», no «de lujo».</text>
+
+<rect x="16" y="256" width="868" height="74" rx="10" class="d-inet"/>
+<text x="30" y="278" class="t t-xs t-b k-inet">LO MODERNO (EN MODELOS DE IA)</text>
+<text x="30" y="300" class="t t-s">Los embeddings ponen cada palabra o frase en un espacio donde «carro» queda cerca de «auto», y los modelos de lenguaje</text>
+<text x="30" y="318" class="t t-s">leen el orden completo. Cuestan más y se explican peor: lo clásico sigue siendo la primera herramienta.</text>
+</svg></div><figcaption><b>Lo que la bolsa de palabras no ve.</b> A la izquierda, dos frases con sentido opuesto que producen exactamente la misma bolsa: el orden se perdió. A la derecha, «carro», «auto» y «coche», tres columnas sin ninguna relación en la matriz aunque signifiquen lo mismo. Abajo, lo que hacen los métodos modernos con esos dos problemas. Lee cada recuadro como una pregunta que lo clásico no puede responder.</figcaption></figure><div class="prose"><ul><li><b>El orden importa.</b> «No es malo, es bueno» y «no es bueno, es malo» tienen la misma bolsa. Los n-gramas recuperan un poco, a costa de un vocabulario enorme.</li><li><b>Los sinónimos no se tocan.</b> Para la matriz, «carro» se parece tanto a «auto» como a «leche». Un cliente que escribe «no hay dónde dejar el auto» no suma a la columna «estacionamiento».</li><li><b>El contexto cambia el sentido.</b> «Genial» en una ironía, «pena» en «valen la pena»: las reglas parchan casos, no entienden.</li></ul><p>Los métodos modernos resuelven buena parte de esto con <b>embeddings</b> (vectores de significado), que ubican cada palabra o frase en un espacio donde las de sentido parecido quedan cerca, y con modelos de lenguaje que leen el texto completo con su orden. Detectan mejor la ironía, entienden sinónimos y se adaptan a temas nuevos, a cambio de más cómputo y de resultados más difíciles de explicar. Cómo funcionan por dentro está en Modelos de IA (https://aaramirez.github.io/modelos-de-ia/temario.html). Una regla práctica: empieza por lo clásico, mira dónde falla y usa esos errores para decidir si lo moderno vale el costo.</p></div></section>
+<section><h2>La idea clave</h2><div class="prose"><p>La minería de texto clásica convierte palabras en números contando. Primero se limpia el texto (minúsculas, sin tildes, sin palabras vacías, a veces a la raíz), sabiendo que cada paso puede borrar algo que la pregunta necesita, como el «no». Después cada documento se vuelve una fila de la bolsa de palabras, y el corpus, una matriz documento-término que se analiza como cualquier tabla. TF-IDF pesa cada palabra por lo frecuente que es en un documento y lo rara que es en los demás, y así muestra qué distingue a cada uno: en Almacenes Ejemplo, las obras de T07. El sentimiento con diccionario suma valores de palabras y acierta mucho en los casos claros, pero no ve la ironía ni el vocabulario propio del negocio. Lo clásico es rápido y explicable; sus errores dicen cuándo hace falta algo más.</p></div></section>
+<section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué quitar las palabras vacías puede empeorar un análisis de sentimiento?</summary><p>Porque las listas estándar incluyen «no», «sin» y «nunca», que invierten el sentido de lo que sigue. Sin ellas, «el pan no estaba fresco» se lee como un elogio.</p></details><details><summary>Una palabra aparece en las 12 tiendas. ¿Cuánto vale su idf con la fórmula clásica y con la de scikit-learn?</summary><p>Con la clásica, log(12/12) = 0: desaparece. Con la de scikit-learn, ln(13/13) + 1 = 1: pesa lo mínimo, pero no desaparece.</p></details><details><summary>«Precios» aparece 39 veces en T07 y «obras» 57. ¿Por qué «obras» pesa mucho más en TF-IDF y no solo un poco más?</summary><p>Porque «precios» está en todas las tiendas y su idf es mínimo (0 con la fórmula clásica), mientras que «obras» aparece solo en T07 y tiene el idf más alto posible. TF-IDF premia lo frecuente aquí y raro en el resto.</p></details><details><summary>¿Qué recupera un bigrama que la bolsa de palabras sueltas pierde?</summary><p>Parte del orden: frases cortas como «no estaba» o «valen la pena», donde el sentido depende de que las palabras vayan juntas.</p></details><details><summary>Un diccionario de sentimiento acierta el 95 % de las reseñas claras de la cadena. ¿Por qué no basta para seguir el problema de T07?</summary><p>Porque las quejas por las obras usan palabras que el diccionario no conoce y salen neutras, y las irónicas salen positivas. Justo las reseñas más importantes quedan mal clasificadas; hay que agregar el vocabulario del negocio o contar menciones directamente.</p></details></div></section>
+<section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Cómo funciona un lematizador para el español, como el de spaCy, y por qué necesita saber si una palabra es verbo, sustantivo o adjetivo?<small>Pista: busca «part-of-speech tagging» y «lematización spaCy español».</small></li><li>¿Qué dice la ley de Zipf sobre la frecuencia de las palabras y qué consecuencias tiene para el tamaño de una matriz documento-término?</li><li>¿Qué es BM25 y por qué los buscadores lo prefieren a TF-IDF?<small>Pista: busca «Okapi BM25 saturación de la frecuencia».</small></li><li>¿Qué es el modelado de temas con LDA (<i>Latent Dirichlet Allocation</i>) y en qué se diferencia de mirar las palabras con más TF-IDF?</li><li>¿Cómo funciona VADER, un diccionario de sentimiento pensado para redes sociales, y qué hace con los signos de exclamación, las mayúsculas y los emojis?</li></ol></div></section>
+<section><h2>Para saber más</h2><div class="vids"><span>Para saber más</span><a class="vid" href="https://scikit-learn.org/stable/modules/feature_extraction.html" target="_blank" rel="noopener">scikit-learn: extracción de características de texto <small>bolsa de palabras, n-gramas y TF-IDF con ejemplos, en inglés</small></a><a class="vid" href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html" target="_blank" rel="noopener">scikit-learn: TfidfVectorizer <small>todas las opciones, incluido el idf suavizado, en inglés</small></a><a class="vid" href="https://snowballstem.org/algorithms/spanish/stemmer.html" target="_blank" rel="noopener">Snowball: el recortador de raíces para español <small>las reglas paso a paso, en inglés</small></a><a class="vid" href="https://www.nltk.org/howto/stem.html" target="_blank" rel="noopener">NLTK: recortadores de raíces <small>cómo usar Snowball en Python, en inglés</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/ciencia-de-datos" target="_blank" rel="noopener">github.com/aaramirez/ciencia-de-datos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="08-lab-1"]');
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  const FR=["La atención fue muy amable.", "Las ofertas valen la pena.", "Los precios están bien.", "La tienda estaba desordenada.", "La fila de la caja era eterna.", "Las frutas estaban frescas.", "Solo había una caja abierta.", "Buena variedad de productos.", "La tienda está limpia y ordenada.", "Las cajas fueron rápidas.", "El personal ayuda a buscar.", "Las cajas fueron rápidas, pero el pan no estaba fresco.", "Encontré todo lo que buscaba.", "Buenísimo que el pan de ayer lo vendan como de hoy.", "Ahorro de tiempo.", "Las frutas estaban frescas, pero el personal no sabía dónde estaba nada.", "Las ofertas valen la pena, pero el pan no estaba fresco.", "La atención fue muy amable, pero el pan no estaba fresco.", "Los precios subieron mucho.", "Felicito al cajero por su paciencia infinita para no abrir otra caja.", "La atención fue muy amable, pero faltaban productos básicos.", "Las frutas estaban frescas, pero las frutas estaban golpeadas.", "Los precios están bien, pero faltaban productos básicos.", "Buena variedad de productos, pero el personal no sabía dónde estaba nada.", "El personal no sabía dónde estaba nada.", "Las frutas estaban golpeadas.", "Buena variedad de productos, pero faltaban productos básicos.", "Encontré todo lo que buscaba, pero la fila de la caja era eterna.", "La atención fue muy amable, pero la fila de la caja era eterna.", "La tienda está limpia y ordenada, pero solo había una caja abierta.", "El pan no estaba fresco.", "Faltaban productos básicos.", "Las cajas fueron rápidas, pero los precios subieron mucho.", "Encontré todo lo que buscaba, pero la tienda estaba desordenada.", "Los precios están bien, pero la fila de la caja era eterna.", "Encontré todo lo que buscaba, pero el personal no sabía dónde estaba nada.", "Los precios están bien, pero los precios subieron mucho.", "Las cajas fueron rápidas, pero las frutas estaban golpeadas.", "La tienda está limpia y ordenada, pero la fila de la caja era eterna.", "La atención fue muy amable, pero el personal no sabía dónde estaba nada.", "Buena variedad de productos, pero solo había una caja abierta.", "Las frutas estaban frescas, pero los precios subieron mucho.", "Los precios están bien, pero solo había una caja abierta.", "Genial, otra vez sin leche.", "Muy buena estrategia para que uno camine más.", "Encontré todo lo que buscaba, pero los precios subieron mucho.", "El personal ayuda a buscar, pero los precios subieron mucho.", "Las ofertas valen la pena, pero las frutas estaban golpeadas.", "La tienda está limpia y ordenada, pero los precios subieron mucho.", "Las frutas estaban frescas, pero la tienda estaba desordenada.", "Encontré todo lo que buscaba, pero las frutas estaban golpeadas.", "Las ofertas valen la pena, pero solo había una caja abierta.", "Los precios están bien, pero la tienda estaba desordenada.", "El personal ayuda a buscar, pero la fila de la caja era eterna.", "Excelente servicio: solo 40 minutos en la fila.", "Volveré cuando tenga el día libre.", "Encontré todo lo que buscaba, pero el pan no estaba fresco.", "Las ofertas valen la pena, pero la tienda estaba desordenada.", "Encontré todo lo que buscaba, pero faltaban productos básicos.", "Los precios están bien, pero el pan no estaba fresco.", "Las ofertas valen la pena, pero el personal no sabía dónde estaba nada.", "Buena variedad de productos, pero los precios subieron mucho.", "Buena variedad de productos, pero las frutas estaban golpeadas.", "Las cajas fueron rápidas, pero la fila de la caja era eterna.", "La atención fue muy amable, pero los precios subieron mucho.", "Las ofertas valen la pena, pero los precios subieron mucho.", "El personal ayuda a buscar, pero faltaban productos básicos.", "La atención fue muy amable, pero las frutas estaban golpeadas.", "El personal ayuda a buscar, pero el pan no estaba fresco.", "La tienda está limpia y ordenada, pero las frutas estaban golpeadas.", "La tienda está limpia y ordenada, pero el personal no sabía dónde estaba nada.", "Las frutas estaban frescas, pero solo había una caja abierta.", "La atención fue muy amable, pero la tienda estaba desordenada.", "Los precios están bien, pero el personal no sabía dónde estaba nada.", "Qué maravilla pagar más por lo mismo.", "Gracias por la sorpresa de cada semana.", "Las cajas fueron rápidas, pero faltaban productos básicos.", "Buena variedad de productos, pero la tienda estaba desordenada.", "Las ofertas valen la pena, pero faltaban productos básicos.", "Las frutas estaban frescas, pero faltaban productos básicos.", "Las frutas estaban frescas, pero el pan no estaba fresco.", "Las cajas fueron rápidas, pero solo había una caja abierta.", "Las cajas fueron rápidas, pero el personal no sabía dónde estaba nada.", "Las frutas estaban frescas, pero la fila de la caja era eterna.", "Encontré todo lo que buscaba, pero solo había una caja abierta.", "Buena variedad de productos, pero el pan no estaba fresco.", "La tienda está limpia y ordenada, pero la tienda estaba desordenada.", "El personal ayuda a buscar, pero solo había una caja abierta.", "Me encanta que las frutas vengan ya golpeadas, así no tengo que hacerlo yo.", "El personal ayuda a buscar, pero la tienda estaba desordenada.", "Las cajas fueron rápidas, pero la tienda estaba desordenada.", "No hay dónde estacionar por las obras.", "Ya no vengo en carro: sin estacionamiento no se puede.", "Cerraron el estacionamiento por las obras de la avenida.", "Las obras de la avenida tapan la entrada.", "Con las obras es imposible llegar en carro.", "Compro aquí hace años, pero cerraron el estacionamiento por las obras y ya no puedo venir."];
+  const T=['T01','T02','T03','T04','T05','T06','T07','T08','T09','T10','T11','T12'];
+  const TN=['Norte Mirador','Norte Estación','Norte Los Pinos','Centro Plaza Mayor','Centro Alameda','Centro Universidad','Sur Puerto','Sur Las Colinas','Sur Mercado Viejo','Oriente Río Claro','Oriente La Loma','Oriente Nuevo Sol'];
+  const RES=('0500001,1400102,3100304,9400005,b100604,6400701,9500809,a40020a,1300b,9400801,7500200,b500501,050000c,2400105,9400200,1100d0e,7300f,6500a01,9400900,3100403,7400005,3300g,6500c0a,0400c0a,3400c09,5400c09,6400100,7500702,1400c07,6400201,8300h,0500805,050090c,1400701,4500702,5400102,920040i,b200j,1500201,650000c,b300k,3400905,7400a00,0500500,9300l,7500902,9500c07,b500a0c,3310m,6410a01,6410105,1510a00,0210i04,1310n,0310n,6110o0p,b510801,0110i06,6510a00,9310q,0510209,551090a,641000c,9410a07,6410100,0510209,2510002,9110p0i,4410900,9510905,141000c,2310r,351010c,8310s,3410208,341050a,051080a,051090a,0310t,6410508,6410008,8510501,a110u0v,1310h,6510a02,641090a,9510105,3310w,6410c09,9510a07,b210p06,3410105,3510007,b510805,3520c09,1420a02,6220304,9520002,6520102,952020a,3420901,642000a,9520c00,a520509,0420a01,3120v0u,6520102,942080a,2420a09,4220v04,5420809,9320g,a420105,3420107,9120p0v,6420005,6420702,6420905,852070a,9420705,042090a,252020c,4420802,9320x,b22040i,1420501,942020c,b120u0o,012030o,122030u,1420205,0520c09,3420109,4520807,6520205,9520102,7520209,942050c,152070a,b520c05,252000a,152010a,1330y,2330z,9530209,623030v,0530c08,0530205,7430801,653050a,3430102,93310,4530c00,3530209,8530809,6430a02,153020a,6530c07,b430c08,4530502,9430c08,0230i0v,53311,8230u0v,1130o03,653050c,9430a00,5530705,6430c08,3530902,023060v,1530a08,323060i,3230604,453020a,7430809,8530a09,9530c0a,33312,a430508,03313,6230o06,743080a,13314,7530500,9530108,0440507,3340h,7240i0u,9440005,3240p06,6540705,9540701,0540508,3440007,9540c05,7440209,3440002,644050c,044090c,13415,354000a,344000a,6340w,9140o06,03416,954000c,0440a02,0141718,114030v,3540008,8140306,4240i0u,83419,0440108,3440809,0540500,2540905,9540c07,4540007,0440a05,754050a,a24040u,0540109,354070a,654080a,93413,23412,5540701,9540507,b44000c,8140603,6341a,7140v0i,b440005,3550008,4550709,2250o04,6450709,8450a08,b45000c,5350m,9350b,7351b,53510,6550100,2150v03,3150d0e,5351c,3150u03,b351d,3450102,6450807,2450908,6550807,b351e,0550005,9351f,b050001,1351g,0350s,3550907,7550c05,3550105,9550805,045080a,4450207,5250v0p,0450708,9351h,b55000c,4550508,6550005,6550200,055020a,1450001,0550507,2151i1j,0150p0i,115030p,3250i0o,755000c,9351k,9351l,a550c0a,b351a,4560a05,5460102,056000c,5460207,9460502,2560100,6260p0i,9360r,b560c05,2560900,2360k,4460507,5160o03,656050c,8460201,9160v0i,1560509,3160v0p,5560008,9260v0i,2560002,3560008,3460802,8460502,3361m,9260o03,0160604,9360g,3560c00,9460a09,b160p03,1460205,646050c,6360f,8460108,8560905,b260p0u,1560108,3460809,b560a02,03612,3361n,416030o,4260u0v,6560c07,1260i0p,b460a02,3460809,6460c09,016030v,126040o,7460701,816030p,946000c,146090c,356020a,5560100,6361e,047020a,8570c02,247090a,6170o03,7470802,0370b,4270o04,9370b,1470001,9570105,b57070a,1470200,a470502,b3715,9470705,0470905,23713,3371o,9371p,1570701,2371q,3371r,327060p,6170j,3470008,1470a09,b570c01,0570801,2270u0i,5470508,5371h,9371s,057010c,3170u03,6470700,7470701,9570c0a,3570105,4370g,1470a07,057020c,6470901,4470005,a371h,157090c,617030o,3570509,9570205,1280u03,3580107,9480001,3580c07,a480501,1381m,3381s,548020c,6280u0p,0480901,4580c09,0180406,0381t,1580908,4381u,5281718,3580807,658020a,3381v,0480c00,3580a01,5480802,2580207,6180o04,1580009,2480a02,5580c01,6480207,358020a,0480a00,9580508,0180u03,1580a02,6280i06,0480207,3480700,6280p06,9381c,a48000a,0381w,6380s,4580108,6480902,758050c,4580a05,6480c08,9181i1j,359000a,a590002,b391x,459020c,5490209,6590005,9590200,159080c,1590a09,4290p06,7391y,9490809,a490102,1190d0e,6590107,049070c,9391w,3391z,4490205,2190i0p,8590805,929040v,0590007,2590200,0590809,3490005,93920,a590502,6590c00,1490a01,0490c01,6190i06,459050a,0490001,6191718,7590c08,3490108,9590501,6590205,2190p06,459080c,9590109,b391b,a490a02,b490702,0490709,3590807,6490005,359050c,9490908,759010c,9391y,33921,9590900,05a0008,51a0d0e,34a090c,65a0900,75a0a07,a3a1z,34a0701,65a0805,04a0100,b1a0406,04a0c09,13a1d,33a1x,44a0701,64a090c,04a0901,32a0p0o,14a0900,31a0p04,54a0501,70a0v0u,85a090c,05a0100,15a0a07,14a0709,65a070c,81a2223,25a050a,34a0200,44a0205,72a0j,b4a0200,31a0d0e,54a0a02,65a0800,92a0o0p,34a0207,73a1r,95a010c,24a0701,35a0805,02a0u04,54a0a08,75a0902,25a0701,05a000c,80a0705,a4a0109,35a0c02,72a0v06,92a0u03,14a0008,54a0a00,05a070c,11a0p0u,93a24,b2a1718,13a25,05b090a,62b0p0o,31b0v03,25b020c,33b26,a5b0102,b3b1s,95b0c00,64b0907,b4b050c,03b27,15b020c,35b0a00,03b0t,63b28,14b0a07,53b29,05b010c,62b2223,34b0907,05b0701,94b0507,12b060u,65b0001,84b0200,91b0d0e,15b0a00,64b0205,94b0c02,05b0701,15b0c07,53b1p,94b0c00,45b0509,95b0102,02b060v,61b1718,15b0108,64b0802,22b1718,65b010a,75b0a07,93b1s,13b1m,25b0a00,03c21,63c2a,21c0v0i,61c1i1j,05c070c,04c0a07,92c0i04,05c0008,94c0201,15c0105,25c0501,05c0805,44c0209,55c010a,64c0500,a4c0c08,11c030u,04c070a,31c0406,75c0a02,b1c1i1j,35c010a,43c1g,62c040v,93c10,05c0908,34c0a00,71c060p,34c0209,54c0209,64c0208,94c0705,35c0708,55c0907,01c0403,02c0604,33c20,53c0b,b3c20,01c0403,44c0502,94c0907,65c0c0a,35c0005,53c0h,04c0c07,64c010a,82c0o04,92c0u0o,04c0501,43d1f,71d0o0v,34d090c,65d080c,85d080c,a0d0509,33d1k,52d0i06,64d0508,61d0o0v,55d050c,85d000a,11d0i0v,25d0108,33d1b,55d0a00,84d090a,02d0p0i,25d0c02,92d060u,b5d0c09,25d0901,84d0207,64d0a00,05d0100,15d0a00,33d2b,65d050c,04d0702,74d080c,02d1i1j,63d27,04d0109,b4d0a02,03d1u,94d0007,35d0a0c,15d0c00,95d0009,01d0v0u,32d060p,94d0908,13d1d,24d0a07,31d0v03,55d0c00,34d0902,05d0a05,13d0m,34d0807,04d0c08,94d0c07,03e0k,54e0c07,64e0c00,95e0c01,34e0800,94e0002,b4e070c,11e0o0v,54e0c05,32e1i1j,a4e0207,b1e0i06,05e0802,74e0209,15e0709,61e0v0p,05e0708,14e0a05,35e0c07,35e0009,45e0a08,72e0o04,65e0a07,a4e0002,64e0700,05e0800,22e030i,61e0o0v,95e0c08,75e020a,13e0n,35e0a09,a2e0u0p,41e0j,01e040i,14e080a,73e2c,95e0809,32e040p,64e0801,04f0702,82f0i0u,15f0c01,05f0207,33f21,35f0208,44f0509,13f19,25f0700,45f0008,63f2d,a3f1u,15f0a05,34f010c,02f0o03,64f0109,04f0705,95f0002,a5f0008,44f0a01,a3f2e,34f0207,94f0a09,13f13,63f1s,24f0a0c,34f0001,25f0800,33f20,53f1c,75f0907,65f0a02,01f1i1j,20f0c02,14f0908,24f0109,51f0i0o,54f0805,15f090c,65f0209,15f020a,32f040o,05f0801,64f050a,75f0108,61f0u0v,05f0508,05f010c,24f000a,34f080a,63f2f,32g2g,64g0702,05g0901,62g0i0o,14g0807,63g20,33g0g,91g0p04,65g020a,33g19,64g0902,91g0p0o,33g0k,72g030o,92g060i,75g0c02,15g0900,32g0406,75g0209,34g0001,14g0902,51g040i,61g0v06,33g0k,85g0701,03g1v,60g0502,85g0a0c,95g0105,15g0c09,75g0205,95g0002,94g0c09,55g0a02,65g0c02,94g0209,b5g070c,32g030o,65g0c07,72g1i1j,12g030v,34g0802,a4g0907,52g0v03,a2g0i0u,b2g0o0u,24h0701,73h16,33h1r,14h0902,31h040p,b4h0508,14h0a00,24h0805,42h040o,02h030i,94h0c07,92h0j,04h0009,63h2e,75h0700,14h0107,60h0u0v,04h0a05,15h0009,33h2d,02h0u0i,55h0807,12h040o,72h0p06,45h0900,84h010a,01h0v0p,94h0009,b3h0y,04h0708,74h0108,14h0708,34h0a07,04h0a08,44h0a02,54h0001,34h0a02,44h0802,33h0b,35h0102,64h0005,a3h20,04h0c07,15h090a,74h0105,72h0i0u,34h0a0c,85h0a09,14i0108,95i0c07,04i0001,31i0p0v,74i0509,04i070c,65i0c08,33i2h,02i0v0u,00i0d0e,64i0201,04i0a0c,04i0809,a5i0705,63i2i,94i0509,65i0807,91i0604,04i0c01,15i0c0a,35i0a0c,44i0009,35i0200,42i0o0v,05i070a,14i0907,34i0008,11i0i06,b2i0u0o,64i0a05,65i0805,03i28,42i030p,13i1t,24i0807,65i0c0a,74i0205,85i0507,54i0a05,64i0802,91i0i04,14j0007,84j0a07,35j0002,91j2223,62j2j,a4j0201,04j0a0c,15j0807,13j1q,34j0701,61j2k,05j000a,54j050c,62j2j,75j0c08,83j2a,34j0502,b1j0d0e,63j2l,35j0705,63j2j,a5j0200,35j0a00,62j2m,95j0807,94j0c02,32j0o0i,63j2m05,65j0209,94j070a,02j0i0p,31j0p0o,a4j0701,43j0z,62j2n0p,72j030v,81j0v0p,34j020c,45j080c,61j2o,14j0205,63j2n,33j26,94j0902,62j2l05,75j0805,10j0w,61j2l,75j0a01,15j0a01,62j2m02,75j0508,34j0209,63j2k,63j2j00,25j010a,32j0v06,62j2l,95j090c,63j2m,14j000a,62j2m,05k0100,63k2n01,05k0201,35k0102,45k0008,62k2m0c,02k0o04,a5k0c09,02k0o0p,14k0508,63k2j0i,a4k0802,61k2m0v,04k080c,61k2j0u,92k0p0o,15k0701,34k0a00,62k2l02,04k0c09,61k2j03,04k0a00,61k2j02,05k0708,61k2k00,95k0805,35k0a01,24k0a09,65k0c07,05k0208,35k090a,62k2l00,03k0n,33k1o,62k2n,94k0c05,35k0007,62k2m00,34k050a,63k2n09,04k0508,31k0j,62k2j,14k0c0a,35k0c00,62k2m,94k0507,15k0709,35k0205,53k1z,61k2j,62k2l,62k2m,71k0v0i,91k0d0e,a5k0a07,05k0807,63k2m0a,94k080a,04k070c,12k0v0u,54k0701,62k2m,93k14,11k0i04,62k2l,03l2a,55l0109,61l2n02,35l080c,34l070a,63l2m01,95l0105,05l0c08,62l2m03,81l2223,05l0a0c,32l0p0v,61l2n04,05l0809,34l0509,62l2j09,95l0205,24l0107,35l0009,62l2n,61l2m04,31l0d0e,63l2l0o,b3l0k,62l2m0u,65l0007,12l0v0u,62l2n,91l1718,04l010c,61l2j06,84l050c,35l0200,94l0c00,64l0900,85l0008,43l2i,63l2m06,42l0u0o,62l2l0o,04l0100,23l21,61l2l,14l0a07,61l2j,14l0107,63l2l02,15l0002,35l0805,01l040v,30l0a00,74l0700,61l2n,a4l0a08,63l2j,63l2l04,62l2n0p,15l0207,62l2n,65l0802').split(',').map((s,i)=>{const fr=[];for(let j=3;j<s.length;j+=2)fr.push(FR[parseInt(s.slice(j,j+2),36)]);
+    return {id:i+1,t:parseInt(s[0],36),e:+s[1],mes:parseInt(s[2],36),texto:fr.join(' ')};});
+  const VACIAS=new Set('de la el los las que y a en por para con su sus lo no se un una es esta estaba era fue muy pero me mi al del como mas ya hay habia otra otro uno todo aqui asi cuando cada solo nada donde le les yo tengo hace ser estan estaban fueron'.split(' '));
+  const norm=t=>t.toLowerCase().normalize('NFD').replace(/[̀-̂̄-ͯ]/g,'').normalize('NFC');
+  const raizDe=w=>{for(const s of ['mente','ciones','cion','es','s']){if(w.endsWith(s)&&w.length-s.length>=4){w=w.slice(0,-s.length);break;}}if(w.length>4&&'aoe'.includes(w[w.length-1]))w=w.slice(0,-1);return w;};
+  window.cdatos08={resenas:RES,tiendas:T,norm,vacias:VACIAS,raiz:raizDe};
+  function tokens(texto,sw,st,bi){
+    let ts=norm(texto).match(/[a-zñ0-9]+/g)||[];
+    if(sw)ts=ts.filter(w=>!VACIAS.has(w));
+    if(st)ts=ts.map(raizDe);
+    if(bi){const b=[];for(let i=0;i+1<ts.length;i++)b.push(ts[i]+' '+ts[i+1]);return b;}
+    return ts;
+  }
+  function docs(g){
+    if(g==='t')return T.map((t,i)=>({k:t+' '+TN[i],sel:r=>r.t===i}));
+    return [1,2,3,4,5].map(e=>({k:e+' estrella'+(e>1?'s':''),sel:r=>r.e===e}));
+  }
+  function llenarDocs(){
+    const g=$('#c8l1-g').value,D=docs(g);
+    $('#c8l1-d').innerHTML=D.map((d,i)=>'<option value="'+i+'"'+((g==='t'&&i===6)||(g==='e'&&i===0)?' selected':'')+'>'+d.k+'</option>').join('');
+  }
+  function pintar(){
+    const g=$('#c8l1-g').value,di=+$('#c8l1-d').value,w=$('#c8l1-w').value,sw=$('#c8l1-sw').checked,st=$('#c8l1-st').checked,bi=$('#c8l1-bi').checked;
+    const D=docs(g),N=D.length;
+    const cuentas=D.map(d=>{const c=new Map();RES.filter(d.sel).forEach(r=>tokens(r.texto,sw,st,bi).forEach(x=>c.set(x,(c.get(x)||0)+1)));return c;});
+    const df=new Map();cuentas.forEach(c=>c.forEach((v,k)=>df.set(k,(df.get(k)||0)+1)));
+    const c=cuentas[di];let pesos=[];
+    c.forEach((tf,k)=>{const d=df.get(k);let v=tf;
+      if(w==='sk')v=tf*(Math.log((1+N)/(1+d))+1); else if(w==='cl')v=tf*Math.log(N/d);
+      pesos.push({k,v,tf,d});});
+    if(w!=='tf'){const norma=Math.sqrt(pesos.reduce((a,p)=>a+p.v*p.v,0))||1;pesos.forEach(p=>p.v/=norma);}
+    pesos.sort((a,b)=>b.v-a.v||b.tf-a.tf||(a.k<b.k?-1:1));
+    const top=pesos.filter(p=>p.v>0).slice(0,12),max=top.length?top[0].v:1;
+    const comun=p=>p.d===N;
+    $('#c8l1-tit').textContent=(w==='tf'?'Las palabras más frecuentes de ':'Las palabras con más peso TF-IDF en ')+D[di].k+' (gris: aparecen en los '+N+' documentos)';
+    if($('#c8l1-v').value==='b')
+      $('#c8l1-res').innerHTML='<div class="c8l1-barras">'+top.map(p=>'<div class="c8l1-fila"><span title="'+p.k+'">'+p.k+'</span><i class="'+(comun(p)?'comun':'')+'" style="width:'+(p.v/max*100)+'%"></i><span>'+(w==='tf'?nf(p.tf):nf(p.v,3))+'</span></div>').join('')+'</div>';
+    else{const nube=pesos.filter(p=>p.v>0).slice(0,28);const mx=nube.length?nube[0].v:1;
+      const orden=nube.map((p,i)=>({p,i})).sort((a,b)=>((a.i*7)%nube.length)-((b.i*7)%nube.length));
+      $('#c8l1-res').innerHTML='<div class="c8l1-nube" aria-label="Nube de palabras">'+orden.map(o=>'<span class="'+(comun(o.p)?'comun':'')+'" style="font-size:'+(0.75+1.6*o.p.v/mx).toFixed(2)+'rem">'+o.p.k+'</span>').join('')+'</div>';}
+    // reseña de ejemplo
+    const lista=RES.filter(D[di].sel),ej=lista.find(r=>r.id===964)||lista[Math.floor(lista.length/3)];
+    const crudos=norm(ej.texto).match(/[a-zñ0-9]+/g)||[];
+    const html=crudos.map(x=>sw&&VACIAS.has(x)?'<s>'+x+'</s>':(st?raizDe(x):x)).join(' ');
+    $('#c8l1-ej').innerHTML='«'+ej.texto+'»<br>→ '+html+(bi?'<br>→ bigramas: '+tokens(ej.texto,sw,st,true).join(' · '):'');
+    // lectura
+    let vocab=new Set(),ntok=0;RES.forEach(r=>{const ts=tokens(r.texto,sw,st,false);ntok+=ts.length;ts.forEach(x=>vocab.add(x));});
+    let o='<span class="big">Vocabulario: '+nf(vocab.size)+' palabras distintas en '+nf(ntok)+' tokens de '+nf(RES.length)+' reseñas.</span>';
+    const nComun=top.filter(comun).length;
+    if(w==='tf')o+='<span class="warn">Por pura frecuencia ganan las palabras que están en todas partes'+(sw?'':', empezando por «la», «de» y «el»')+'. Cuentan de qué se habla en toda la cadena, no qué distingue a este documento.</span>';
+    else if(w==='cl')o+='<span>Con el logaritmo clásico, una palabra que aparece en los '+N+' documentos vale exactamente cero: solo quedan las que este documento comparte con pocos.'+(top.length<12?' Aquí quedaron apenas '+top.length+'.':'')+'</span>';
+    else o+='<span>scikit-learn suma 1 al logaritmo para que ninguna palabra valga cero: las comunes pesan menos, pero no desaparecen. '+(nComun>=8?'En este documento casi todo es vocabulario común: no tiene un tema propio.':'Las palabras moradas son las que este documento tiene y los demás casi no.')+'</span>';
+    if(g==='t'&&di===6&&w!=='tf')o+='<span class="ok">T07 Sur Puerto se distingue por «obras», «avenida», «estacionamiento» y «carro»: el tema que ninguna otra tienda tiene. Es la pista que el capítulo 10 sigue.</span>';
+    if(bi&&sw)o+='<span>Con las palabras vacías fuera, los bigramas pierden el «no»: «no estaba fresco» queda en «pan fresco». Para buscar frases, limpia menos.</span>';
+    if(st)o+='<span>Con la raíz recortada, «fresco», «frescas» y «frescos» cuentan como una sola palabra: el vocabulario baja y los conteos suben.</span>';
+    $('#c8l1-out').innerHTML=o;
+  }
+  $('#c8l1-g').addEventListener('change',()=>{llenarDocs();pintar();});
+  ['#c8l1-d','#c8l1-w','#c8l1-v','#c8l1-sw','#c8l1-st','#c8l1-bi'].forEach(s=>$(s).addEventListener('change',pintar));
+  llenarDocs();pintar();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="08-lab-2"]');
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  const LEX={amable:1,bien:1,buena:1,buen:1,buenisimo:2,excelente:2,genial:2,maravilla:2,encanta:2,frescas:1,fresco:1,limpia:1,ordenada:1,rapidas:1,felicito:1,gracias:1,paciencia:1,ayuda:1,variedad:1,ahorro:1,sorpresa:1,
+    faltaban:-1,golpeadas:-1,eterna:-2,desordenada:-1,subieron:-1,imposible:-2,cerraron:-1,tapan:-1,pena:-1};
+  const FRASES=[['valen la pena',1],['no sabia',-1],['una caja abierta',-1],['sin estacionamiento',-1],['no puedo',-1],['no se puede',-1],['otra vez sin',-1]];
+  const norm=t=>t.toLowerCase().normalize('NFD').replace(/[̀-̂̄-ͯ]/g,'').normalize('NFC');
+  function puntuar(texto,neg,inten,fra){
+    const tok=norm(texto).match(/[a-zñ0-9]+/g)||[],partes=[];let s=0,i=0;
+    while(i<tok.length){
+      if(fra){let hit=null;for(const [f,v] of FRASES){const fw=f.split(' ');if(fw.every((x,j)=>tok[i+j]===x)){hit=[fw.length,v,f];break;}}
+        if(hit){s+=hit[1];partes.push({w:hit[2],v:hit[1],mod:true});i+=hit[0];continue;}}
+      const w=tok[i];let v=LEX[w]||0,nota='';
+      if(v){
+        if(neg&&tok.slice(Math.max(0,i-3),i).some(x=>x==='no'||x==='sin'||x==='nunca')){v=-v;nota='invertida';}
+        if(inten&&i>0&&tok[i-1]==='muy'){v*=1.5;nota+=(nota?', ':'')+'× 1,5';}
+        if(inten&&i+1<tok.length&&tok[i+1]==='mucho'){v*=1.5;nota+=(nota?', ':'')+'× 1,5';}
+      }
+      s+=v;partes.push({w,v,nota});i++;
+    }
+    return {s,partes};
+  }
+  const clase=s=>s>0?'positiva':s<0?'negativa':'neutra';
+  const real=e=>e<=2?'negativa':e===3?'mixta':'positiva';
+  function uno(){
+    const neg=$('#c8l2-n').checked,inten=$('#c8l2-i').checked,fra=$('#c8l2-f').checked;
+    const r=puntuar($('#c8l2-txt').value,neg,inten,fra);
+    $('#c8l2-tok').innerHTML=r.partes.map(p=>'<span class="'+(p.v>0?'pos':p.v<0?'neg':'')+(p.mod?' mod':'')+'" title="'+(p.nota||'')+'">'+p.w+(p.v?'<sup>'+(p.v>0?'+':'')+nf(p.v,Number.isInteger(p.v)?0:1)+'</sup>':'')+'</span>').join('')||'<span>(sin palabras)</span>';
+    const txt=$('#c8l2-txt').value;
+    let o='<span class="big">Puntaje '+(r.s>0?'+':'')+nf(r.s,Number.isInteger(r.s)?0:1)+' → '+clase(r.s)+'</span>';
+    if(/solo 40 minutos|otra vez sin leche|maravilla pagar|paciencia infinita|ya golpeadas|pan de ayer/i.test(txt))o+='<span class="warn">Es ironía: las palabras son positivas y la intención es una queja. El diccionario suma palabras; no entiende que «excelente» se dijo con sarcasmo.</span>';
+    else if(/obras|estacionamiento/i.test(txt)&&r.s>=0)o+='<span class="warn">«Obras» y «estacionamiento» no están en el diccionario: para un diccionario general no son buenas ni malas. Un problema nuevo y propio de la tienda pasa inadvertido.</span>';
+    else if(/no estaba fresco/i.test(txt)&&!neg)o+='<span class="warn">Sin la regla de negación, «no estaba fresco» suma como «fresco»: el diccionario lee lo contrario.</span>';
+    else if(/valen la pena/i.test(txt)&&!fra)o+='<span class="warn">Sin expresiones, «pena» resta: «valen la pena» se lee como algo triste. Las palabras sueltas pierden el sentido de la frase.</span>';
+    else if(/pero/i.test(txt))o+='<span>Con «pero», lo importante suele venir después; el diccionario suma las dos partes por igual y a menudo da cero.</span>';
+    else o+='<span>Cada palabra conocida suma o resta su valor; las demás no cuentan. Prueba quitar una regla o escribe tu propia reseña.</span>';
+    $('#c8l2-out').innerHTML=o;
+  }
+  function todas(){
+    const D=window.cdatos08;if(!D){$('#c8l2-mat').innerHTML='';return;}
+    const neg=$('#c8l2-n').checked,inten=$('#c8l2-i').checked,fra=$('#c8l2-f').checked;
+    const C={};let n=0,okPN=0,nPN=0,ironia=0,obras=0;
+    D.resenas.forEach(r=>{if(!r.e)return;n++;const s=puntuar(r.texto,neg,inten,fra).s,a=real(r.e),b=clase(s);
+      const k=a+'|'+b;C[k]=(C[k]||0)+1;
+      if(a!=='mixta'){nPN++;if((a==='negativa'&&b==='negativa')||(a==='positiva'&&b==='positiva'))okPN++;}
+      if(a==='negativa'&&b==='positiva')ironia++;if(a==='negativa'&&b==='neutra')obras++;});
+    const filas=['negativa','mixta','positiva'],cols=['negativa','neutra','positiva'];
+    $('#c8l2-mat').innerHTML='<table><thead><tr><th>Estrellas</th>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+
+      filas.map(f=>'<tr><th>'+(f==='negativa'?'1-2 ★':f==='mixta'?'3 ★':'4-5 ★')+'</th>'+cols.map(c=>{const ok=(f===c)||(f==='mixta'&&c==='neutra');return '<td class="'+(ok?'ok':'')+'">'+nf(C[f+'|'+c]||0)+'</td>';}).join('')+'</tr>').join('')+'</tbody></table>';
+    $('#c8l2-out2').innerHTML='<span class="big">Acierta el signo en '+nf(okPN/nPN*100,1)+' % de las '+nf(nPN)+' reseñas claramente positivas o negativas.</span>'+
+      (neg&&inten&&fra?'<span>'+nf(ironia)+' reseñas de 1 o 2 estrellas salen positivas (casi todas irónicas) y '+nf(obras)+' salen neutras (la mayoría habla de las obras). Con '+nf(n)+' reseñas el error se ve; con un millón, nadie lo leería una por una.</span>'
+      :'<span class="warn">Sin todas las reglas, '+nf(ironia)+' reseñas de 1 o 2 estrellas salen positivas y '+nf(obras)+' neutras: a los errores de fondo se suman los de leer palabras sueltas. Activa las tres reglas para ver solo los que quedan.</span>');
+  }
+  function todo(){uno();todas();}
+  $('#c8l2-ej').addEventListener('change',()=>{$('#c8l2-txt').value=$('#c8l2-ej').value;uno();});
+  $('#c8l2-txt').addEventListener('input',uno);
+  ['#c8l2-n','#c8l2-i','#c8l2-f'].forEach(s=>$(s).addEventListener('change',todo));
+  $('#c8l2-txt').value=$('#c8l2-ej').value;
+  todo();
+})();
+</script>
+<script>
+(function(){
+  /* ---- Componente Pyodide común del curso «Ciencia de datos» (copiar tal cual) ----
+     Pyodide 314.0.7 (Python 3.14.2; pandas 3.0.2, polars 1.33.1, numpy 2.4.6, duckdb 1.5.1).
+     Se descarga solo al pulsar el botón y se comparte entre todos los labs de la página. */
+  const PY=window.cdatosPy||(window.cdatosPy=(function(){
+    const VER='314.0.7',BASE='https://cdn.jsdelivr.net/pyodide/v'+VER+'/full/';
+    let base=null;const listos={};
+    const AYUDA=[
+      'import ast, io, json, sys',
+      '_cdatos_espacios = {}',
+      'def _cdatos_limpio(v):',
+      '    if v is None: return None',
+      '    if hasattr(v, "item") and not isinstance(v, (str, bytes)):',
+      '        try: v = v.item()',
+      '        except Exception: v = str(v)',
+      '    if isinstance(v, float) and v != v: return None',
+      '    if isinstance(v, (bool, int, float, str)): return v',
+      '    return str(v)',
+      'def _cdatos_tabla(x, n=12):',
+      '    mod = type(x).__module__.split(".")[0]',
+      '    if mod == "polars":',
+      '        import polars as pl',
+      '        if isinstance(x, pl.LazyFrame): x = x.collect()',
+      '        if isinstance(x, pl.Series): x = x.to_frame()',
+      '        if not isinstance(x, pl.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.rows(); indice = None',
+      '        cols = list(h.columns); tipos = [str(t) for t in h.dtypes]',
+      '    elif mod == "pandas":',
+      '        import pandas as pd',
+      '        if isinstance(x, pd.Series): x = x.to_frame()',
+      '        if not isinstance(x, pd.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.astype(object).values.tolist()',
+      '        indice = [str(i) for i in h.index]',
+      '        cols = [str(c) for c in h.columns]; tipos = [str(t) for t in h.dtypes]',
+      '    elif x is None: return None',
+      '    else: return {"valor": repr(x)}',
+      '    return {"columnas": cols, "tipos": tipos, "indice": indice, "forma": list(x.shape), "motor": mod,',
+      '            "filas": [[_cdatos_limpio(v) for v in f] for f in filas]}',
+      'def _cdatos_correr(lab, codigo):',
+      '    ns = _cdatos_espacios.setdefault(lab, {"__name__": "__main__"})',
+      '    buf, viejo = io.StringIO(), sys.stdout',
+      '    sys.stdout = buf',
+      '    try:',
+      '        arbol = ast.parse(codigo); ultimo = None',
+      '        if arbol.body and isinstance(arbol.body[-1], ast.Expr):',
+      '            exp = ast.Expression(arbol.body.pop().value)',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '            ultimo = eval(compile(exp, "<lab>", "eval"), ns)',
+      '        else:',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '        return json.dumps({"salida": buf.getvalue(), "tabla": _cdatos_tabla(ultimo)})',
+      '    except BaseException as e:',
+      '        return json.dumps({"salida": buf.getvalue(), "error": type(e).__name__ + ": " + str(e)})',
+      '    finally:',
+      '        sys.stdout = viejo'].join('\n');
+    function script(){return new Promise((ok,mal)=>{
+      if(window.loadPyodide)return ok();
+      const s=document.createElement('script');s.src=BASE+'pyodide.js';
+      s.onload=ok;s.onerror=()=>mal(new Error('No se pudo descargar Pyodide'));document.head.appendChild(s);});}
+    return {VER,
+      /* paquetes: ['pandas'] o ['pandas','polars']; aviso(texto) recibe el estado */
+      cargar(paquetes,aviso){
+        if(!base){aviso&&aviso('Descargando Python (Pyodide '+VER+')…');
+          base=script().then(()=>loadPyodide({indexURL:BASE})).then(py=>{py.runPython(AYUDA);return py;});
+          base.catch(()=>{base=null;});}
+        return base.then(async py=>{
+          const faltan=paquetes.filter(p=>!listos[p]);
+          if(faltan.length){aviso&&aviso('Instalando '+faltan.join(' y ')+'…');
+            await py.loadPackage(faltan);faltan.forEach(p=>listos[p]=1);}
+          return py;});
+      },
+      /* archivos: {'ventas.csv': 'texto…'}; se escriben en la carpeta de trabajo de Python */
+      archivos(py,archivos){for(const k in archivos)py.FS.writeFile(k,archivos[k]);},
+      async correr(py,lab,codigo){
+        py.globals.set('_cdatos_codigo',codigo);
+        const r=JSON.parse(py.runPython('_cdatos_correr('+JSON.stringify(lab)+', _cdatos_codigo)'));
+        return r;}
+    };
+  })());
+  /* Dibuja la tabla que devuelve PY.correr (r.tabla) dentro de un elemento */
+  function pintarTabla(el,t){
+    const nfx=(v,dec)=>{if(typeof v!=='number')return v===null?'<i>nulo</i>':String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const d=dec?2:(Number.isInteger(v)?0:2);const s=Math.abs(v).toFixed(d).split('.');
+      s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (v<0?'−':'')+s.join(',');};
+    if(!t){el.innerHTML='';return;}
+    if(t.valor!==undefined){el.innerHTML='<pre class="cdatos-valor">'+nfx(t.valor)+'</pre>';return;}
+    const idx=t.indice&&!t.indice.every((v,i)=>v===String(i));
+    let h='<table class="tbl"><thead><tr>'+(idx?'<th></th>':'')+t.columnas.map((c,i)=>'<th>'+nfx(c)+'<br><small>'+t.tipos[i]+'</small></th>').join('')+'</tr></thead><tbody>';
+    t.filas.forEach((f,j)=>{h+='<tr>'+(idx?'<th>'+nfx(t.indice[j])+'</th>':'')+f.map((v,i)=>'<td'+(typeof v==='number'?' style="text-align:right"':'')+'>'+(/(^|_)id$|^año$|^anio$/i.test(String(t.columnas[i]))&&typeof v==='number'?String(v):nfx(v,/float/i.test(t.tipos[i])))+'</td>').join('')+'</tr>';});
+    const n=t.forma[0];
+    el.innerHTML=h+'</tbody></table><p class="hint">'+(n>t.filas.length?'Primeras '+t.filas.length+' de ':'')+nfx(n)+' filas × '+t.forma[1]+' columnas · '+t.motor+'</p>';
+  }
+  /* ---- fin del componente ---- */
+
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="08-lab-3"]');
+  const LAB='08-lab-3', PAQ=["pandas"];
+  const EJ=[{"t": "Del texto a los tokens", "cod": "import pandas as pd, re, unicodedata\nresenas = pd.read_csv(\"resenas.csv\")\nVACIAS = set(\"de la el los las que y a en por para con su sus lo no se un una es esta estaba era fue muy \"\n             \"pero me mi al del como mas ya hay habia otra otro uno todo aqui asi cuando cada solo nada \"\n             \"donde le les yo tengo hace ser estan estaban fueron\".split())\n\ndef normalizar(texto):\n    \"\"\"Minúsculas y sin tildes, pero conservando la ñ.\"\"\"\n    t = unicodedata.normalize(\"NFD\", texto.lower())\n    t = \"\".join(c for c in t if unicodedata.category(c) != \"Mn\" or c == \"\\u0303\")\n    return unicodedata.normalize(\"NFC\", t)\n\ndef tokens(texto):\n    return [w for w in re.findall(r\"[a-zñ0-9]+\", normalizar(texto)) if w not in VACIAS]\n\nresenas[\"tokens\"] = resenas[\"texto\"].map(tokens)\npalabras = resenas.explode(\"tokens\", ignore_index=True)\ntodas = sum(len(re.findall(r\"[a-zñ0-9]+\", normalizar(t))) for t in resenas[\"texto\"])\nprint(f\"{len(resenas)} reseñas · {todas} tokens en bruto · {len(palabras)} sin palabras vacías\")\nprint(\"Ejemplo:\", resenas.loc[963, \"texto\"], \"→\", resenas.loc[963, \"tokens\"])\npalabras[\"tokens\"].value_counts().head(10).to_frame()", "lee": "Normalizar deja todo en minúsculas y sin tildes; la expresión regular corta el texto en palabras y el filtro quita las palabras vacías. Más de la mitad de los tokens eran «de», «la», «el» y compañía. Lo que queda dice de qué se habla en la cadena: precios, atención, personal, frutas.", "r": {"salida": "1112 reseñas · 10858 tokens en bruto · 5469 sin palabras vacías\nEjemplo: Compro aquí hace años, pero cerraron el estacionamiento por las obras y ya no puedo venir. → ['compro', 'años', 'cerraron', 'estacionamiento', 'obras', 'puedo', 'venir']\n", "tabla": {"columnas": ["count"], "tipos": ["int64"], "indice": ["precios", "personal", "productos", "frutas", "tienda", "atencion", "amable", "bien", "encontre", "buscaba"], "forma": [10, 1], "motor": "pandas", "filas": [[258], [242], [237], [227], [220], [196], [196], [189], [174], [174]]}}}, {"t": "Bolsa de palabras: la matriz tienda × palabra", "cod": "import pandas as pd, re, unicodedata\nresenas = pd.read_csv(\"resenas.csv\")\nVACIAS = set(\"de la el los las que y a en por para con su sus lo no se un una es esta estaba era fue muy \"\n             \"pero me mi al del como mas ya hay habia otra otro uno todo aqui asi cuando cada solo nada \"\n             \"donde le les yo tengo hace ser estan estaban fueron\".split())\n\ndef normalizar(texto):\n    \"\"\"Minúsculas y sin tildes, pero conservando la ñ.\"\"\"\n    t = unicodedata.normalize(\"NFD\", texto.lower())\n    t = \"\".join(c for c in t if unicodedata.category(c) != \"Mn\" or c == \"\\u0303\")\n    return unicodedata.normalize(\"NFC\", t)\n\ndef tokens(texto):\n    return [w for w in re.findall(r\"[a-zñ0-9]+\", normalizar(texto)) if w not in VACIAS]\n\nresenas[\"tokens\"] = resenas[\"texto\"].map(tokens)\npalabras = resenas.explode(\"tokens\", ignore_index=True)\nmatriz = pd.crosstab(palabras[\"tienda_id\"], palabras[\"tokens\"])   # documento × término\nprint(\"Forma de la matriz:\", matriz.shape, \"· celdas en cero:\", f\"{(matriz == 0).mean().mean():.0%}\")\nmatriz[[\"precios\", \"amable\", \"fila\", \"obras\", \"estacionamiento\", \"carro\"]]", "lee": "Cada fila es un documento (todas las reseñas de una tienda) y cada columna una palabra; la celda cuenta cuántas veces aparece. Se pierde el orden de las palabras, por eso se llama bolsa. «Obras» y «estacionamiento» casi solo tienen números en la fila de T07.", "r": {"salida": "Forma de la matriz: (12, 85) · celdas en cero: 40%\n", "tabla": {"columnas": ["precios", "amable", "fila", "obras", "estacionamiento", "carro"], "tipos": ["int64", "int64", "int64", "int64", "int64", "int64"], "indice": ["T01", "T02", "T03", "T04", "T05", "T06", "T07", "T08", "T09", "T10", "T11", "T12"], "forma": [12, 6], "motor": "pandas", "filas": [[26, 27, 14, 0, 0, 0], [26, 19, 4, 0, 0, 0], [14, 12, 4, 0, 0, 0], [37, 38, 14, 0, 0, 0], [14, 8, 3, 0, 0, 0], [18, 7, 2, 0, 0, 0], [39, 32, 8, 57, 17, 15], [19, 7, 3, 0, 0, 0], [7, 5, 2, 0, 0, 0], [34, 25, 9, 0, 0, 0], [13, 6, 2, 0, 0, 0], [11, 10, 5, 0, 0, 0]]}}}, {"t": "TF-IDF a mano, con la fórmula clásica", "cod": "import pandas as pd, re, unicodedata\nresenas = pd.read_csv(\"resenas.csv\")\nVACIAS = set(\"de la el los las que y a en por para con su sus lo no se un una es esta estaba era fue muy \"\n             \"pero me mi al del como mas ya hay habia otra otro uno todo aqui asi cuando cada solo nada \"\n             \"donde le les yo tengo hace ser estan estaban fueron\".split())\n\ndef normalizar(texto):\n    \"\"\"Minúsculas y sin tildes, pero conservando la ñ.\"\"\"\n    t = unicodedata.normalize(\"NFD\", texto.lower())\n    t = \"\".join(c for c in t if unicodedata.category(c) != \"Mn\" or c == \"\\u0303\")\n    return unicodedata.normalize(\"NFC\", t)\n\ndef tokens(texto):\n    return [w for w in re.findall(r\"[a-zñ0-9]+\", normalizar(texto)) if w not in VACIAS]\nimport numpy as np\nresenas[\"tokens\"] = resenas[\"texto\"].map(tokens)\npalabras = resenas.explode(\"tokens\", ignore_index=True)\ntf = pd.crosstab(palabras[\"tienda_id\"], palabras[\"tokens\"])\nN = len(tf)                                  # 12 documentos\ndf = (tf > 0).sum()                          # en cuántas tiendas aparece cada palabra\nidf = np.log(N / df)                         # 0 si aparece en todas\ntfidf = tf * idf\ntfidf = tfidf.div(np.sqrt((tfidf ** 2).sum(axis=1)), axis=0)   # cada fila con largo 1\nprint(\"Palabras con idf = 0 (están en las 12 tiendas):\", int((idf == 0).sum()), \"de\", len(idf))\ntfidf.loc[\"T07\"].sort_values(ascending=False).head(8).round(3).to_frame()", "lee": "El idf castiga a las palabras que están en todos los documentos: con el logaritmo clásico valen cero. Lo que queda arriba en T07 es lo que solo T07 tiene. La última división normaliza cada fila para que una tienda con más reseñas no gane solo por tener más texto.", "r": {"salida": "Palabras con idf = 0 (están en las 12 tiendas): 34 de 85\n", "tabla": {"columnas": ["T07"], "tipos": ["float64"], "indice": ["obras", "avenida", "estacionamiento", "entrada", "tapan", "carro", "cerraron", "estacionar"], "forma": [8, 1], "motor": "pandas", "filas": [[0.739], [0.389], [0.22], [0.22], [0.22], [0.194], [0.182], [0.182]]}}}, {"t": "TF-IDF con scikit-learn", "cod": "import pandas as pd, re, unicodedata\nresenas = pd.read_csv(\"resenas.csv\")\nVACIAS = set(\"de la el los las que y a en por para con su sus lo no se un una es esta estaba era fue muy \"\n             \"pero me mi al del como mas ya hay habia otra otro uno todo aqui asi cuando cada solo nada \"\n             \"donde le les yo tengo hace ser estan estaban fueron\".split())\n\ndef normalizar(texto):\n    \"\"\"Minúsculas y sin tildes, pero conservando la ñ.\"\"\"\n    t = unicodedata.normalize(\"NFD\", texto.lower())\n    t = \"\".join(c for c in t if unicodedata.category(c) != \"Mn\" or c == \"\\u0303\")\n    return unicodedata.normalize(\"NFC\", t)\n\ndef tokens(texto):\n    return [w for w in re.findall(r\"[a-zñ0-9]+\", normalizar(texto)) if w not in VACIAS]\nfrom sklearn.feature_extraction.text import TfidfVectorizer\ndocs = resenas.groupby(\"tienda_id\")[\"texto\"].apply(\" \".join)     # un documento por tienda\nvec = TfidfVectorizer(preprocessor=normalizar, token_pattern=r\"[a-zñ0-9]+\", stop_words=sorted(VACIAS))\nX = vec.fit_transform(docs)                   # matriz dispersa 12 × vocabulario\npesos = pd.DataFrame(X.toarray(), index=docs.index, columns=vec.get_feature_names_out())\nprint(\"Matriz:\", X.shape, \"· idf mínimo:\", round(vec.idf_.min(), 3), \"· idf máximo:\", round(vec.idf_.max(), 3))\npesos.loc[\"T07\"].sort_values(ascending=False).head(8).round(3).to_frame()", "lee": "<code>TfidfVectorizer<\/code> hace en una línea la limpieza, la bolsa de palabras, el idf y la normalización. Su idf es suavizado: ln((1 + N) / (1 + df)) + 1, así que ninguna palabra vale cero (el mínimo es 1). El orden de T07 no cambia: obras, avenida, estacionamiento.", "r": {"salida": "Matriz: (12, 85) · idf mínimo: 1.0 · idf máximo: 2.872\n", "tabla": {"columnas": ["T07"], "tipos": ["float64"], "indice": ["obras", "avenida", "estacionamiento", "entrada", "tapan", "carro", "cerraron", "estacionar"], "forma": [8, 1], "motor": "pandas", "filas": [[0.633], [0.333], [0.189], [0.189], [0.189], [0.167], [0.155], [0.155]]}}, "paq": ["scikit-learn"], "aviso": "(scikit-learn agrega unos 19 MB)"}, {"t": "Bigramas: las palabras que van juntas", "cod": "import pandas as pd, re, unicodedata\nresenas = pd.read_csv(\"resenas.csv\")\nVACIAS = set(\"de la el los las que y a en por para con su sus lo no se un una es esta estaba era fue muy \"\n             \"pero me mi al del como mas ya hay habia otra otro uno todo aqui asi cuando cada solo nada \"\n             \"donde le les yo tengo hace ser estan estaban fueron\".split())\n\ndef normalizar(texto):\n    \"\"\"Minúsculas y sin tildes, pero conservando la ñ.\"\"\"\n    t = unicodedata.normalize(\"NFD\", texto.lower())\n    t = \"\".join(c for c in t if unicodedata.category(c) != \"Mn\" or c == \"\\u0303\")\n    return unicodedata.normalize(\"NFC\", t)\n\ndef tokens(texto):\n    return [w for w in re.findall(r\"[a-zñ0-9]+\", normalizar(texto)) if w not in VACIAS]\nfrom collections import Counter\npares = Counter()\nfor t in resenas[\"texto\"]:\n    ws = re.findall(r\"[a-zñ0-9]+\", normalizar(t))        # sin quitar palabras vacías\n    pares.update(zip(ws, ws[1:]))\ntabla = pd.DataFrame([(\" \".join(p), n) for p, n in pares.items()], columns=[\"bigrama\", \"veces\"])\nprint(\"Con «no»:\", tabla[tabla[\"bigrama\"].str.startswith(\"no \")].nlargest(4, \"veces\").values.tolist())\ntabla.nlargest(10, \"veces\")", "lee": "Un bigrama es un par de palabras seguidas. Los más frecuentes son un artículo con su sustantivo («los precios», «el personal») o frases fijas («muy amable»), pero los que empiezan con «no» guardan algo que la bolsa de palabras pierde: «no estaba», «no sabía». Por eso los bigramas se calculan antes de quitar las palabras vacías.", "r": {"salida": "Con «no»: [['no sabia', 69], ['no estaba', 64], ['no hay', 14], ['no abrir', 6]]\n", "tabla": {"columnas": ["bigrama", "veces"], "tipos": ["str", "int64"], "indice": ["10", "44", "23", "24", "13", "0", "1", "2", "3", "11"], "forma": [10, 2], "motor": "pandas", "filas": [["los precios", 258], ["el personal", 242], ["las frutas", 227], ["frutas estaban", 226], ["la tienda", 220], ["la atencion", 196], ["atencion fue", 196], ["fue muy", 196], ["muy amable", 196], ["precios estan", 189]]}}}, {"t": "Sentimiento con un diccionario mínimo", "cod": "import pandas as pd, re, unicodedata\nresenas = pd.read_csv(\"resenas.csv\")\nVACIAS = set(\"de la el los las que y a en por para con su sus lo no se un una es esta estaba era fue muy \"\n             \"pero me mi al del como mas ya hay habia otra otro uno todo aqui asi cuando cada solo nada \"\n             \"donde le les yo tengo hace ser estan estaban fueron\".split())\n\ndef normalizar(texto):\n    \"\"\"Minúsculas y sin tildes, pero conservando la ñ.\"\"\"\n    t = unicodedata.normalize(\"NFD\", texto.lower())\n    t = \"\".join(c for c in t if unicodedata.category(c) != \"Mn\" or c == \"\\u0303\")\n    return unicodedata.normalize(\"NFC\", t)\n\ndef tokens(texto):\n    return [w for w in re.findall(r\"[a-zñ0-9]+\", normalizar(texto)) if w not in VACIAS]\nLEX = {\"amable\": 1, \"bien\": 1, \"buena\": 1, \"frescas\": 1, \"fresco\": 1, \"limpia\": 1, \"rapidas\": 1,\n       \"excelente\": 2, \"genial\": 2, \"maravilla\": 2, \"encanta\": 2, \"buenisimo\": 2, \"gracias\": 1,\n       \"faltaban\": -1, \"golpeadas\": -1, \"eterna\": -2, \"desordenada\": -1, \"subieron\": -1}\n\ndef sentimiento(texto):\n    ws = re.findall(r\"[a-zñ0-9]+\", normalizar(texto)); s = 0\n    for i, w in enumerate(ws):\n        v = LEX.get(w, 0)\n        if v and \"no\" in ws[max(0, i - 3):i]:     # negación: invierte\n            v = -v\n        s += v\n    return \"positiva\" if s > 0 else \"negativa\" if s < 0 else \"neutra\"\n\nr = resenas.dropna(subset=[\"estrellas\"]).copy()\nr[\"segun_estrellas\"] = pd.cut(r[\"estrellas\"], [0, 2, 3, 5], labels=[\"negativa\", \"mixta\", \"positiva\"])\nr[\"segun_diccionario\"] = r[\"texto\"].map(sentimiento)\npd.crosstab(r[\"segun_estrellas\"], r[\"segun_diccionario\"])", "lee": "Un diccionario de 18 palabras y una regla de negación ya separan bien las reseñas claras. Los errores importantes están en la fila «negativa»: las irónicas salen positivas y las de las obras salen neutras, porque «obras» no está en ningún diccionario general.", "r": {"salida": "", "tabla": {"columnas": ["negativa", "neutra", "positiva"], "tipos": ["int64", "int64", "int64"], "indice": ["negativa", "mixta", "positiva"], "forma": [3, 3], "motor": "pandas", "filas": [[169, 37, 38], [51, 88, 33], [0, 48, 638]]}}}];
+  function archivos(){
+    const D=window.cdatos08||{resenas:[],tiendas:[]};
+    let c='resena_id,tienda_id,estrellas,mes,texto\n';
+    D.resenas.forEach(r=>{const m=r.mes;c+=r.id+','+D.tiendas[r.t]+','+(r.e?r.e:'')+','+(2025+Math.floor(m/12))+'-'+String(m%12+1).padStart(2,'0')+',"'+r.texto.replace(/"/g,'""')+'"\n';});
+    return {'resenas.csv':c};
+  }
+  const q=s=>raiz.querySelector(s);
+  const sel=q('#c8l3-ej'),cod=q('#c8l3-cod'),bc=q('#c8l3-cargar'),br=q('#c8l3-correr'),est=q('#c8l3-est'),sal=q('#c8l3-sal'),tab=q('#c8l3-tab'),out=q('#c8l3-out');
+  let py=null;const extra={};
+  function estado(t,c){est.textContent=t;est.className='c8l3-est'+(c?' '+c:'');}
+  function mostrar(r,e,guardado){
+    sal.hidden=!(r.salida||r.error);sal.textContent=(r.salida||'')+(r.error?(r.salida?'\n':'')+r.error:'');sal.classList.toggle('err',!!r.error);
+    pintarTabla(tab,r.error?null:r.tabla);
+    out.innerHTML=r.error?'<span class="warn">El código falló.</span><span>Lee la última línea del error: dice qué tipo de problema es y dónde. Corrígelo o vuelve a elegir el ejemplo.</span>'
+      :(guardado?'<span class="hint">Resultado guardado (calculado con el mismo código). Carga Python para ejecutarlo y editarlo.</span>':'')+'<span>'+e.lee+'</span>';
+  }
+  function elegir(){const e=EJ[+sel.value];cod.value=e.cod;if(py)correr();else mostrar(e.r,e,true);}
+  async function correr(){
+    if(!py)return;br.disabled=true;
+    const e=EJ[+sel.value];
+    try{
+      const falta=(e.paq||[]).filter(p=>!extra[p]);
+      if(falta.length){await PY.cargar(PAQ.concat(falta),t=>estado(t+(e.aviso?' '+e.aviso:'')));falta.forEach(p=>extra[p]=1);}
+      estado('Ejecutando…');
+      const r=await PY.correr(py,LAB,cod.value);
+      mostrar(r,cod.value===e.cod?e:{lee:'Ejecutaste tu versión del código: compara la tabla con la del ejemplo original.'},false);
+      estado(r.error?'El código falló: lee el error abajo.':'Listo: Python 3.14 con '+PAQ.concat(Object.keys(extra)).join(' y ')+'.',r.error?'warn':'ok');
+    }catch(err){estado('No se pudo terminar: '+err.message+'. Revisa tu conexión y vuelve a intentar.','warn');}
+    br.disabled=false;
+  }
+  bc.addEventListener('click',async()=>{
+    bc.disabled=true;
+    try{py=await PY.cargar(PAQ,t=>estado(t));PY.archivos(py,archivos());bc.hidden=true;br.disabled=false;correr();}
+    catch(err){bc.disabled=false;estado('No se pudo cargar Python. Revisa tu conexión y vuelve a intentar; el resultado guardado sigue abajo.','warn');}
+  });
+  br.addEventListener('click',correr);
+  cod.addEventListener('keydown',ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key==='Enter'){ev.preventDefault();correr();}});
+  sel.addEventListener('change',elegir);
+  elegir();
+})();
+</script>
+</body>
+</html>

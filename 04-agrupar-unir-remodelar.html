@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agrupar, unir y remodelar · Ciencia de datos · Ciencia de datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Del dato crudo a la decisión: hacer buenas preguntas, limpiar, explorar, visualizar, minar datos y texto y comunicar resultados con pandas y Polars, con código que corre en la página.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="agrupar-unir-remodelar">
+<header class="topbar"><a class="brand" href="index.html">Ciencia de <b>datos</b></a><span class="eyebrow">Curso visual e interactivo · Datos e inteligencia artificial</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 04 DE 10</span><h1>Agrupar, unir y remodelar datos</h1><p class="lede">Lorena quiere las ventas por región, Hernán manda su reporte con un mes por columna y los tickets no saben a qué socio pertenecen. Este capítulo enseña las tres operaciones que convierten tablas sueltas en respuestas: agrupar, unir y remodelar, y la costumbre que evita el error más caro de todos, contar las filas después de cada unión.</p></header>
+<section><h2>Agrupar: dividir, aplicar y combinar</h2><div class="prose"><p>La limpieza del capítulo 03 dejó a Mariana Solís con seis archivos ordenados en <code>limpio/</code>: 197.576 tickets, sus 736.371 líneas de detalle, 6.015 socios del Club Ejemplo, 48 productos, 12 tiendas y las reseñas. El lunes llegan tres pedidos. Lorena Quintero quiere las ventas de octubre por región. Hernán Ibáñez, el gerente del Sur, vuelve con su planilla del capítulo 03, una tienda por fila y un mes por columna, y pregunta por qué no cuadra con el reporte de la oficina. Y Verónica Peña, de mercadeo, quiere saber cuánto compran los socios inscritos en cada tienda.</p><p>Ninguno de los tres pedidos se responde mirando una sola tabla tal como está. Hay que <b>resumir</b> (muchas filas en pocas), <b>combinar</b> (tickets con tiendas, tickets con socios) y <b>cambiar la forma</b> (meses en columnas o en filas). Son tres operaciones, y casi todo el trabajo diario de un analista es una mezcla de ellas.</p><p>La primera tiene nombre propio. En 2011, Hadley Wickham la llamó <b>dividir, aplicar y combinar</b> (<i>split-apply-combine</i>): se <b>divide</b> la tabla en grupos según el valor de una o más columnas, se <b>aplica</b> una función a cada grupo por separado y se <b>combinan</b> los resultados en una tabla nueva. En pandas es <code>groupby</code>; en Polars, <code>group_by</code>; en SQL, <code>GROUP BY</code>.</p></div><div class="analogia"><b>Imagínalo así</b><p>Al final del día, el encargado de una tienda vacía la caja sobre la mesa. Primero separa los billetes en pilas por valor (dividir), después cuenta cada pila (aplicar) y al final anota en una hoja «tantos de 10, tantos de 20» (combinar). Nadie cuenta los billetes mezclados: separarlos primero es lo que hace la cuenta fácil.</p></div><div class="prose"><p>Para Lorena, la columna que divide es la región. Pero la región no está en los tickets: está en <code>tiendas</code>. Por eso el primer paso es unir (lo veremos en detalle más abajo) y el segundo, agrupar:</p><div class="code-copia"><pre><code>import pandas as pd
+
+ventas = pd.read_parquet("limpio/ventas.parquet")
+tiendas = pd.read_parquet("limpio/tiendas.parquet")
+v = ventas.merge(tiendas, on="tienda_id", how="left", validate="many_to_one")
+octubre = v[(v["fecha_hora"] &gt;= "2026-10-01") &amp; (v["fecha_hora"] &lt; "2026-11-01")]
+octubre.groupby("region")["total"].sum()</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div></div><figure class="fig fig-esquema" id="04-diagrama-1"><div class="lienzo"><svg viewBox="0 0 900 380" style="min-width:720px" role="img" aria-label="Dividir, aplicar y combinar: los tickets de octubre de 2026 se separan en cuatro grupos por región, a cada grupo se le aplica una suma y los resultados se combinan en una tabla de cuatro filas">
+<defs><marker id="c4d1-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker></defs>
+<text x="20" y="24" class="t t-xs t-b t-m">9.313 TICKETS DE OCTUBRE 2026</text>
+<rect x="20" y="34" width="200" height="306" rx="8" class="caja"/>
+<text x="32" y="54" class="t t-xs t-b t-m">TICKET</text><text x="100" y="54" class="t t-xs t-b t-m">REGIÓN</text><text x="208" y="54" class="t t-xs t-b t-m" text-anchor="end">TOTAL</text>
+<rect x="26" y="62" width="188" height="25" rx="4" class="d-inet"/>
+<text x="32" y="79" class="t t-s t-mono">288264</text><text x="100" y="79" class="t t-s">Oriente</text><text x="208" y="79" class="t t-s t-mono" text-anchor="end">18,87</text>
+<rect x="26" y="92" width="188" height="25" rx="4" class="d-inet"/>
+<text x="32" y="109" class="t t-s t-mono">288265</text><text x="100" y="109" class="t t-s">Oriente</text><text x="208" y="109" class="t t-s t-mono" text-anchor="end">6,31</text>
+<rect x="26" y="122" width="188" height="25" rx="4" class="d-sis"/>
+<text x="32" y="139" class="t t-s t-mono">288266</text><text x="100" y="139" class="t t-s">Sur</text><text x="208" y="139" class="t t-s t-mono" text-anchor="end">12,79</text>
+<rect x="26" y="152" width="188" height="25" rx="4" class="d-oper"/>
+<text x="32" y="169" class="t t-s t-mono">288267</text><text x="100" y="169" class="t t-s">Norte</text><text x="208" y="169" class="t t-s t-mono" text-anchor="end">7,54</text>
+<rect x="26" y="182" width="188" height="25" rx="4" class="d-inet"/>
+<text x="32" y="199" class="t t-s t-mono">288268</text><text x="100" y="199" class="t t-s">Oriente</text><text x="208" y="199" class="t t-s t-mono" text-anchor="end">23,76</text>
+<rect x="26" y="212" width="188" height="25" rx="4" class="d-sis"/>
+<text x="32" y="229" class="t t-s t-mono">288269</text><text x="100" y="229" class="t t-s">Sur</text><text x="208" y="229" class="t t-s t-mono" text-anchor="end">11,44</text>
+<rect x="26" y="242" width="188" height="25" rx="4" class="d-oper"/>
+<text x="32" y="259" class="t t-s t-mono">288270</text><text x="100" y="259" class="t t-s">Norte</text><text x="208" y="259" class="t t-s t-mono" text-anchor="end">24,43</text>
+<rect x="26" y="272" width="188" height="25" rx="4" class="d-oper"/>
+<text x="32" y="289" class="t t-s t-mono">288271</text><text x="100" y="289" class="t t-s">Norte</text><text x="208" y="289" class="t t-s t-mono" text-anchor="end">30,18</text>
+<text x="32" y="319" class="t t-s t-mono">…</text><text x="100" y="319" class="t t-s">…</text><text x="208" y="319" class="t t-s t-mono" text-anchor="end">…</text>
+<text x="252" y="24" class="t t-xs t-b k-enl">1 · DIVIDIR (groupby)</text><text x="490" y="24" class="t t-xs t-b k-enl">2 · APLICAR (sum)</text><text x="694" y="24" class="t t-xs t-b k-enl">3 · COMBINAR</text>
+<path d="M222 190C236 190 236 72 250 72" class="ln" marker-end="url(#c4d1-m)"/>
+<rect x="252" y="36" width="200" height="72" rx="8" class="d-oper"/>
+<text x="266" y="64" class="t t-b">Norte</text><text x="266" y="84" class="t t-s t-m">3.042 tickets</text>
+<rect x="370" y="52" width="13" height="40" rx="2" class="caja"/>
+<rect x="388" y="52" width="13" height="40" rx="2" class="caja"/>
+<rect x="406" y="52" width="13" height="40" rx="2" class="caja"/>
+<rect x="424" y="52" width="13" height="40" rx="2" class="caja"/>
+<path d="M454 72H486" class="ln s-enl" style="stroke-width:2" marker-end="url(#c4d1-m)"/>
+<rect x="490" y="48" width="170" height="48" rx="8" class="c-enl"/>
+<text x="502" y="67" class="t t-s t-mono">sum(total)</text><text x="648" y="87" class="t t-b t-mono" text-anchor="end">51.800,30</text>
+<path d="M662 72C676 72 676 190 690 190" class="ln" marker-end="url(#c4d1-m)"/>
+<path d="M222 190C236 190 236 152 250 152" class="ln" marker-end="url(#c4d1-m)"/>
+<rect x="252" y="116" width="200" height="72" rx="8" class="d-casa"/>
+<text x="266" y="144" class="t t-b">Centro</text><text x="266" y="164" class="t t-s t-m">2.624 tickets</text>
+<rect x="370" y="132" width="13" height="40" rx="2" class="caja"/>
+<rect x="388" y="132" width="13" height="40" rx="2" class="caja"/>
+<rect x="406" y="132" width="13" height="40" rx="2" class="caja"/>
+<rect x="424" y="132" width="13" height="40" rx="2" class="caja"/>
+<path d="M454 152H486" class="ln s-enl" style="stroke-width:2" marker-end="url(#c4d1-m)"/>
+<rect x="490" y="128" width="170" height="48" rx="8" class="c-enl"/>
+<text x="502" y="147" class="t t-s t-mono">sum(total)</text><text x="648" y="167" class="t t-b t-mono" text-anchor="end">40.087,78</text>
+<path d="M662 152C676 152 676 190 690 190" class="ln" marker-end="url(#c4d1-m)"/>
+<path d="M222 190C236 190 236 232 250 232" class="ln" marker-end="url(#c4d1-m)"/>
+<rect x="252" y="196" width="200" height="72" rx="8" class="d-inet"/>
+<text x="266" y="224" class="t t-b">Oriente</text><text x="266" y="244" class="t t-s t-m">1.888 tickets</text>
+<rect x="370" y="212" width="13" height="40" rx="2" class="caja"/>
+<rect x="388" y="212" width="13" height="40" rx="2" class="caja"/>
+<rect x="406" y="212" width="13" height="40" rx="2" class="caja"/>
+<rect x="424" y="212" width="13" height="40" rx="2" class="caja"/>
+<path d="M454 232H486" class="ln s-enl" style="stroke-width:2" marker-end="url(#c4d1-m)"/>
+<rect x="490" y="208" width="170" height="48" rx="8" class="c-enl"/>
+<text x="502" y="227" class="t t-s t-mono">sum(total)</text><text x="648" y="247" class="t t-b t-mono" text-anchor="end">28.430,46</text>
+<path d="M662 232C676 232 676 190 690 190" class="ln" marker-end="url(#c4d1-m)"/>
+<path d="M222 190C236 190 236 312 250 312" class="ln" marker-end="url(#c4d1-m)"/>
+<rect x="252" y="276" width="200" height="72" rx="8" class="d-sis"/>
+<text x="266" y="304" class="t t-b">Sur</text><text x="266" y="324" class="t t-s t-m">1.759 tickets</text>
+<rect x="370" y="292" width="13" height="40" rx="2" class="caja"/>
+<rect x="388" y="292" width="13" height="40" rx="2" class="caja"/>
+<rect x="406" y="292" width="13" height="40" rx="2" class="caja"/>
+<rect x="424" y="292" width="13" height="40" rx="2" class="caja"/>
+<path d="M454 312H486" class="ln s-enl" style="stroke-width:2" marker-end="url(#c4d1-m)"/>
+<rect x="490" y="288" width="170" height="48" rx="8" class="c-enl"/>
+<text x="502" y="307" class="t t-s t-mono">sum(total)</text><text x="648" y="327" class="t t-b t-mono" text-anchor="end">24.688,91</text>
+<path d="M662 312C676 312 676 190 690 190" class="ln" marker-end="url(#c4d1-m)"/>
+<rect x="694" y="100" width="190" height="180" rx="8" class="caja"/>
+<text x="706" y="122" class="t t-xs t-b t-m">REGIÓN</text><text x="872" y="122" class="t t-xs t-b t-m" text-anchor="end">VENTAS US$</text>
+<rect x="700" y="136" width="178" height="27" rx="4" class="d-oper"/><text x="708" y="154" class="t t-s">Norte</text><text x="870" y="154" class="t t-s t-mono" text-anchor="end">51.800,30</text>
+<rect x="700" y="168" width="178" height="27" rx="4" class="d-casa"/><text x="708" y="186" class="t t-s">Centro</text><text x="870" y="186" class="t t-s t-mono" text-anchor="end">40.087,78</text>
+<rect x="700" y="200" width="178" height="27" rx="4" class="d-inet"/><text x="708" y="218" class="t t-s">Oriente</text><text x="870" y="218" class="t t-s t-mono" text-anchor="end">28.430,46</text>
+<rect x="700" y="232" width="178" height="27" rx="4" class="d-sis"/><text x="708" y="250" class="t t-s">Sur</text><text x="870" y="250" class="t t-s t-mono" text-anchor="end">24.688,91</text>
+<text x="694" y="306" class="t t-s t-mono">v.groupby("region")</text><text x="694" y="324" class="t t-s t-mono">  ["total"].sum()</text>
+<text x="694" y="352" class="t t-s t-m">9.313 filas → 4 filas</text>
+</svg></div><figcaption><b>Dividir, aplicar y combinar con los tickets de octubre.</b> A la izquierda, los 9.313 tickets de octubre de 2026, cada uno con su región (el color). Al centro, los cuatro grupos que arma <code>groupby("region")</code>, con cuántos tickets tiene cada uno, y la suma que se aplica a cada grupo por separado. A la derecha, la tabla combinada: cuatro filas, una por región. Son las cifras de octubre que Lorena firmó en el capítulo 01.</figcaption></figure><div class="prose"><p>Es la misma consulta que el capítulo 02 escribió en pandas, Polars y SQL; ahora interesa qué hace por dentro y qué puede salir mal. El resultado tiene cuatro filas: Norte US$ 51.800,30, Centro 40.087,78, Oriente 28.430,46 y Sur 24.688,91, que suman los US$ 145.007,45 de la cadena. El índice de la tabla nueva es la región. Si prefieres que la región quede como columna normal (para unirla o graficarla después), pide <code>groupby("region", as_index=False)</code> o agrega <code>.reset_index()</code> al final.</p><p>Se puede agrupar por más de una columna a la vez: <code>groupby(["region", "formato"])</code> arma un grupo por cada combinación que existe en los datos (ocho, en este caso). Y conviene saber dos detalles que causan sorpresas. Los valores nulos en la columna que agrupa se descartan por omisión (<code>dropna=False</code> los conserva como un grupo más). Y si agrupas por una columna categórica, pandas puede mostrar combinaciones vacías; <code>observed=True</code> muestra solo las que existen.</p></div></section>
+<section><h2>Agregaciones y funciones de ventana</h2><div class="prose"><p>Una <b>agregación</b> (<i>aggregation</i>) es una función que recibe muchos valores y devuelve uno: suma, conteo, promedio, mediana, mínimo, máximo, cantidad de valores distintos. Lorena no quiere solo la suma: quiere también cuántos tickets y el ticket promedio. Con la <b>agregación con nombre</b> (<i>named aggregation</i>) de pandas, cada columna del resultado dice de dónde sale y con qué función:</p><div class="code-copia"><pre><code>octubre.groupby("region").agg(
+    ventas=("total", "sum"),
+    tickets=("ticket_id", "count"),
+    ticket_promedio=("total", "mean"),
+    socios=("cliente_id", "nunique"),
+).round(2)</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>El Norte tiene 3.042 tickets con un promedio de US$ 17,03 y el Sur 1.759 con 14,04. (Ese ticket más bajo del Sur es el que preocupa a Hernán; el capítulo 05 muestra que la comparación esconde una trampa.) En Polars, la misma idea se escribe con una expresión por columna:</p><div class="code-copia"><pre><code>import polars as pl
+
+(pl.read_parquet("limpio/ventas.parquet")
+   .join(pl.read_parquet("limpio/tiendas.parquet"), on="tienda_id", how="left")
+   .filter(pl.col("fecha_hora").dt.strftime("%Y-%m") == "2026-10")
+   .group_by("region")
+   .agg(pl.col("total").sum().alias("ventas"),
+        pl.len().alias("tickets"),
+        pl.col("total").mean().alias("ticket_promedio")))</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>Ahora un pedido distinto: Hernán quiere saber qué parte de las ventas de su región hace cada tienda. Una agregación no sirve, porque colapsa las tiendas en una fila por región y se pierde el detalle. Lo que hace falta es calcular algo <b>por grupo</b> pero devolverlo <b>en cada fila</b>. Eso es una <b>función de ventana</b> (<i>window function</i>): mira un grupo de filas (la «ventana») para calcular un valor, pero no colapsa nada.</p></div><div class="analogia"><b>Imagínalo así</b><p>En una carrera, la tabla de posiciones por categoría no borra a ningún corredor: cada uno conserva su fila y al lado aparece su puesto dentro de su categoría y cuánto le sacó el ganador. Para calcular el puesto hay que mirar a toda la categoría, pero el resultado se anota corredor por corredor.</p></div><div class="prose"><p>En pandas, la herramienta es <code>transform</code>: aplica la función por grupo y devuelve una serie del mismo largo que la tabla original.</p><div class="code-copia"><pre><code>t = octubre.groupby(["region", "tienda_id"], as_index=False)["total"].sum()
+t["total_region"] = t.groupby("region")["total"].transform("sum")
+t["part_%"] = (t["total"] / t["total_region"] * 100).round(1)
+t["puesto"] = t.groupby("region")["total"].rank(ascending=False)</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div></div><figure class="fig fig-comparacion" id="04-diagrama-2"><div class="lienzo"><svg viewBox="0 0 900 360" style="min-width:720px" role="img" aria-label="Agregación frente a función de ventana: con la suma por región las seis tiendas se colapsan en dos filas; con transform cada tienda conserva su fila y recibe el total de su región y su participación">
+<defs><marker id="c4d2-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker></defs>
+<text x="20" y="22" class="t t-xs t-b t-m">VENTAS POR TIENDA · OCTUBRE 2026</text>
+<rect x="20" y="32" width="212" height="190" rx="8" class="caja"/>
+<text x="28" y="52" class="t t-xs t-b t-m">REGIÓN</text>
+<text x="92" y="52" class="t t-xs t-b t-m">TIENDA</text>
+<text x="148" y="52" class="t t-xs t-b t-m">VENTAS</text>
+<rect x="24" y="60" width="204" height="22" rx="4" class="d-oper"/>
+<text x="28" y="75" class="t t-s t-mono">Norte</text>
+<text x="92" y="75" class="t t-s t-mono">T01</text>
+<text x="148" y="75" class="t t-s t-mono">24.150,9</text>
+<rect x="24" y="86" width="204" height="22" rx="4" class="d-oper"/>
+<text x="28" y="101" class="t t-s t-mono">Norte</text>
+<text x="92" y="101" class="t t-s t-mono">T02</text>
+<text x="148" y="101" class="t t-s t-mono">21.371,2</text>
+<rect x="24" y="112" width="204" height="22" rx="4" class="d-oper"/>
+<text x="28" y="127" class="t t-s t-mono">Norte</text>
+<text x="92" y="127" class="t t-s t-mono">T03</text>
+<text x="148" y="127" class="t t-s t-mono">6.278,2</text>
+<rect x="24" y="138" width="204" height="22" rx="4" class="d-sis"/>
+<text x="28" y="153" class="t t-s t-mono">Sur</text>
+<text x="92" y="153" class="t t-s t-mono">T07</text>
+<text x="148" y="153" class="t t-s t-mono">12.826,4</text>
+<rect x="24" y="164" width="204" height="22" rx="4" class="d-sis"/>
+<text x="28" y="179" class="t t-s t-mono">Sur</text>
+<text x="92" y="179" class="t t-s t-mono">T08</text>
+<text x="148" y="179" class="t t-s t-mono">6.023,5</text>
+<rect x="24" y="190" width="204" height="22" rx="4" class="d-sis"/>
+<text x="28" y="205" class="t t-s t-mono">Sur</text>
+<text x="92" y="205" class="t t-s t-mono">T09</text>
+<text x="148" y="205" class="t t-s t-mono">5.839,1</text>
+<text x="300" y="22" class="t t-xs t-b k-enl">AGREGAR: COLAPSA</text>
+<path d="M236 90H296" class="ln s-enl" style="stroke-width:2" marker-end="url(#c4d2-m)"/>
+<rect x="300" y="32" width="156" height="86" rx="8" class="caja"/>
+<text x="308" y="52" class="t t-xs t-b t-m">REGIÓN</text>
+<text x="372" y="52" class="t t-xs t-b t-m">VENTAS</text>
+<rect x="304" y="60" width="148" height="22" rx="4" class="d-oper"/>
+<text x="308" y="75" class="t t-s t-mono">Norte</text>
+<text x="372" y="75" class="t t-s t-mono">51.800,3</text>
+<rect x="304" y="86" width="148" height="22" rx="4" class="d-sis"/>
+<text x="308" y="101" class="t t-s t-mono">Sur</text>
+<text x="372" y="101" class="t t-s t-mono">24.688,9</text>
+<text x="300" y="138" class="t t-s t-mono">.groupby("region")["total"]</text><text x="300" y="154" class="t t-s t-mono">  .sum()</text><text x="300" y="176" class="t t-s t-m">6 filas → 2 filas</text>
+<text x="490" y="22" class="t t-xs t-b k-enl">VENTANA: CONSERVA LAS FILAS</text>
+<path d="M236 214C320 260 420 250 486 200" class="ln s-enl" style="stroke-width:2" marker-end="url(#c4d2-m)"/>
+<rect x="490" y="32" width="294" height="190" rx="8" class="caja"/>
+<text x="498" y="52" class="t t-xs t-b t-m">REGIÓN</text>
+<text x="560" y="52" class="t t-xs t-b t-m">TIENDA</text>
+<text x="612" y="52" class="t t-xs t-b t-m">TOTAL REGIÓN</text>
+<text x="716" y="52" class="t t-xs t-b t-m">PART.</text>
+<rect x="494" y="60" width="286" height="22" rx="4" class="d-oper"/>
+<text x="498" y="75" class="t t-s t-mono">Norte</text>
+<text x="560" y="75" class="t t-s t-mono">T01</text>
+<text x="612" y="75" class="t t-s t-mono">51.800,3</text>
+<text x="716" y="75" class="t t-s t-mono">46,6 %</text>
+<rect x="494" y="86" width="286" height="22" rx="4" class="d-oper"/>
+<text x="498" y="101" class="t t-s t-mono">Norte</text>
+<text x="560" y="101" class="t t-s t-mono">T02</text>
+<text x="612" y="101" class="t t-s t-mono">51.800,3</text>
+<text x="716" y="101" class="t t-s t-mono">41,3 %</text>
+<rect x="494" y="112" width="286" height="22" rx="4" class="d-oper"/>
+<text x="498" y="127" class="t t-s t-mono">Norte</text>
+<text x="560" y="127" class="t t-s t-mono">T03</text>
+<text x="612" y="127" class="t t-s t-mono">51.800,3</text>
+<text x="716" y="127" class="t t-s t-mono">12,1 %</text>
+<rect x="494" y="138" width="286" height="22" rx="4" class="d-sis"/>
+<text x="498" y="153" class="t t-s t-mono">Sur</text>
+<text x="560" y="153" class="t t-s t-mono">T07</text>
+<text x="612" y="153" class="t t-s t-mono">24.688,9</text>
+<text x="716" y="153" class="t t-s t-mono">52,0 %</text>
+<rect x="494" y="164" width="286" height="22" rx="4" class="d-sis"/>
+<text x="498" y="179" class="t t-s t-mono">Sur</text>
+<text x="560" y="179" class="t t-s t-mono">T08</text>
+<text x="612" y="179" class="t t-s t-mono">24.688,9</text>
+<text x="716" y="179" class="t t-s t-mono">24,4 %</text>
+<rect x="494" y="190" width="286" height="22" rx="4" class="d-sis"/>
+<text x="498" y="205" class="t t-s t-mono">Sur</text>
+<text x="560" y="205" class="t t-s t-mono">T09</text>
+<text x="612" y="205" class="t t-s t-mono">24.688,9</text>
+<text x="716" y="205" class="t t-s t-mono">23,7 %</text>
+<text x="490" y="236" class="t t-s t-mono">.groupby("region")["total"]</text><text x="490" y="252" class="t t-s t-mono">  .transform("sum")</text><text x="490" y="274" class="t t-s t-m">6 filas → 6 filas: cada tienda sabe cuánto pesa</text>
+<rect x="20" y="292" width="860" height="52" rx="8" class="c-enl"/>
+<text x="36" y="314" class="t t-s"><tspan class="t-b">Otras ventanas:</tspan> puesto dentro del grupo (rank), acumulado (cumsum), diferencia con la fila anterior (diff),</text>
+<text x="36" y="332" class="t t-s">promedio móvil de 7 días (rolling). En Polars, cualquier expresión con .over("region").</text>
+</svg></div><figcaption><b>Agregar colapsa; una ventana conserva las filas.</b> A la izquierda, las ventas de octubre de las seis tiendas del Norte y del Sur. Al centro, la agregación: la suma por región deja dos filas y la tienda desaparece. A la derecha, la ventana: cada tienda conserva su fila y recibe el total de su región y su participación. Abajo, otras funciones de ventana frecuentes.</figcaption></figure><div class="prose"><p>En el Sur, T07 Sur Puerto hace el 52,0 % de las ventas de octubre; en el Norte, T01 y T02 se reparten casi en partes iguales el 88 %. Las ventanas más usadas son pocas: el <b>puesto</b> dentro del grupo (<code>rank</code>), el <b>acumulado</b> (<code>cumsum</code>), la <b>diferencia</b> con la fila anterior (<code>diff</code>, por ejemplo mes contra mes), el <b>desplazamiento</b> (<code>shift</code>, para traer el valor del año anterior al lado del actual) y el <b>promedio móvil</b> (<code>rolling</code>), que suaviza una serie diaria. En Polars, cualquier expresión se vuelve de ventana agregándole <code>.over("region")</code>, y en SQL existe la cláusula <code>OVER (PARTITION BY region)</code>.</p></div></section>
+<section><h2><i>Joins</i>: interno, izquierdo, completo y anti</h2><div class="prose"><p>Un <b>join</b> (unión) combina dos tablas por una <b>clave</b> (<i>key</i>): una o más columnas cuyo valor dice qué fila de una tabla corresponde a qué fila de la otra. Los tickets tienen <code>cliente_id</code>; los socios también. Unirlas pone el nombre y la fecha de alta del socio al lado de cada compra. La idea viene de las bases de datos relacionales (está a fondo en <a href="https://aaramirez.github.io/bases-de-datos/temario.html" target="_blank" rel="noopener">Bases de datos</a>), y pandas la hace con <code>merge</code>, Polars con <code>join</code>.</p></div><div class="analogia"><b>Imagínalo así</b><p>Una profesora tiene la lista de asistencia de un taller y la lista de inscritos. Al cruzarlas aparecen cuatro preguntas distintas: ¿quiénes vinieron y estaban inscritos?, ¿quiénes vinieron, inscritos o no?, ¿todos, vinieran o no?, ¿quiénes vinieron sin estar inscritos? Las dos listas son las mismas; lo que cambia es qué pregunta haces al cruzarlas. Cada pregunta es un tipo de join.</p></div><div class="prose"><p>Lo que cambia entre un tipo y otro es <b>qué pasa con las filas que no encuentran pareja</b>. Con los tickets a la izquierda y los socios a la derecha:</p><ul><li><b>Interno</b> (<i>inner join</i>): solo quedan las filas que encuentran pareja en las dos tablas. Los tickets anónimos y los de un cliente que no existe desaparecen.</li><li><b>Izquierdo</b> (<i>left join</i>): quedan todas las filas de la izquierda; si no encuentran pareja, las columnas de la derecha quedan vacías (<code>NaN</code> en pandas, <code>null</code> en Polars). Es el join de todos los días en análisis: la tabla de hechos (los tickets) manda y el número de filas no cambia.</li><li><b>Derecho</b> (<i>right join</i>): lo mismo, pero manda la derecha. Casi siempre se escribe como un izquierdo con las tablas al revés.</li><li><b>Completo</b> (<i>full outer join</i>): quedan todas las filas de las dos tablas, con vacíos donde falta la pareja. Es el join de auditoría: muestra todo lo que no calza.</li><li><b>Anti</b> (<i>anti join</i>): quedan solo las filas de la izquierda que <b>no</b> encuentran pareja, sin columnas de la derecha. Es la lista de lo que hay que investigar.</li><li><b>Semi</b> (<i>semi join</i>): quedan las filas de la izquierda que <b>sí</b> encuentran pareja, sin agregar columnas. Filtra sin unir.</li></ul></div><figure class="fig fig-comparacion" id="04-diagrama-3"><div class="lienzo"><svg viewBox="0 0 900 330" style="min-width:720px" role="img" aria-label="Cuatro tipos de join con dos círculos, ventas a la izquierda y clientes a la derecha: el interno conserva la intersección, el izquierdo todo ventas, el completo todo, y el anti solo la parte de ventas sin pareja; debajo, cuántas filas da cada uno con los datos de la cadena">
+<defs><clipPath id="c4d3-a0"><circle cx="90" cy="110" r="52"/></clipPath><clipPath id="c4d3-a1"><circle cx="310" cy="110" r="52"/></clipPath><clipPath id="c4d3-a2"><circle cx="530" cy="110" r="52"/></clipPath><clipPath id="c4d3-a3"><circle cx="750" cy="110" r="52"/></clipPath></defs>
+<rect x="20" y="20" width="204" height="290" rx="10" class="caja"/>
+<text x="32" y="42" class="t t-xs t-b k-enl">INTERNO (inner)</text>
+<circle cx="148" cy="110" r="52" clip-path="url(#c4d3-a0)" style="fill:var(--c-enl);fill-opacity:.55"/>
+<circle cx="90" cy="110" r="52" style="fill:none;stroke:var(--c-enl);stroke-width:1.6"/><circle cx="148" cy="110" r="52" style="fill:none;stroke:var(--muted);stroke-width:1.6"/>
+<text x="66" y="184" class="t t-s" text-anchor="middle">ventas</text><text x="172" y="184" class="t t-s" text-anchor="middle">clientes</text>
+<text x="32" y="226" class="t t-b">122.275 filas</text>
+<text x="32" y="248" class="t t-s t-m">pierde los anónimos y los 20</text>
+<text x="32" y="264" class="t t-s t-m">inexistentes</text>
+<rect x="240" y="20" width="204" height="290" rx="10" class="caja"/>
+<text x="252" y="42" class="t t-xs t-b k-enl">IZQUIERDO (left)</text>
+<circle cx="310" cy="110" r="52" style="fill:var(--c-enl);fill-opacity:.55"/>
+<circle cx="368" cy="110" r="52" clip-path="url(#c4d3-a1)" style="fill:var(--c-enl);fill-opacity:.55"/>
+<circle cx="310" cy="110" r="52" style="fill:none;stroke:var(--c-enl);stroke-width:1.6"/><circle cx="368" cy="110" r="52" style="fill:none;stroke:var(--muted);stroke-width:1.6"/>
+<text x="286" y="184" class="t t-s" text-anchor="middle">ventas</text><text x="392" y="184" class="t t-s" text-anchor="middle">clientes</text>
+<text x="252" y="226" class="t t-b">197.576 filas</text>
+<text x="252" y="248" class="t t-s t-m">las mismas que ventas, con</text>
+<text x="252" y="264" class="t t-s t-m">NaN donde no hay socio</text>
+<rect x="460" y="20" width="204" height="290" rx="10" class="caja"/>
+<text x="472" y="42" class="t t-xs t-b k-enl">COMPLETO (outer)</text>
+<circle cx="530" cy="110" r="52" style="fill:var(--c-enl);fill-opacity:.55"/>
+<circle cx="588" cy="110" r="52" style="fill:var(--c-enl);fill-opacity:.55"/>
+<circle cx="588" cy="110" r="52" clip-path="url(#c4d3-a2)" style="fill:var(--c-enl);fill-opacity:.55"/>
+<circle cx="530" cy="110" r="52" style="fill:none;stroke:var(--c-enl);stroke-width:1.6"/><circle cx="588" cy="110" r="52" style="fill:none;stroke:var(--muted);stroke-width:1.6"/>
+<text x="506" y="184" class="t t-s" text-anchor="middle">ventas</text><text x="612" y="184" class="t t-s" text-anchor="middle">clientes</text>
+<text x="472" y="226" class="t t-b">197.703 filas</text>
+<text x="472" y="248" class="t t-s t-m">suma los 127 socios que nunca</text>
+<text x="472" y="264" class="t t-s t-m">compraron</text>
+<rect x="680" y="20" width="204" height="290" rx="10" class="caja"/>
+<text x="692" y="42" class="t t-xs t-b k-enl">ANTI (anti)</text>
+<circle cx="750" cy="110" r="52" style="fill:var(--c-enl);fill-opacity:.55"/>
+<circle cx="808" cy="110" r="52" clip-path="url(#c4d3-a3)" style="fill:var(--card);fill-opacity:1"/>
+<circle cx="750" cy="110" r="52" style="fill:none;stroke:var(--c-enl);stroke-width:1.6"/><circle cx="808" cy="110" r="52" style="fill:none;stroke:var(--muted);stroke-width:1.6"/>
+<text x="726" y="184" class="t t-s" text-anchor="middle">ventas</text><text x="832" y="184" class="t t-s" text-anchor="middle">clientes</text>
+<text x="692" y="226" class="t t-b">75.301 filas</text>
+<text x="692" y="248" class="t t-s t-m">solo ventas sin socio: 75.281</text>
+<text x="692" y="264" class="t t-s t-m">anónimos y 20 inexistentes</text>
+</svg></div><figcaption><b>Cuatro joins entre ventas y clientes.</b> En cada recuadro, el círculo de la izquierda son los tickets y el de la derecha los socios; la intersección son los tickets cuyo socio existe. Lo sombreado es lo que llega al resultado. Debajo, cuántas filas da cada join con los datos limpios de la cadena: el interno pierde 75.301 tickets, el izquierdo conserva los 197.576, el completo suma los 127 socios que nunca compraron y el anti deja solo los tickets sin socio.</figcaption></figure><div class="prose"><p>Con los datos de la cadena, la diferencia no es académica. Un join interno entre tickets y socios deja 122.275 filas y US$ 1.873.234,18: si alguien calcula «las ventas» después de ese join, pierde más de un tercio de la cadena sin ver ningún error, porque el 38,1 % de los tickets es anónimo (el cliente no pasó su tarjeta). Por eso, para enriquecer los hechos con datos de una dimensión, el join correcto es el izquierdo.</p></div><div class="lab" id="04-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3><i>Joins</i> animados: une ventas con clientes y mira qué filas sobreviven</h3></div><p class="hint">Cinco tickets reales de la cadena (cuatro de T07 el 31 de julio de 2026, uno con un cliente que no existe) y cuatro socios del Club Ejemplo. Elige el tipo de join y mira qué filas llegan al resultado, cuáles quedan con NaN y cuáles se pierden; pulsa «paso a paso» para ver cómo cada ticket busca a su socio.</p><style>
+[id="04-lab-1"] .c4l1-mesa{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+[id="04-lab-1"] .c4l1-caja{overflow-x:auto}
+[id="04-lab-1"] .c4l1-t{width:100%;border-collapse:collapse;font:500 .8rem var(--f-mono)}
+[id="04-lab-1"] .c4l1-t caption{font:700 .78rem var(--f-display);text-align:left;padding-bottom:4px;color:var(--ink)}
+[id="04-lab-1"] .c4l1-t th{font:600 .68rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px}
+[id="04-lab-1"] .c4l1-t td{padding:4px 6px;border-top:1px solid var(--line);transition:background .35s,opacity .35s;white-space:nowrap}
+[id="04-lab-1"] .c4l1-t td.n{text-align:right}
+[id="04-lab-1"] tr.par td{background:var(--good-soft)}
+[id="04-lab-1"] tr.solo td{background:var(--warm-soft)}
+[id="04-lab-1"] tr.fuera td{opacity:.35;text-decoration:line-through}
+[id="04-lab-1"] tr.foco td{outline:2px solid var(--c-enl);outline-offset:-2px}
+[id="04-lab-1"] td.nulo{color:var(--warm);font-style:italic}
+[id="04-lab-1"] .c4l1-code{font:.78rem/1.5 var(--f-mono);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+[id="04-lab-1"] .c4l1-ley{display:flex;flex-wrap:wrap;gap:12px;font:500 .8rem var(--f-display);color:var(--muted)}
+[id="04-lab-1"] .c4l1-ley i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+@media (max-width:620px){[id="04-lab-1"] .c4l1-mesa{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion: reduce){[id="04-lab-1"] .c4l1-t td{transition:none}}
+</style>
+<div class="btns" role="group" aria-label="Tipo de join" id="c4l1-b">
+  <button type="button" data-j="inner" aria-pressed="true">Interno</button>
+  <button type="button" data-j="left" aria-pressed="false">Izquierdo</button>
+  <button type="button" data-j="right" aria-pressed="false">Derecho</button>
+  <button type="button" data-j="outer" aria-pressed="false">Completo</button>
+  <button type="button" data-j="anti" aria-pressed="false">Anti</button>
+  <button type="button" data-j="semi" aria-pressed="false">Semi</button>
+</div>
+<div class="btns"><button type="button" id="c4l1-paso">▶ Ver el join paso a paso</button></div>
+<div class="c4l1-mesa">
+  <div class="c4l1-caja"><table class="c4l1-t" id="c4l1-izq"></table></div>
+  <div class="c4l1-caja"><table class="c4l1-t" id="c4l1-der"></table></div>
+</div>
+<div class="c4l1-caja"><table class="c4l1-t" id="c4l1-res"></table></div>
+<div class="c4l1-ley"><span><i style="background:var(--good-soft);border:1px solid var(--good)"></i>encontró pareja</span><span><i style="background:var(--warm-soft);border:1px solid var(--warm)"></i>sobrevive sin pareja (NaN)</span><span><i style="background:var(--paper);border:1px solid var(--line)"></i>tachada: no llega al resultado</span></div>
+<pre class="c4l1-code" id="c4l1-code"></pre>
+<div class="readout texto" id="c4l1-out" aria-live="polite"></div></div><div class="prose"><p>El anti join merece un lugar especial en tu caja de herramientas, porque responde la pregunta que nadie hace: ¿qué se perdió? En pandas no tiene un nombre propio; se arma con un join izquierdo y la columna que agrega <code>indicator=True</code>:</p><div class="code-copia"><pre><code>m = ventas.merge(clientes[["cliente_id"]], on="cliente_id", how="left", indicator=True)
+inexistentes = m[(m["_merge"] == "left_only") &amp; m["cliente_id"].notna()]</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>Con los datos limpios aparecen los 20 tickets cuyo <code>cliente_id</code> no existe en el Club, como el 29945 o el 66322: alguien digitó un número de más (el 2994 y el 6632 sí existen). En Polars es directo: <code>ventas.join(clientes, on="cliente_id", how="anti")</code>.</p><p>El mismo truco encuentra un hueco que no se ve sumando. Si Mariana une el detalle con los tickets de <code>ventas.csv</code> y <code>ventas_oriente.csv</code> <b>sin</b> el reenvío que mandó Beatriz Lugo, el anti join del detalle contra los tickets devuelve 342 líneas de 123 tickets, todas de T09 entre el 8 y el 16 de septiembre de 2026, que valen US$ 1.520,55. El detalle sabe que esas compras ocurrieron; el archivo de ventas no las tenía.</p></div><div class="ml"><b>En la práctica</b><p><b>La regla de los dos números.</b> Desde ese día, Mariana anota dos números antes y después de cada join: cuántas filas y cuánto suma <code>total</code>. Si hizo un join izquierdo de tickets contra una dimensión y cualquiera de los dos cambió, algo está mal y no sigue hasta explicarlo. Y cada join que la deja con menos filas de las que esperaba va seguido de un anti join, para ver qué se perdió y por qué.</p></div></section>
+<section><h2>Las trampas de unir: claves repetidas y filas que se multiplican</h2><div class="prose"><p>El error más caro de unir no hace ruido. Mariana une los tickets con <code>clientes.csv</code> tal como llegó, sin la limpieza del capítulo 03, para sumar las ventas por tienda de inscripción. El código corre, el resultado se ve razonable y nadie sospecha. Pero entraron 197.576 tickets y salieron 198.120 filas, y la suma pasó de US$ 3.027.430,10 a US$ 3.035.627,96: aparecieron US$ 8.197,86 que nadie vendió.</p><p>La causa son las 25 filas que el sistema exportó dos veces. Cuando un ticket de Fabián Castillo, el socio 1544, busca su <code>cliente_id</code> a la derecha, encuentra <b>dos</b> filas idénticas, y el join hace lo que debe hacer un join: produce una fila por cada pareja. Sus 70 tickets se vuelven 140 filas.</p></div><div class="analogia"><b>Imagínalo así</b><p>Si en la lista de inscritos del taller alguien aparece dos veces por error, al cruzarla con la asistencia esa persona queda contada dos veces como presente. La lista de asistencia estaba bien y el cruce también: el problema era que la otra lista prometía una fila por persona y no la cumplía.</p></div><div class="prose"><p>Lo que se rompió es la <b>cardinalidad</b> (<i>cardinality</i>) del join: cuántas filas de un lado pueden corresponder a cuántas del otro. Hay cuatro casos:</p><ul><li><b>Uno a uno</b> (1:1): cada clave aparece una vez a cada lado. Por ejemplo, socios con una tabla de preferencias de cada socio.</li><li><b>Muchos a uno</b> (m:1): la clave se repite a la izquierda pero no a la derecha. Tickets contra socios, tickets contra tiendas, líneas contra productos. Es el caso normal de los hechos contra sus dimensiones, y <b>no cambia el número de filas</b> de la izquierda.</li><li><b>Uno a muchos</b> (1:m): al revés, por ejemplo tiendas contra tickets. El resultado tiene tantas filas como la derecha.</li><li><b>Muchos a muchos</b> (m:m): la clave se repite a los dos lados. Las filas se multiplican: cada fila de la izquierda se copia tantas veces como parejas tiene. Casi nunca es lo que se quiere.</li></ul></div><figure class="fig fig-esquema" id="04-diagrama-4"><div class="lienzo"><svg viewBox="0 0 900 330" style="min-width:720px" role="img" aria-label="Cardinalidad de un join: uno a uno, muchos a uno y la trampa de una clave repetida a la derecha, donde cada fila de la izquierda se copia tantas veces como parejas encuentra y las filas se multiplican">
+<rect x="20" y="20" width="280" height="292" rx="10" class="caja"/>
+<text x="32" y="42" class="t t-xs t-b k-enl">UNO A UNO (1:1)</text>
+<rect x="36" y="60" width="84" height="28" rx="5" class="c-enl"/><text x="78" y="79" class="t t-s t-mono" text-anchor="middle">2077</text>
+<rect x="36" y="100" width="84" height="28" rx="5" class="c-enl"/><text x="78" y="119" class="t t-s t-mono" text-anchor="middle">4788</text>
+<rect x="36" y="140" width="84" height="28" rx="5" class="c-enl"/><text x="78" y="159" class="t t-s t-mono" text-anchor="middle">5097</text>
+<rect x="210" y="60" width="74" height="28" rx="5" class="caja"/><text x="247" y="79" class="t t-s t-mono" text-anchor="middle">2077</text>
+<rect x="210" y="100" width="74" height="28" rx="5" class="caja"/><text x="247" y="119" class="t t-s t-mono" text-anchor="middle">4788</text>
+<rect x="210" y="140" width="74" height="28" rx="5" class="caja"/><text x="247" y="159" class="t t-s t-mono" text-anchor="middle">5097</text>
+<path d="M122 74L208 74" class="ln" style="stroke-width:1.6"/>
+<path d="M122 114L208 114" class="ln" style="stroke-width:1.6"/>
+<path d="M122 154L208 154" class="ln" style="stroke-width:1.6"/>
+<text x="32" y="246" class="t t-b">3 → 3 filas</text><text x="32" y="266" class="t t-s t-m">socio con su ficha extra</text>
+<text x="32" y="292" class="t t-s t-mono">validate="one_to_one"</text>
+<rect x="316" y="20" width="280" height="292" rx="10" class="caja"/>
+<text x="328" y="42" class="t t-xs t-b k-enl">MUCHOS A UNO (m:1)</text>
+<rect x="332" y="60" width="84" height="28" rx="5" class="c-enl"/><text x="374" y="79" class="t t-s t-mono" text-anchor="middle">270149</text>
+<rect x="332" y="100" width="84" height="28" rx="5" class="c-enl"/><text x="374" y="119" class="t t-s t-mono" text-anchor="middle">269494</text>
+<rect x="332" y="140" width="84" height="28" rx="5" class="c-enl"/><text x="374" y="159" class="t t-s t-mono" text-anchor="middle">270135</text>
+<rect x="332" y="180" width="84" height="28" rx="5" class="c-enl"/><text x="374" y="199" class="t t-s t-mono" text-anchor="middle">270142</text>
+<rect x="506" y="60" width="74" height="28" rx="5" class="caja"/><text x="543" y="79" class="t t-s t-mono" text-anchor="middle">2077</text>
+<rect x="506" y="100" width="74" height="28" rx="5" class="caja"/><text x="543" y="119" class="t t-s t-mono" text-anchor="middle">4788</text>
+<rect x="506" y="140" width="74" height="28" rx="5" class="caja"/><text x="543" y="159" class="t t-s t-mono" text-anchor="middle">5097</text>
+<path d="M418 74L504 74" class="ln" style="stroke-width:1.6"/>
+<path d="M418 114L504 74" class="ln" style="stroke-width:1.6"/>
+<path d="M418 154L504 114" class="ln" style="stroke-width:1.6"/>
+<path d="M418 194L504 154" class="ln" style="stroke-width:1.6"/>
+<text x="328" y="246" class="t t-b">4 → 4 filas</text><text x="328" y="266" class="t t-s t-m">tickets → socios: el caso normal</text>
+<text x="328" y="292" class="t t-s t-mono">validate="many_to_one"</text>
+<rect x="612" y="20" width="280" height="292" rx="10" class="caja"/>
+<text x="624" y="42" class="t t-xs t-b k-warm">LA TRAMPA: CLAVE REPETIDA</text>
+<rect x="628" y="60" width="84" height="28" rx="5" class="c-enl"/><text x="670" y="79" class="t t-s t-mono" text-anchor="middle">t1 · 1544</text>
+<rect x="628" y="100" width="84" height="28" rx="5" class="c-enl"/><text x="670" y="119" class="t t-s t-mono" text-anchor="middle">t2 · 1544</text>
+<rect x="628" y="140" width="84" height="28" rx="5" class="c-enl"/><text x="670" y="159" class="t t-s t-mono" text-anchor="middle">t3 · 1545</text>
+<rect x="628" y="180" width="84" height="28" rx="5" class="c-enl"/><text x="670" y="199" class="t t-s t-mono" text-anchor="middle">t4 · 1546</text>
+<rect x="802" y="60" width="74" height="28" rx="5" style="fill:var(--warm-soft);stroke:var(--warm)"/><text x="839" y="79" class="t t-s t-mono" text-anchor="middle">1544</text>
+<rect x="802" y="100" width="74" height="28" rx="5" style="fill:var(--warm-soft);stroke:var(--warm)"/><text x="839" y="119" class="t t-s t-mono" text-anchor="middle">1544</text>
+<rect x="802" y="140" width="74" height="28" rx="5" class="caja"/><text x="839" y="159" class="t t-s t-mono" text-anchor="middle">1545</text>
+<rect x="802" y="180" width="74" height="28" rx="5" class="caja"/><text x="839" y="199" class="t t-s t-mono" text-anchor="middle">1546</text>
+<path d="M714 74L800 74" class="ln s-warm" style="stroke-width:1.6"/>
+<path d="M714 74L800 114" class="ln s-warm" style="stroke-width:1.6"/>
+<path d="M714 114L800 74" class="ln s-warm" style="stroke-width:1.6"/>
+<path d="M714 114L800 114" class="ln s-warm" style="stroke-width:1.6"/>
+<path d="M714 154L800 154" class="ln" style="stroke-width:1.6"/>
+<path d="M714 194L800 194" class="ln" style="stroke-width:1.6"/>
+<text x="624" y="246" class="t t-b">4 → 6 filas</text><text x="624" y="266" class="t t-s t-m">el socio 1544 está dos veces</text>
+<text x="624" y="292" class="t t-s t-mono">validate="many_to_one"</text>
+<text x="880" y="292" class="t t-s k-warm" text-anchor="end">→ MergeError</text>
+</svg></div><figcaption><b>Cardinalidad: cuántas parejas encuentra cada fila.</b> A la izquierda, uno a uno: tres socios con tres fichas, tres filas. Al centro, muchos a uno: cuatro tickets (dos de Gloria Méndez) contra tres socios, cuatro filas. A la derecha, la trampa: el socio 1544 está dos veces en <code>clientes.csv</code>, así que cada uno de sus tickets encuentra dos parejas (líneas rojas) y cuatro tickets se vuelven seis filas. Abajo, el <code>validate</code> que corresponde a cada caso; en el tercero, pandas se detiene con un error.</figcaption></figure><div class="prose"><p>La defensa tiene tres capas, de la más barata a la más completa:</p><ol class="steps"><li><span><b>Declarar la cardinalidad esperada.</b> <code>merge(..., validate="many_to_one")</code> revisa antes de unir que la clave sea única a la derecha y, si no lo es, se detiene con <code>MergeError: Merge keys are not unique in right dataset</code>. Polars tiene el mismo parámetro: <code>validate="m:1"</code>. Un error que avisa vale más que una cifra equivocada que nadie revisa.</span></li><li><span><b>Contar filas antes y después.</b> Un join izquierdo m:1 no puede cambiar el número de filas. Un <code>assert len(m) == len(ventas)</code> en el script lo convierte en una prueba automática.</span></li><li><span><b>Revisar la clave antes de unir.</b> <code>clientes["cliente_id"].is_unique</code> o <code>clientes["cliente_id"].duplicated().sum()</code> responden en una línea si la promesa se cumple.</span></li></ol></div><div class="lab" id="04-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Una clave repetida que duplica las ventas: encuentra el error</h3></div><p class="hint">Los tickets de cinco socios se unen con <code>clientes.csv</code> crudo. Mira cómo cambian las filas y el total, haz clic en las filas de clientes para encontrar la clave repetida y prueba los dos arreglos: validar la cardinalidad y quitar duplicados antes de unir.</p><style>
+[id="04-lab-2"] .c4l2-met{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:8px}
+[id="04-lab-2"] .c4l2-met div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper)}
+[id="04-lab-2"] .c4l2-met b{display:block;font:700 1.1rem var(--f-display)}
+[id="04-lab-2"] .c4l2-met b.mal{color:var(--warm)} [id="04-lab-2"] .c4l2-met b.bien{color:var(--good)}
+[id="04-lab-2"] .c4l2-met small{font:600 .68rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+[id="04-lab-2"] .c4l2-mesa{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+[id="04-lab-2"] .c4l2-caja{overflow-x:auto}
+[id="04-lab-2"] .c4l2-t{width:100%;border-collapse:collapse;font:500 .8rem var(--f-mono)}
+[id="04-lab-2"] .c4l2-t caption{font:700 .78rem var(--f-display);text-align:left;padding-bottom:4px;color:var(--ink)}
+[id="04-lab-2"] .c4l2-t th{font:600 .68rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px}
+[id="04-lab-2"] .c4l2-t td{padding:4px 6px;border-top:1px solid var(--line);white-space:nowrap}
+[id="04-lab-2"] .c4l2-t td.n{text-align:right}
+[id="04-lab-2"] .c4l2-t tr{cursor:pointer}
+[id="04-lab-2"] .c4l2-t tr.ojo td{background:var(--warm-soft)}
+[id="04-lab-2"] .c4l2-t tr.ok td{background:var(--good-soft)}
+[id="04-lab-2"] .c4l2-t tr.tachada td{opacity:.35;text-decoration:line-through}
+@media (max-width:620px){[id="04-lab-2"] .c4l2-mesa{grid-template-columns:minmax(0,1fr)}}
+</style>
+<div class="c4l2-met">
+  <div><small>Filas de ventas</small><b id="c4l2-f0"></b></div>
+  <div><small>Filas tras el join</small><b id="c4l2-f1"></b></div>
+  <div><small>Total antes</small><b id="c4l2-t0"></b></div>
+  <div><small>Total después</small><b id="c4l2-t1"></b></div>
+</div>
+<div class="c4l2-mesa">
+  <div class="c4l2-caja"><table class="c4l2-t" id="c4l2-v"></table></div>
+  <div class="c4l2-caja"><table class="c4l2-t" id="c4l2-c"></table></div>
+</div>
+<div class="btns" role="group" aria-label="Cómo se une" id="c4l2-fix">
+  <button type="button" data-f="nada" aria-pressed="true">Join directo</button>
+  <button type="button" data-f="validar" aria-pressed="false">Con validate="many_to_one"</button>
+  <button type="button" data-f="dedup" aria-pressed="false">drop_duplicates() antes de unir</button>
+</div>
+<div class="c4l2-caja"><table class="c4l2-t" id="c4l2-r"></table></div>
+<div class="readout texto" id="c4l2-out" aria-live="polite"></div></div><div class="prose"><p>Hay otras trampas, menos frecuentes pero igual de silenciosas:</p><ul><li><b>Tipos distintos en la clave.</b> Si <code>cliente_id</code> es entero a un lado y texto al otro (<code>2077</code> contra <code>"2077"</code>), pandas se niega a unir o no encuentra ninguna pareja. Si los nombres de tienda tienen un espacio al final o mayúsculas distintas, tampoco coinciden: limpia las claves antes.</li><li><b>Claves vacías.</b> Un <code>cliente_id</code> nulo no encuentra pareja, y eso es correcto: el ticket anónimo no es de nadie. Pero si la otra tabla también tiene claves nulas, conviene revisar cómo las trata cada herramienta antes de confiar.</li><li><b>Columnas con el mismo nombre.</b> Si las dos tablas tienen una columna <code>tienda_id</code> que no es la clave (en <code>clientes</code> es la tienda de inscripción, en <code>ventas</code> la tienda de la compra), el resultado trae <code>tienda_id_x</code> y <code>tienda_id_y</code>. Usa <code>suffixes=("_venta", "_alta")</code> para que el nombre diga qué es cada una.</li></ul></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Agrupar, unir y remodelar las ventas de la cadena</h3></div><p>Vas a correr en tu computadora todo lo del capítulo sobre los datos limpios: ventas por región, una ventana, la trampa de la clave repetida, los anti joins y el reporte de Hernán en ancho y en largo. Necesitas la carpeta <code>datos-cadena</code> con <code>limpio/</code>, que dejó el script de limpieza del capítulo 03, y el entorno virtual del capítulo 02.</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Guarda este script como <code>unir.py</code> en la carpeta <code>datos-cadena</code>.</span></li></ol><div class="code-copia"><pre><code>"""Agrupar, unir y remodelar las ventas de Almacenes Ejemplo (capítulo 04)."""
+from pathlib import Path
+
+import pandas as pd
+import polars as pl
+
+CARPETA = Path.home() / "datos-cadena"
+L, C = CARPETA / "limpio", CARPETA / "crudo"
+ventas = pd.read_parquet(L / "ventas.parquet")
+tiendas = pd.read_parquet(L / "tiendas.parquet")
+clientes = pd.read_parquet(L / "clientes.parquet")
+
+# 1. Agrupar: ventas de octubre de 2026 por región
+v = ventas.merge(tiendas, on="tienda_id", how="left", validate="many_to_one")
+octubre = v[(v["fecha_hora"] &gt;= "2026-10-01") &amp; (v["fecha_hora"] &lt; "2026-11-01")]
+print(octubre.groupby("region").agg(ventas=("total", "sum"), tickets=("ticket_id", "count"),
+                                    ticket_promedio=("total", "mean")).round(2), "\n")
+
+# 2. Ventana: participación de cada tienda dentro de su región
+t = octubre.groupby(["region", "tienda_id"], as_index=False)["total"].sum()
+t["part_%"] = (t["total"] / t.groupby("region")["total"].transform("sum") * 100).round(1)
+print(t, "\n")
+
+# 3. La trampa: unir con clientes.csv crudo (con 25 filas repetidas)
+crudo = pd.read_csv(C / "clientes.csv")
+m = ventas.merge(crudo, on="cliente_id", how="left")
+print(f"filas: {len(ventas):,} -&gt; {len(m):,} · total: {ventas['total'].sum():,.2f} -&gt; {m['total'].sum():,.2f}")
+try:
+    ventas.merge(crudo, on="cliente_id", how="left", validate="many_to_one")
+except pd.errors.MergeError as e:
+    print("validate lo detiene:", str(e).splitlines()[0])
+ok = ventas.merge(clientes, on="cliente_id", how="left", validate="many_to_one", indicator=True)
+print("con clientes limpios:", len(ok), "filas\n", ok["_merge"].value_counts(), "\n")
+
+# 4. Anti joins: lo que no calza
+inexistentes = ok[(ok["_merge"] == "left_only") &amp; ok["cliente_id"].notna()]
+print("tickets con un cliente que no existe:", len(inexistentes), inexistentes["cliente_id"].head(5).tolist())
+detalle = pd.read_parquet(L / "detalle.parquet")
+sin_reenvio = pd.concat([pd.read_csv(C / "ventas.csv"), pd.read_csv(C / "ventas_oriente.csv", sep=";", decimal=",")])
+huerfanas = detalle[~detalle["ticket_id"].isin(sin_reenvio["ticket_id"])]
+print("líneas del detalle sin ticket (antes del reenvío):", len(huerfanas), "de", huerfanas["ticket_id"].nunique(), "tickets\n")
+
+# 5. Remodelar: el reporte de Hernán, de largo a ancho y de vuelta
+sur = v[(v["region"] == "Sur") &amp; (v["fecha_hora"] &gt;= "2026-08-01")].copy()
+sur["mes"] = sur["fecha_hora"].dt.strftime("%Y-%m")
+ancho = sur.pivot_table(index="tienda_id", columns="mes", values="total", aggfunc="sum").round(0)
+print(ancho, "\n")
+largo = ancho.reset_index().melt(id_vars="tienda_id", var_name="mes", value_name="ventas")
+print(largo.shape, "\n")
+
+# 6. Tabla dinámica con totales y la misma agregación en Polars
+print(pd.crosstab(octubre["region"], octubre["medio_pago"], values=octubre["total"], aggfunc="sum",
+                  margins=True, margins_name="Total").round(0), "\n")
+print(pl.read_parquet(L / "ventas.parquet")
+      .join(pl.read_parquet(L / "tiendas.parquet"), on="tienda_id", how="left", validate="m:1")
+      .filter(pl.col("fecha_hora").dt.strftime("%Y-%m") == "2026-10")
+      .group_by("region").agg(pl.col("total").sum().round(2).alias("ventas"))
+      .sort("ventas", descending=True))</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Con el entorno activado, córrelo:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python unir.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 unir.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Compara las cifras de la primera tabla con las de Lorena y las de la última (Polars) con las de pandas.</span></li><li><span>Cambia <code>how="left"</code> por <code>how="inner"</code> en la línea de <code>ok = …</code> y vuelve a correrlo: anota cuántas filas quedan.</span></li></ol><p><b>Qué observar:</b> las ventas por región de octubre son las del capítulo 01 (Norte US$ 51.800,30, Sur 24.688,91) en pandas y en Polars. Con <code>clientes.csv</code> crudo, 197.576 tickets se vuelven 198.120 filas y aparecen US$ 8.197,86 de más, y <code>validate</code> se detiene con el mensaje de claves repetidas. Con los clientes limpios, el join izquierdo conserva las 197.576 filas: 122.275 encuentran socio y 75.301 no (75.281 anónimos y los 20 inexistentes). Sin el reenvío de T09 hay 342 líneas huérfanas de 123 tickets. La tabla dinámica por medio de pago suma un poco menos que el total de octubre porque los tickets sin medio de pago quedan fuera de las columnas; es un buen ejemplo de por qué conviene comparar siempre con el total.</p></div></section>
+<section><h2>Remodelar: de ancho a largo y de largo a ancho</h2><div class="prose"><p>La planilla de Hernán tiene una fila por tienda del Sur (T07, T08, T09) y una columna por mes (agosto, septiembre y octubre de 2026), con las ventas en cada celda. El capítulo 03 la llamó <b>formato ancho</b> (<i>wide format</i>): cómoda para leer, porque de un vistazo comparas los meses de una tienda, pero contraria a los <b>datos ordenados</b> (<i>tidy data</i>), que piden una variable por columna, y aquí hay una variable, el mes, escondida en los nombres de tres columnas. Para agrupar por mes, filtrar meses o darle un color a cada mes en un gráfico, hace falta el <b>formato largo</b> (<i>long format</i>): una fila por tienda y mes, con columnas <code>tienda</code>, <code>mes</code> y <code>ventas</code>.</p></div><div class="analogia"><b>Imagínalo así</b><p>Una planilla de notas de colegio tiene un alumno por fila y una columna por materia: perfecta para la reunión de padres. Pero para calcular el promedio por materia de todo el curso, o ver qué materia tiene más notas rojas, es más cómodo una lista larga con tres columnas, «alumno, materia, nota». Es la misma información, dispuesta para otra pregunta.</p></div><div class="prose"><p>Pasar de ancho a largo es <b>despivotar</b> (<i>melt</i> o <i>unpivot</i>): las columnas de meses se apilan en una sola columna <code>mes</code> y sus valores en una columna <code>ventas</code>. Pasar de largo a ancho es <b>pivotar</b> (<i>pivot</i>): los valores de una columna se vuelven nombres de columnas.</p><div class="code-copia"><pre><code>largo = ancho.melt(id_vars="tienda", var_name="mes", value_name="ventas")
+ancho_otra_vez = largo.pivot(index="tienda", columns="mes", values="ventas")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div></div><figure class="fig fig-esquema" id="04-diagrama-5"><div class="lienzo"><svg viewBox="0 0 900 380" style="min-width:720px" role="img" aria-label="El reporte de Hernán en formato ancho, una fila por tienda y un mes por columna, se convierte con melt en formato largo, una fila por tienda y mes, y vuelve con pivot">
+<defs><marker id="c4d5-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker></defs>
+<text x="20" y="24" class="t t-xs t-b t-m">ANCHO: EL REPORTE DE HERNÁN (3 × 4)</text>
+<rect x="20" y="34" width="320" height="140" rx="8" class="caja"/>
+<text x="32" y="58" class="t t-xs t-b t-m">TIENDA</text>
+<text x="108" y="58" class="t t-xs t-b t-m">2026-08</text>
+<text x="184" y="58" class="t t-xs t-b t-m">2026-09</text>
+<text x="260" y="58" class="t t-xs t-b t-m">2026-10</text>
+<text x="32" y="88" class="t t-s t-mono">T07</text>
+<rect x="104" y="70" width="68" height="26" rx="4" class="c-red"/>
+<text x="108" y="88" class="t t-s t-mono">13.083</text>
+<rect x="180" y="70" width="68" height="26" rx="4" class="c-fis"/>
+<text x="184" y="88" class="t t-s t-mono">11.938</text>
+<rect x="256" y="70" width="68" height="26" rx="4" class="c-tra"/>
+<text x="260" y="88" class="t t-s t-mono">12.826</text>
+<text x="32" y="120" class="t t-s t-mono">T08</text>
+<rect x="104" y="102" width="68" height="26" rx="4" class="c-red"/>
+<text x="108" y="120" class="t t-s t-mono">6.315</text>
+<rect x="180" y="102" width="68" height="26" rx="4" class="c-fis"/>
+<text x="184" y="120" class="t t-s t-mono">5.740</text>
+<rect x="256" y="102" width="68" height="26" rx="4" class="c-tra"/>
+<text x="260" y="120" class="t t-s t-mono">6.023</text>
+<text x="32" y="152" class="t t-s t-mono">T09</text>
+<rect x="104" y="134" width="68" height="26" rx="4" class="c-red"/>
+<text x="108" y="152" class="t t-s t-mono">5.953</text>
+<rect x="180" y="134" width="68" height="26" rx="4" class="c-fis"/>
+<text x="184" y="152" class="t t-s t-mono">5.189</text>
+<rect x="256" y="134" width="68" height="26" rx="4" class="c-tra"/>
+<text x="260" y="152" class="t t-s t-mono">5.839</text>
+<text x="20" y="200" class="t t-s">Cómodo para leer: de un vistazo comparas meses.</text><text x="20" y="220" class="t t-s t-m">Incómodo para analizar: el «mes» está escondido</text><text x="20" y="238" class="t t-s t-m">en los nombres de las columnas.</text>
+<text x="20" y="276" class="t t-s t-mono">ancho.melt(id_vars="tienda",</text><text x="20" y="294" class="t t-s t-mono">  var_name="mes", value_name="ventas")</text>
+<text x="20" y="324" class="t t-s t-mono">largo.pivot(index="tienda",</text><text x="20" y="342" class="t t-s t-mono">  columns="mes", values="ventas")</text>
+<path d="M350 84H446" class="ln s-enl" style="stroke-width:2" marker-end="url(#c4d5-m)"/><text x="356" y="74" class="t t-s t-mono">melt</text>
+<path d="M446 140H350" class="ln s-enl" style="stroke-width:2" marker-end="url(#c4d5-m)"/><text x="356" y="160" class="t t-s t-mono">pivot</text>
+<text x="460" y="24" class="t t-xs t-b t-m">LARGO: UNA FILA POR TIENDA Y MES (9 × 3)</text>
+<rect x="460" y="34" width="250" height="334" rx="8" class="caja"/>
+<text x="472" y="58" class="t t-xs t-b t-m">TIENDA</text>
+<text x="548" y="58" class="t t-xs t-b t-m">MES</text>
+<text x="624" y="58" class="t t-xs t-b t-m">VENTAS</text>
+<rect x="544" y="68" width="72" height="26" rx="4" class="c-red"/>
+<text x="472" y="86" class="t t-s t-mono">T07</text><text x="548" y="86" class="t t-s t-mono">2026-08</text><text x="626" y="86" class="t t-s t-mono">13.083</text>
+<rect x="544" y="100" width="72" height="26" rx="4" class="c-red"/>
+<text x="472" y="118" class="t t-s t-mono">T08</text><text x="548" y="118" class="t t-s t-mono">2026-08</text><text x="626" y="118" class="t t-s t-mono">6.315</text>
+<rect x="544" y="132" width="72" height="26" rx="4" class="c-red"/>
+<text x="472" y="150" class="t t-s t-mono">T09</text><text x="548" y="150" class="t t-s t-mono">2026-08</text><text x="626" y="150" class="t t-s t-mono">5.953</text>
+<rect x="544" y="164" width="72" height="26" rx="4" class="c-fis"/>
+<text x="472" y="182" class="t t-s t-mono">T07</text><text x="548" y="182" class="t t-s t-mono">2026-09</text><text x="626" y="182" class="t t-s t-mono">11.938</text>
+<rect x="544" y="196" width="72" height="26" rx="4" class="c-fis"/>
+<text x="472" y="214" class="t t-s t-mono">T08</text><text x="548" y="214" class="t t-s t-mono">2026-09</text><text x="626" y="214" class="t t-s t-mono">5.740</text>
+<rect x="544" y="228" width="72" height="26" rx="4" class="c-fis"/>
+<text x="472" y="246" class="t t-s t-mono">T09</text><text x="548" y="246" class="t t-s t-mono">2026-09</text><text x="626" y="246" class="t t-s t-mono">5.189</text>
+<rect x="544" y="260" width="72" height="26" rx="4" class="c-tra"/>
+<text x="472" y="278" class="t t-s t-mono">T07</text><text x="548" y="278" class="t t-s t-mono">2026-10</text><text x="626" y="278" class="t t-s t-mono">12.826</text>
+<rect x="544" y="292" width="72" height="26" rx="4" class="c-tra"/>
+<text x="472" y="310" class="t t-s t-mono">T08</text><text x="548" y="310" class="t t-s t-mono">2026-10</text><text x="626" y="310" class="t t-s t-mono">6.023</text>
+<rect x="544" y="324" width="72" height="26" rx="4" class="c-tra"/>
+<text x="472" y="342" class="t t-s t-mono">T09</text><text x="548" y="342" class="t t-s t-mono">2026-10</text><text x="626" y="342" class="t t-s t-mono">5.839</text>
+<text x="726" y="74" class="t t-s t-b">Ordenado (tidy):</text><text x="726" y="92" class="t t-s">cada columna es</text><text x="726" y="110" class="t t-s">una variable.</text>
+<text x="726" y="146" class="t t-s t-m">Ahora sí se puede</text><text x="726" y="164" class="t t-s t-m">agrupar por mes,</text><text x="726" y="182" class="t t-s t-m">filtrar meses o</text><text x="726" y="200" class="t t-s t-m">pintar color="mes"</text><text x="726" y="218" class="t t-s t-m">en un gráfico.</text>
+<text x="726" y="262" class="t t-s t-m">En Polars:</text><text x="726" y="280" class="t t-s t-mono">unpivot / pivot</text>
+</svg></div><figcaption><b>El reporte de Hernán en ancho y en largo.</b> A la izquierda, el formato ancho: tres tiendas del Sur por tres meses de 2026, con las ventas ya conciliadas con la oficina y redondeadas a dólares (cada color es un mes). A la derecha, el mismo contenido en formato largo: nueve filas, una por tienda y mes, con el mes como columna. Las flechas son las dos operaciones que van y vuelven: <code>melt</code> y <code>pivot</code>, con su código abajo a la izquierda.</figcaption></figure><div class="prose"><p>En Polars, las dos operaciones se llaman <code>unpivot</code> y <code>pivot</code> (<code>df.unpivot(index="tienda", variable_name="mes", value_name="ventas")</code>), y en DuckDB existen como sentencias SQL <code>UNPIVOT</code> y <code>PIVOT</code>. Dos cuidados. <code>pivot</code> exige que cada combinación de índice y columna aparezca una sola vez: si hay dos filas de T07 en agosto, falla con <code>ValueError: Index contains duplicate entries</code>, porque no sabe cuál poner en la celda. Y el formato ancho tiende a llenarse de vacíos: si una tienda no vendió un mes, la celda queda <code>NaN</code>, mientras que en largo esa fila simplemente no existe.</p><p>El reporte de Hernán, por cierto, no cuadraba con el de la oficina por una razón que ya conoces: su hoja de septiembre de T09 no tenía los nueve días del reenvío de Beatriz. Pasado a largo y unido con las cifras de la oficina por tienda y mes, la diferencia apareció sola en una fila.</p></div></section>
+<section><h2>Tablas dinámicas sin hoja de cálculo</h2><div class="prose"><p>Quien trabaja con hojas de cálculo conoce la <b>tabla dinámica</b> (<i>pivot table</i>): se arrastra una columna a las filas, otra a las columnas, un valor al centro y se elige cómo resumirlo. Es una agrupación por dos variables y un pivote, todo junto. En pandas es una sola función:</p><div class="code-copia"><pre><code>pd.pivot_table(octubre, index="region", columns="medio_pago", values="total",
+               aggfunc="sum", margins=True, margins_name="Total")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><p>A diferencia de <code>pivot</code>, <code>pivot_table</code> sí admite filas repetidas, porque las agrega con <code>aggfunc</code> (suma, promedio, conteo o una lista de varias). <code>margins=True</code> agrega una fila y una columna de totales. Para contar en vez de sumar, <code>pd.crosstab(octubre["region"], octubre["medio_pago"])</code> arma la <b>tabla de contingencia</b> (<i>contingency table</i>) directamente, y con <code>normalize="index"</code> la convierte en porcentajes por fila: en octubre, la tarjeta ronda la mitad de las ventas en las cuatro regiones y la transferencia no llega al 11 %.</p><p>¿Por qué no hacerlo en la hoja de cálculo, si ya se sabe? Por las mismas razones del registro de limpieza del capítulo 03: el código queda escrito, se puede revisar, corre igual el mes que viene con datos nuevos y no depende de que alguien recuerde qué campos arrastró. Una tabla dinámica en Python es una línea que se versiona; en una planilla, es un estado de la pantalla.</p></div><div class="lab" id="04-lab-3"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Agrupar, unir y remodelar con pandas y Polars en la página</h3></div><p class="hint">Una muestra de 902 tickets de 2026 con sus tiendas y socios. Elige un ejemplo (agrupar, ventana, unir con verificación, remodelar, tabla dinámica o Polars), edita el código y ejecútalo: Python corre en tu navegador. Antes de cargarlo ves el resultado guardado de cada ejemplo.</p><style>
+[id="04-lab-3"] .c4l3-cod{width:100%;box-sizing:border-box;min-height:12em;font:.82rem/1.45 var(--f-mono);padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);resize:vertical;tab-size:4}
+[id="04-lab-3"] .c4l3-sal{font:.8rem var(--f-mono);background:var(--paper);border-radius:8px;padding:8px 10px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+[id="04-lab-3"] .c4l3-sal.err{color:var(--warm)}
+[id="04-lab-3"] .c4l3-est{font:500 .85rem var(--f-display);color:var(--muted);margin:0}
+[id="04-lab-3"] .c4l3-est.ok{color:var(--good)} [id="04-lab-3"] .c4l3-est.warn{color:var(--warm)}
+[id="04-lab-3"] .c4l3-tab{overflow-x:auto}
+[id="04-lab-3"] .c4l3-tab td,[id="04-lab-3"] .c4l3-tab th{font-size:.8rem;padding:4px 8px;white-space:nowrap}
+[id="04-lab-3"] .c4l3-img img{max-width:100%;height:auto;display:block;background:#fff;border-radius:8px}
+</style>
+<div class="opciones"><label>Ejemplo
+  <select id="c4l3-ej"><option value="0">Agrupar: ventas por región</option><option value="1">Ventana: participación de cada tienda en su región</option><option value="2">Unir y verificar: indicator y validate</option><option value="3">Remodelar: de largo a ancho y de vuelta</option><option value="4">Tabla dinámica: región × medio de pago</option><option value="5">Lo mismo en Polars</option></select></label></div>
+<textarea id="c4l3-cod" class="c4l3-cod" spellcheck="false" aria-label="Código de Python que puedes editar"></textarea>
+<div class="btns">
+  <button type="button" class="primary" id="c4l3-cargar">Cargar Python (unos 40 MB, con Polars · tarda unos segundos)</button>
+  <button type="button" id="c4l3-correr" disabled>Ejecutar (Ctrl+Enter)</button>
+</div>
+<p class="c4l3-est" id="c4l3-est" aria-live="polite">Python sin cargar · mientras tanto ves el resultado guardado</p>
+<pre class="c4l3-sal" id="c4l3-sal" hidden></pre>
+<div class="c4l3-img" id="c4l3-img" hidden></div>
+<div class="c4l3-tab" id="c4l3-tab"></div>
+<div class="readout texto" id="c4l3-out" aria-live="polite"></div></div><div class="caso"><b>Un caso real</b><p><b>El informe que contaba dos veces.</b> Un caso que se repite en muchas empresas, con distintos nombres: un equipo de ventas une los pedidos con una tabla de clientes que, después de una migración, tenía algunos clientes con dos filas (una por cada sistema de origen). Nadie validó la cardinalidad, el informe mostró un crecimiento que no existía y se pagaron comisiones sobre ventas duplicadas antes de que alguien notara que la suma no cuadraba con contabilidad. La corrección técnica fue una línea (<code>validate</code>); la lección fue organizacional: toda cifra que sale de un join se concilia contra una fuente independiente antes de usarse para pagar o decidir.</p></div></section>
+<section><h2>La idea clave</h2><div class="prose"><p>Casi todo análisis es una combinación de tres operaciones. <b>Agrupar</b> divide la tabla por una o más columnas, aplica una función a cada grupo y combina los resultados; las <b>funciones de ventana</b> calculan por grupo sin colapsar las filas. <b>Unir</b> trae columnas de otra tabla por una clave, y el tipo de join decide qué pasa con lo que no encuentra pareja: el izquierdo es el de todos los días y el anti el que muestra lo que se perdió. <b>Remodelar</b> cambia la forma sin cambiar el contenido: largo para analizar, ancho para leer. Y una regla que no se negocia: después de cada unión, cuenta las filas y la suma, y explica cualquier diferencia antes de seguir.</p></div></section>
+<section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Qué diferencia hay entre <code>groupby("region")["total"].sum()</code> y <code>groupby("region")["total"].transform("sum")</code>?</summary><p>La primera devuelve una fila por región (agrega y colapsa). La segunda devuelve el total de la región repetido en cada fila original (función de ventana): la tabla conserva su largo y puedes calcular participaciones.</p></details><details><summary>Mariana une los tickets con los socios usando un join interno y suma <code>total</code>. ¿Por qué la cifra es mucho menor que la de la cadena?</summary><p>Porque el join interno descarta los tickets sin pareja: los 75.281 anónimos (38,1 %) y los 20 con un cliente inexistente. Para enriquecer los tickets sin perderlos se usa un join izquierdo.</p></details><details><summary>Un join izquierdo de 197.576 tickets contra una tabla de socios devuelve 198.120 filas. ¿Qué pasó y cómo lo habría evitado?</summary><p>La clave está repetida en la tabla de socios (algunos aparecen dos veces), así que sus tickets se copiaron. Lo habría detenido <code>validate="many_to_one"</code> o una revisión de <code>duplicated()</code> en la clave antes de unir.</p></details><details><summary>¿Para qué sirve un anti join? Da un ejemplo de la cadena.</summary><p>Para encontrar las filas de una tabla que no tienen pareja en otra: lo que se perdería en un join interno. En la cadena encuentra los 20 tickets con un <code>cliente_id</code> inexistente y las 342 líneas de detalle de T09 que no tenían ticket antes del reenvío.</p></details><details><summary>El reporte de Hernán tiene un mes por columna. ¿Qué operación lo deja listo para agrupar por mes y por qué?</summary><p><code>melt</code> (o <code>unpivot</code> en Polars): apila las columnas de meses en una columna <code>mes</code> y sus valores en <code>ventas</code>, y así el mes pasa a ser una variable con la que se puede agrupar, filtrar o colorear.</p></details><details><summary>¿Por qué <code>pivot</code> puede fallar donde <code>pivot_table</code> funciona?</summary><p>Porque <code>pivot</code> exige una sola fila por cada combinación de índice y columna; si hay repetidas no sabe qué valor poner. <code>pivot_table</code> las agrega con una función (suma, promedio).</p></details></div></section>
+<section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es un <i>cross join</i> (producto cartesiano) y en qué casos se usa a propósito, por ejemplo para armar una grilla de todas las tiendas por todos los días?<small>Pista: busca «cross join calendario relleno de días sin ventas».</small></li><li>¿Qué son los <i>joins</i> por aproximación o «al más cercano» (<code>merge_asof</code> en pandas, <code>join_asof</code> en Polars) y para qué sirven con datos de fecha y hora?</li><li>¿Qué es un <i>hash join</i> y por qué los motores de bases de datos y Polars lo prefieren para unir tablas grandes?<small>Pista: compáralo con el <i>sort-merge join</i>.</small></li><li>¿Cómo funciona <code>GROUPING SETS</code>, <code>ROLLUP</code> o <code>CUBE</code> en SQL para obtener subtotales por varios niveles en una sola consulta?</li><li>¿Qué es una dimensión de cambio lento y por qué afecta un join si un socio cambia de tienda de inscripción?<small>Pista: busca «slowly changing dimension tipo 2».</small></li></ol></div></section>
+<section><h2>Para saber más</h2><div class="vids"><span>Para saber más</span><a class="vid" href="https://pandas.pydata.org/docs/user_guide/merging.html" target="_blank" rel="noopener">pandas: Merge, join, concatenate and compare <small>los tipos de join, <code>indicator</code> y <code>validate</code>, en inglés</small></a><a class="vid" href="https://pandas.pydata.org/docs/user_guide/reshaping.html" target="_blank" rel="noopener">pandas: Reshaping and pivot tables <small><code>melt</code>, <code>pivot</code>, <code>pivot_table</code> y <code>crosstab</code>, en inglés</small></a><a class="vid" href="https://docs.pola.rs/user-guide/transformations/joins/" target="_blank" rel="noopener">Polars: Joins <small>todos los tipos de join en Polars, incluidos semi y anti, en inglés</small></a><a class="vid" href="https://www.jstatsoft.org/article/view/v040i01" target="_blank" rel="noopener">The Split-Apply-Combine Strategy for Data Analysis <small>el artículo de Hadley Wickham (2011), en inglés</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/ciencia-de-datos" target="_blank" rel="noopener">github.com/aaramirez/ciencia-de-datos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="04-lab-1"]');
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  const usd=n=>'US$ '+nf(n,2);
+  // Cinco tickets reales de los datos limpios (cuatro de T07 el 31 de julio de 2026 y uno con un cliente que no existe)
+  const V=[{id:270135,c:4788,m:56.27},{id:270142,c:5097,m:48.01},{id:270149,c:2077,m:26.60},{id:270155,c:null,m:9.43},{id:122646,c:29945,m:64.50}];
+  // Cuatro socios del Club Ejemplo (Pilar Jiménez se inscribió en agosto y todavía no compra)
+  const C=[{c:2077,n:'Gloria Méndez',a:'2022-05-09'},{c:4788,n:'Germán Acosta',a:'2025-09-06'},{c:5097,n:'Marisol Acosta',a:'2025-07-28'},{c:1663,n:'Pilar Jiménez',a:'2026-08-03'}];
+  let j='inner',timer=null;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cel=(v,num)=>v===null||v===undefined?'<td class="nulo">'+(num?'NaN':'NaN')+'</td>':'<td'+(num?' class="n"':'')+'>'+v+'</td>';
+  function calc(){
+    const res=[],cUsado=new Set(),vPar=new Set();
+    V.forEach(v=>{const ms=C.filter(c=>v.c!==null&&c.c===v.c);
+      if(ms.length){vPar.add(v.id);ms.forEach(c=>{cUsado.add(c.c);if(j!=='anti')res.push({v,c:j==='semi'?null:c,k:'par'});});}
+      else if(j==='left'||j==='outer'||j==='anti')res.push({v,c:null,k:j==='anti'?'par':'solo'});});
+    if(j==='right'||j==='outer')C.forEach(c=>{if(!cUsado.has(c.c))res.push({v:null,c,k:'solo'});});
+    if(j==='right')res.sort((a,b)=>C.indexOf(a.c)-C.indexOf(b.c));
+    return {res,cUsado,vPar};
+  }
+  function pintar(foco){
+    const {res,cUsado,vPar}=calc();
+    const vIn=new Set(res.filter(r=>r.v).map(r=>r.v.id)),cIn=new Set(res.filter(r=>r.c).map(r=>r.c.c));
+    const soloV=j==='anti'||j==='semi';
+    const clsV=v=>!vIn.has(v.id)?'fuera':(vPar.has(v.id)?(j==='anti'?'fuera':'par'):(j==='anti'?'solo':'solo'));
+    $('#c4l1-izq').innerHTML='<caption>ventas (izquierda)</caption><tr><th>ticket_id</th><th>cliente_id</th><th>total</th></tr>'+
+      V.map((v,i)=>'<tr class="'+(foco===undefined?clsV(v):(i<foco?clsV(v):i===foco?'foco':''))+'">'+cel(v.id)+cel(v.c)+'<td class="n">'+nf(v.m,2)+'</td></tr>').join('');
+    $('#c4l1-der').innerHTML='<caption>clientes (derecha)</caption><tr><th>cliente_id</th><th>nombre</th><th>alta</th></tr>'+
+      C.map(c=>{let k=cUsado.has(c.c)?'par':(cIn.has(c.c)?'solo':'fuera');
+        if(foco!==undefined){const v=V[foco];k=(v&&v.c===c.c)?'foco':'';}
+        return '<tr class="'+k+'">'+cel(c.c)+cel(c.n)+cel(c.a)+'</tr>';}).join('');
+    const cols=soloV?['ticket_id','cliente_id','total']:['ticket_id','cliente_id','total','nombre','alta'];
+    const filas=foco===undefined?res:res.filter(r=>r.v&&V.indexOf(r.v)<=foco);
+    $('#c4l1-res').innerHTML='<caption>resultado: '+filas.length+' filas</caption><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr>'+
+      filas.map(r=>'<tr class="'+(j==='anti'?'solo':r.k)+'">'+cel(r.v?r.v.id:null)+cel(r.v?r.v.c:(r.c?r.c.c:null))+(r.v?'<td class="n">'+nf(r.v.m,2)+'</td>':cel(null,true))+(soloV?'':cel(r.c?r.c.n:null)+cel(r.c?r.c.a:null))+'</tr>').join('');
+    const pl={inner:'inner',left:'left',right:'right',outer:'full',anti:'anti',semi:'semi'}[j];
+    const pd={inner:'ventas.merge(clientes, on="cliente_id", how="inner")',left:'ventas.merge(clientes, on="cliente_id", how="left")',
+      right:'ventas.merge(clientes, on="cliente_id", how="right")',outer:'ventas.merge(clientes, on="cliente_id", how="outer")',
+      anti:'m = ventas.merge(clientes[["cliente_id"]], on="cliente_id", how="left", indicator=True)\nm[m["_merge"] == "left_only"].drop(columns="_merge")',
+      semi:'ventas[ventas["cliente_id"].isin(clientes["cliente_id"])]'}[j];
+    $('#c4l1-code').textContent='# pandas\n'+pd+'\n# Polars\nventas.join(clientes, on="cliente_id", how="'+pl+'")';
+    const tot=res.reduce((a,r)=>a+(r.v?r.v.m:0),0),totV=V.reduce((a,v)=>a+v.m,0);
+    const T={inner:'Solo sobreviven los tickets cuyo cliente existe en las dos tablas. El ticket anónimo y el del cliente 29945, que no existe, desaparecen sin aviso, y Pilar tampoco aparece: el total baja y nadie se entera.',
+      left:'Sobreviven todos los tickets. Los que no encuentran socio quedan con nombre y alta vacíos (NaN). Es el join de todos los días en análisis: la tabla de hechos manda y el número de filas no cambia.',
+      right:'Sobreviven todos los socios, compren o no. Pilar Jiménez queda con el ticket vacío: sirve para preguntar quién está inscrito y no compra.',
+      outer:'Sobrevive todo: tickets sin socio y socios sin tickets. Es el join de auditoría: muestra de una vez todo lo que no calza entre las dos tablas.',
+      anti:'Quedan solo los tickets que no encontraron socio, con las columnas de ventas. Es la lista de lo que hay que investigar: el anónimo (esperable, no pasó la tarjeta) y el 29945 (un dígito de más al digitar).',
+      semi:'Quedan los tickets que sí encontraron socio, pero sin agregar columnas de clientes: filtra sin unir. Nunca duplica filas, aunque un cliente estuviera repetido.'}[j];
+    if(foco===undefined)$('#c4l1-out').innerHTML='<span class="big">'+res.length+' filas · total en el resultado: '+usd(tot)+' de '+usd(totV)+'</span><span>'+T+'</span>';
+    else{const v=V[foco];const m=C.find(c=>v.c!==null&&c.c===v.c);
+      $('#c4l1-out').innerHTML='<span class="big">Ticket '+v.id+': busca cliente_id '+(v.c===null?'vacío':v.c)+'</span><span>'+(m?'Encuentra a '+m.n+'.':(v.c===null?'Una clave vacía no se empareja con nada (en pandas, NaN tampoco es igual a NaN).':'No hay ningún socio con ese número.'))+'</span>';}
+  }
+  function paso(){
+    if(timer){clearInterval(timer);timer=null;}
+    if(reduce){pintar();return;}
+    let i=0;pintar(0);
+    timer=setInterval(()=>{i++;if(i>=V.length){clearInterval(timer);timer=null;setTimeout(()=>pintar(),600);return;}pintar(i);},1100);
+  }
+  raiz.querySelectorAll('#c4l1-b button').forEach(b=>b.addEventListener('click',()=>{
+    if(timer){clearInterval(timer);timer=null;}
+    j=b.dataset.j;raiz.querySelectorAll('#c4l1-b button').forEach(x=>x.setAttribute('aria-pressed',x===b));pintar();}));
+  $('#c4l1-paso').addEventListener('click',paso);
+  pintar();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="04-lab-2"]');
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  const usd=n=>'US$ '+nf(n,2);
+  // Tickets de cinco socios (22 meses, datos limpios), resumidos por cliente para que quepan
+  const V=[{c:1544,n:70,m:1242.99},{c:1545,n:9,m:110.84},{c:1546,n:31,m:244.99},{c:1547,n:21,m:455.29},{c:1548,n:10,m:260.92}];
+  // clientes.csv crudo: la fila de 1544 se exportó dos veces
+  const C=[{c:1544,nom:'Fabián Castillo',t:'T04'},{c:1544,nom:'Fabián Castillo',t:'T04'},{c:1545,nom:'Claudia Molina',t:'T08'},{c:1546,nom:'Miriam Pineda',t:'T03'},{c:1547,nom:'Rafael Ramos',t:'T10'},{c:1548,nom:'Wilson Molina',t:'T01'}];
+  let modo='nada',visto=null;
+  function pintar(){
+    const usadas=modo==='dedup'?C.filter((c,i)=>C.findIndex(x=>x.c===c.c)===i):C;
+    const f0=V.reduce((a,v)=>a+v.n,0),t0=V.reduce((a,v)=>a+v.m,0);
+    let f1=0,t1=0,porT={};
+    const err=modo==='validar';
+    if(!err)V.forEach(v=>{const k=usadas.filter(c=>c.c===v.c);k.forEach(c=>{f1+=v.n;t1+=v.m;porT[c.t]=(porT[c.t]||0)+v.m;});});
+    $('#c4l2-f0').textContent=nf(f0);$('#c4l2-t0').textContent=usd(t0);
+    const b1=$('#c4l2-f1'),b2=$('#c4l2-t1');
+    b1.textContent=err?'—':nf(f1);b2.textContent=err?'—':usd(t1);
+    b1.className=b2.className=err?'':(f1===f0?'bien':'mal');
+    $('#c4l2-v').innerHTML='<caption>ventas por socio (izquierda)</caption><tr><th>cliente_id</th><th>tickets</th><th>total</th></tr>'+
+      V.map(v=>'<tr class="'+(visto===v.c?(C.filter(c=>c.c===v.c).length>1?'ojo':'ok'):'')+'"><td>'+v.c+'</td><td class="n">'+v.n+'</td><td class="n">'+nf(v.m,2)+'</td></tr>').join('');
+    $('#c4l2-c').innerHTML='<caption>clientes.csv (derecha)</caption><tr><th>cliente_id</th><th>nombre</th><th>tienda</th></tr>'+
+      C.map((c,i)=>{const rep=C.filter(x=>x.c===c.c).length;let k='';
+        if(modo==='dedup'&&usadas.indexOf(c)<0)k='tachada';else if(visto===c.c)k=rep>1?'ojo':'ok';
+        return '<tr data-c="'+c.c+'" tabindex="0" class="'+k+'"><td>'+c.c+'</td><td>'+c.nom+'</td><td>'+c.t+'</td></tr>';}).join('');
+    raiz.querySelectorAll('#c4l2-c tr[data-c]').forEach(tr=>{const f=()=>{visto=+tr.dataset.c;pintar();};tr.addEventListener('click',f);tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}});});
+    const tiendas=Object.keys(porT).sort();
+    $('#c4l2-r').innerHTML=err?'':'<caption>ventas por tienda de inscripción</caption><tr><th>tienda</th><th>ventas</th></tr>'+tiendas.map(t=>'<tr class="'+(t==='T04'&&modo==='nada'?'ojo':'')+'"><td>'+t+'</td><td class="n">'+nf(porT[t],2)+'</td></tr>').join('');
+    let h='';
+    if(visto!==null){const rep=C.filter(c=>c.c===visto).length;
+      h+='<span class="'+(rep>1?'warn':'ok')+'">cliente_id '+visto+' aparece '+rep+' '+(rep>1?'veces':'vez')+' en clientes.csv.</span>';}
+    if(modo==='nada')h+='<span class="big">'+nf(f0)+' tickets entran, '+nf(f1)+' filas salen: sobran '+usd(t1-t0)+'.</span><span>Cada ticket de Fabián encontró dos filas iguales y se copió dos veces. Nadie ve un error: la suma de T04 se ve normal, solo que está inflada. En toda la cadena pasa lo mismo con 25 socios: 197.576 tickets se vuelven 198.120 filas y aparecen US$ 8.197,86 que nadie vendió.</span>';
+    else if(err)h+='<span class="warn">MergeError: Merge keys are not unique in right dataset; not a many-to-one merge</span><span>Con <code>validate="many_to_one"</code> pandas revisa la promesa «cada cliente aparece una vez a la derecha» y se detiene en vez de inflar en silencio. Un error que avisa vale más que una cifra equivocada que nadie revisa. En Polars es <code>validate="m:1"</code>.</span>';
+    else h+='<span class="ok">'+nf(f0)+' tickets entran y '+nf(f1)+' filas salen: el total cuadra.</span><span>Quitar los duplicados exactos de clientes antes de unir (lo que hizo la limpieza del capítulo 03) deja una fila por socio. La regla: cuenta las filas antes y después de cada join y explica cualquier diferencia.</span>';
+    $('#c4l2-out').innerHTML=h;
+  }
+  raiz.querySelectorAll('#c4l2-fix button').forEach(b=>b.addEventListener('click',()=>{modo=b.dataset.f;raiz.querySelectorAll('#c4l2-fix button').forEach(x=>x.setAttribute('aria-pressed',x===b));pintar();}));
+  pintar();
+})();
+</script>
+<script>
+(function(){
+  /* ---- Componente Pyodide común del curso «Ciencia de datos» (copiar tal cual) ----
+     Pyodide 314.0.7 (Python 3.14.2; pandas 3.0.2, polars 1.33.1, numpy 2.4.6, duckdb 1.5.1).
+     Se descarga solo al pulsar el botón y se comparte entre todos los labs de la página. */
+  const PY=window.cdatosPy||(window.cdatosPy=(function(){
+    const VER='314.0.7',BASE='https://cdn.jsdelivr.net/pyodide/v'+VER+'/full/';
+    let base=null;const listos={};
+    const AYUDA=[
+      'import ast, io, json, sys',
+      '_cdatos_espacios = {}',
+      'def _cdatos_limpio(v):',
+      '    if v is None: return None',
+      '    if hasattr(v, "item") and not isinstance(v, (str, bytes)):',
+      '        try: v = v.item()',
+      '        except Exception: v = str(v)',
+      '    if isinstance(v, float) and v != v: return None',
+      '    if isinstance(v, (bool, int, float, str)): return v',
+      '    return str(v)',
+      'def _cdatos_tabla(x, n=12):',
+      '    mod = type(x).__module__.split(".")[0]',
+      '    if mod == "polars":',
+      '        import polars as pl',
+      '        if isinstance(x, pl.LazyFrame): x = x.collect()',
+      '        if isinstance(x, pl.Series): x = x.to_frame()',
+      '        if not isinstance(x, pl.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.rows(); indice = None',
+      '        cols = list(h.columns); tipos = [str(t) for t in h.dtypes]',
+      '    elif mod == "pandas":',
+      '        import pandas as pd',
+      '        if isinstance(x, pd.Series): x = x.to_frame()',
+      '        if not isinstance(x, pd.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.astype(object).values.tolist()',
+      '        indice = [str(i) for i in h.index]',
+      '        cols = [str(c) for c in h.columns]; tipos = [str(t) for t in h.dtypes]',
+      '    elif x is None: return None',
+      '    else: return {"valor": repr(x)}',
+      '    return {"columnas": cols, "tipos": tipos, "indice": indice, "forma": list(x.shape), "motor": mod,',
+      '            "filas": [[_cdatos_limpio(v) for v in f] for f in filas]}',
+      'def _cdatos_correr(lab, codigo):',
+      '    ns = _cdatos_espacios.setdefault(lab, {"__name__": "__main__"})',
+      '    buf, viejo = io.StringIO(), sys.stdout',
+      '    sys.stdout = buf',
+      '    try:',
+      '        arbol = ast.parse(codigo); ultimo = None',
+      '        if arbol.body and isinstance(arbol.body[-1], ast.Expr):',
+      '            exp = ast.Expression(arbol.body.pop().value)',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '            ultimo = eval(compile(exp, "<lab>", "eval"), ns)',
+      '        else:',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '        return json.dumps({"salida": buf.getvalue(), "tabla": _cdatos_tabla(ultimo)})',
+      '    except BaseException as e:',
+      '        return json.dumps({"salida": buf.getvalue(), "error": type(e).__name__ + ": " + str(e)})',
+      '    finally:',
+      '        sys.stdout = viejo'].join('\n');
+    function script(){return new Promise((ok,mal)=>{
+      if(window.loadPyodide)return ok();
+      const s=document.createElement('script');s.src=BASE+'pyodide.js';
+      s.onload=ok;s.onerror=()=>mal(new Error('No se pudo descargar Pyodide'));document.head.appendChild(s);});}
+    return {VER,
+      /* paquetes: ['pandas'] o ['pandas','polars']; aviso(texto) recibe el estado */
+      cargar(paquetes,aviso){
+        if(!base){aviso&&aviso('Descargando Python (Pyodide '+VER+')…');
+          base=script().then(()=>loadPyodide({indexURL:BASE})).then(py=>{py.runPython(AYUDA);return py;});
+          base.catch(()=>{base=null;});}
+        return base.then(async py=>{
+          const faltan=paquetes.filter(p=>!listos[p]);
+          if(faltan.length){aviso&&aviso('Instalando '+faltan.join(' y ')+'…');
+            await py.loadPackage(faltan);faltan.forEach(p=>listos[p]=1);}
+          return py;});
+      },
+      /* archivos: {'ventas.csv': 'texto…'}; se escriben en la carpeta de trabajo de Python */
+      archivos(py,archivos){for(const k in archivos)py.FS.writeFile(k,archivos[k]);},
+      async correr(py,lab,codigo){
+        py.globals.set('_cdatos_codigo',codigo);
+        const r=JSON.parse(py.runPython('_cdatos_correr('+JSON.stringify(lab)+', _cdatos_codigo)'));
+        return r;}
+    };
+  })());
+  /* Dibuja la tabla que devuelve PY.correr (r.tabla) dentro de un elemento */
+  function pintarTabla(el,t){
+    const nfx=(v,dec)=>{if(typeof v!=='number')return v===null?'<i>nulo</i>':String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const d=dec?2:(Number.isInteger(v)?0:2);const s=Math.abs(v).toFixed(d).split('.');
+      s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (v<0?'−':'')+s.join(',');};
+    if(!t){el.innerHTML='';return;}
+    if(t.valor!==undefined){el.innerHTML='<pre class="cdatos-valor">'+nfx(t.valor)+'</pre>';return;}
+    const idx=t.indice&&!t.indice.every((v,i)=>v===String(i));
+    let h='<table class="tbl"><thead><tr>'+(idx?'<th></th>':'')+t.columnas.map((c,i)=>'<th>'+nfx(c)+'<br><small>'+t.tipos[i]+'</small></th>').join('')+'</tr></thead><tbody>';
+    t.filas.forEach((f,j)=>{h+='<tr>'+(idx?'<th>'+nfx(t.indice[j])+'</th>':'')+f.map((v,i)=>'<td'+(typeof v==='number'?' style="text-align:right"':'')+'>'+(/(^|_)id$|^año$|^anio$/i.test(String(t.columnas[i]))&&typeof v==='number'?String(v):nfx(v,/float/i.test(t.tipos[i])))+'</td>').join('')+'</tr>';});
+    const n=t.forma[0];
+    el.innerHTML=h+'</tbody></table><p class="hint">'+(n>t.filas.length?'Primeras '+t.filas.length+' de ':'')+nfx(n)+' filas × '+t.forma[1]+' columnas · '+t.motor+'</p>';
+  }
+  /* ---- fin del componente ---- */
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="04-lab-3"]');
+  const LAB='04-lab-3', PAQ=["pandas", "polars"];
+  const ARCH={"ventas.csv": "ticket_id,fecha,tienda_id,cliente_id,medio_pago,total\n208438,2026-01-01,T01,5942,tarjeta,13.88\n208505,2026-01-01,T10,5843,efectivo,11.24\n208568,2026-01-01,T06,5522,efectivo,4.77\n208581,2026-01-01,T07,1154,transferencia,7.94\n208644,2026-01-01,T04,1381,efectivo,30.64\n208746,2026-01-02,T10,,tarjeta,2.85\n208759,2026-01-02,T02,3453,tarjeta,14.48\n208771,2026-01-02,T09,,tarjeta,10.60\n209130,2026-01-03,T02,6826,transferencia,19.90\n209224,2026-01-03,T07,4626,tarjeta,13.47\n209401,2026-01-04,T05,3393,tarjeta,4.45\n209728,2026-01-05,T02,6826,tarjeta,16.69\n209761,2026-01-05,T03,,tarjeta,5.83\n209775,2026-01-05,T04,,transferencia,51.40\n209871,2026-01-06,T01,2772,efectivo,32.95\n209877,2026-01-06,T08,6808,efectivo,8.05\n209991,2026-01-06,T05,,tarjeta,36.56\n210104,2026-01-07,T06,3768,tarjeta,9.92\n210163,2026-01-07,T01,,tarjeta,52.22\n210213,2026-01-07,T04,,efectivo,6.47\n210298,2026-01-08,T04,5787,efectivo,50.37\n210302,2026-01-08,T02,,tarjeta,17.39\n210306,2026-01-08,T02,2902,tarjeta,12.99\n210309,2026-01-08,T01,4173,efectivo,5.40\n210387,2026-01-08,T02,5693,tarjeta,3.60\n210493,2026-01-08,T07,6581,tarjeta,52.58\n210644,2026-01-09,T01,5866,tarjeta,37.64\n210686,2026-01-09,T12,,tarjeta,7.11\n210696,2026-01-09,T12,5663,efectivo,3.93\n210724,2026-01-09,T01,3660,tarjeta,12.51\n210850,2026-01-10,T01,5520,tarjeta,20.77\n210893,2026-01-10,T02,,efectivo,24.54\n210948,2026-01-10,T07,6057,tarjeta,29.11\n211262,2026-01-11,T02,3331,tarjeta,13.63\n211323,2026-01-11,T06,5197,efectivo,6.31\n211363,2026-01-11,T10,4184,tarjeta,8.38\n211504,2026-01-12,T10,1203,transferencia,30.43\n211629,2026-01-12,T01,,efectivo,8.27\n211757,2026-01-13,T02,,efectivo,14.21\n211783,2026-01-13,T09,,transferencia,1.38\n211937,2026-01-14,T07,4479,efectivo,23.12\n211971,2026-01-14,T07,16326,tarjeta,22.15\n212202,2026-01-15,T02,6859,efectivo,16.27\n212271,2026-01-15,T08,,tarjeta,1.17\n212501,2026-01-16,T03,6985,tarjeta,29.68\n212516,2026-01-16,T04,1254,tarjeta,13.35\n212535,2026-01-16,T06,1308,efectivo,22.00\n212699,2026-01-16,T05,,efectivo,28.41\n212772,2026-01-17,T10,1018,efectivo,9.64\n212971,2026-01-17,T09,,tarjeta,7.73\n213092,2026-01-18,T10,,efectivo,14.37\n213096,2026-01-18,T07,3569,transferencia,53.11\n213118,2026-01-18,T07,,efectivo,14.73\n213204,2026-01-18,T06,6953,tarjeta,4.77\n213302,2026-01-18,T05,,tarjeta,6.69\n213344,2026-01-18,T04,1540,tarjeta,14.63\n213444,2026-01-19,T06,2998,efectivo,6.94\n213611,2026-01-19,T04,,efectivo,10.18\n213636,2026-01-19,T01,1339,tarjeta,20.03\n213766,2026-01-20,T10,,efectivo,11.87\n213768,2026-01-20,T02,,tarjeta,8.27\n213851,2026-01-20,T08,6626,tarjeta,19.63\n214003,2026-01-21,T05,2372,efectivo,16.69\n214211,2026-01-22,T04,,tarjeta,12.35\n214241,2026-01-22,T04,3376,tarjeta,10.34\n214423,2026-01-23,T02,,efectivo,8.48\n214439,2026-01-23,T09,,tarjeta,5.08\n214676,2026-01-24,T02,,efectivo,12.99\n214731,2026-01-24,T02,1670,tarjeta,15.59\n214966,2026-01-24,T06,4024,efectivo,8.85\n215276,2026-01-25,T03,,tarjeta,17.83\n215604,2026-01-27,T02,5173,efectivo,17.87\n215628,2026-01-27,T02,3851,efectivo,25.33\n215685,2026-01-27,T01,1023,tarjeta,28.09\n215807,2026-01-28,T09,,tarjeta,11.56\n215869,2026-01-28,T11,1280,efectivo,7.43\n215917,2026-01-28,T10,,efectivo,46.23\n215975,2026-01-28,T12,3885,efectivo,2.23\n215999,2026-01-29,T04,2893,tarjeta,33.46\n216154,2026-01-29,T04,,tarjeta,11.50\n216266,2026-01-30,T12,,efectivo,6.36\n216267,2026-01-30,T09,4482,efectivo,16.13\n216456,2026-01-30,T01,,tarjeta,5.15\n216457,2026-01-30,T02,5805,efectivo,18.65\n216478,2026-01-30,T08,5240,efectivo,10.27\n216685,2026-01-31,T04,4958,efectivo,31.74\n216964,2026-02-01,T01,,tarjeta,7.85\n217011,2026-02-01,T01,4748,tarjeta,21.52\n217097,2026-02-01,T05,5029,efectivo,1.38\n217152,2026-02-01,T12,4122,efectivo,10.29\n217553,2026-02-03,T04,,efectivo,18.03\n217559,2026-02-03,T01,,efectivo,14.11\n217640,2026-02-03,T06,3785,tarjeta,2.01\n217705,2026-02-04,T05,6418,efectivo,6.63\n217978,2026-02-05,T07,6444,efectivo,15.15\n217991,2026-02-05,T04,1565,tarjeta,35.14\n218004,2026-02-05,T07,5489,tarjeta,10.92\n218006,2026-02-05,T02,,tarjeta,11.56\n218042,2026-02-05,T04,1981,tarjeta,19.14\n218096,2026-02-05,T02,6281,efectivo,3.39\n218276,2026-02-06,T07,5750,tarjeta,33.79\n218416,2026-02-06,T01,,efectivo,18.76\n218516,2026-02-07,T04,,tarjeta,20.26\n218517,2026-02-07,T09,2103,efectivo,11.24\n218682,2026-02-07,T11,,tarjeta,17.49\n218748,2026-02-07,T02,,efectivo,21.58\n218752,2026-02-07,T09,4350,tarjeta,44.51\n218879,2026-02-08,T01,,transferencia,1.33\n218942,2026-02-08,T05,,tarjeta,2.71\n218954,2026-02-08,T05,2762,efectivo,60.70\n218960,2026-02-08,T08,6073,tarjeta,9.39\n219046,2026-02-08,T01,3989,transferencia,13.89\n219053,2026-02-08,T10,3085,efectivo,1.17\n219085,2026-02-08,T05,,efectivo,5.30\n219324,2026-02-09,T12,6696,efectivo,2.33\n219635,2026-02-11,T02,,efectivo,7.63\n219648,2026-02-11,T10,1822,tarjeta,17.70\n219672,2026-02-11,T03,3321,tarjeta,19.08\n219701,2026-02-11,T01,,efectivo,4.77\n219809,2026-02-12,T10,2421,tarjeta,8.27\n219825,2026-02-12,T11,,efectivo,6.41\n219831,2026-02-12,T07,,tarjeta,1.91\n219921,2026-02-12,T11,,efectivo,5.40\n219976,2026-02-12,T02,,tarjeta,25.55\n219994,2026-02-12,T08,2707,transferencia,2.23\n220370,2026-02-14,T04,1544,efectivo,17.91\n220380,2026-02-14,T09,1367,tarjeta,6.04\n220407,2026-02-14,T08,2784,efectivo,3.39\n220561,2026-02-14,T09,,transferencia,3.39\n220744,2026-02-15,T02,5761,efectivo,26.61\n221421,2026-02-17,T05,,tarjeta,2.01\n221489,2026-02-18,T07,4431,tarjeta,2.33\n221531,2026-02-18,T07,4566,tarjeta,7.64\n221543,2026-02-18,T07,,efectivo,16.54\n221748,2026-02-19,T07,1369,transferencia,15.95\n221784,2026-02-19,T07,,transferencia,15.16\n221798,2026-02-19,T04,1126,efectivo,29.84\n221870,2026-02-19,T02,6832,tarjeta,8.27\n221889,2026-02-19,T01,2223,efectivo,37.59\n221930,2026-02-19,T02,3804,tarjeta,3.87\n221985,2026-02-20,T03,5604,transferencia,5.78\n221993,2026-02-20,T10,2048,tarjeta,64.45\n222146,2026-02-20,T03,1577,efectivo,10.39\n222183,2026-02-20,T10,,tarjeta,5.94\n222514,2026-02-21,T01,,transferencia,80.97\n222546,2026-02-22,T01,3505,efectivo,3.24\n222634,2026-02-22,T10,,efectivo,23.59\n222813,2026-02-22,T04,4722,efectivo,6.22\n222937,2026-02-23,T05,2409,efectivo,1.17\n222951,2026-02-23,T02,3431,transferencia,21.41\n222999,2026-02-23,T10,2073,efectivo,9.18\n223061,2026-02-23,T10,1980,tarjeta,3.87\n223178,2026-02-24,T12,3885,tarjeta,5.73\n223191,2026-02-24,T03,3715,tarjeta,5.09\n223408,2026-02-25,T05,,tarjeta,2.01\n223758,2026-02-27,T02,4277,efectivo,6.14\n223925,2026-02-27,T07,,efectivo,4.19\n223929,2026-02-27,T02,6373,efectivo,5.20\n223969,2026-02-27,T01,5784,efectivo,24.25\n223991,2026-02-27,T07,6226,transferencia,2.66\n224177,2026-02-28,T04,3365,tarjeta,8.60\n224532,2026-03-01,T03,5559,efectivo,5.40\n224712,2026-03-02,T04,,tarjeta,1.91\n224759,2026-03-02,T02,1608,tarjeta,9.54\n225000,2026-03-03,T02,,efectivo,20.27\n225026,2026-03-03,T11,1502,transferencia,11.55\n225109,2026-03-03,T06,1599,efectivo,4.24\n225147,2026-03-03,T02,1772,efectivo,8.47\n225244,2026-03-04,T07,5081,efectivo,9.01\n225345,2026-03-04,T09,2100,efectivo,3.82\n225396,2026-03-04,T02,2247,tarjeta,12.63\n225720,2026-03-06,T08,4130,efectivo,13.25\n225861,2026-03-06,T11,1280,efectivo,18.60\n225913,2026-03-06,T01,2254,tarjeta,4.88\n226069,2026-03-07,T07,2072,efectivo,6.04\n226204,2026-03-07,T04,3403,transferencia,14.94\n226209,2026-03-07,T01,,tarjeta,2.23\n226384,2026-03-08,T07,5605,efectivo,8.70\n226438,2026-03-08,T03,6202,tarjeta,2.23\n226535,2026-03-08,T06,,tarjeta,7.85\n226603,2026-03-08,T01,,transferencia,1.33\n226805,2026-03-09,T05,,efectivo,14.73\n226858,2026-03-09,T07,5776,efectivo,33.57\n227030,2026-03-10,T01,5114,efectivo,1.38\n227078,2026-03-10,T10,6228,efectivo,51.31\n227090,2026-03-10,T05,1288,tarjeta,5.46\n227142,2026-03-10,T10,,efectivo,4.04\n227316,2026-03-11,T09,,transferencia,1.91\n227338,2026-03-11,T11,1215,tarjeta,12.19\n227374,2026-03-11,T08,,transferencia,46.54\n227491,2026-03-12,T05,4136,efectivo,20.62\n227635,2026-03-12,T04,,tarjeta,53.75\n227680,2026-03-13,T04,,tarjeta,14.96\n227796,2026-03-13,T05,,tarjeta,1.33\n227915,2026-03-13,T04,4996,tarjeta,7.73\n227985,2026-03-14,T04,1685,efectivo,4.13\n228031,2026-03-14,T02,,tarjeta,31.79\n228325,2026-03-14,T02,2578,efectivo,11.50\n228328,2026-03-14,T04,2387,tarjeta,19.99\n228441,2026-03-15,T01,1002,transferencia,20.77\n228467,2026-03-15,T03,,efectivo,8.26\n228524,2026-03-15,T06,4557,tarjeta,7.42\n228531,2026-03-15,T08,,transferencia,6.42\n228583,2026-03-15,T09,5361,tarjeta,15.57\n228596,2026-03-15,T04,,tarjeta,16.95\n228604,2026-03-15,T02,5165,efectivo,3.82\n228835,2026-03-16,T07,,tarjeta,5.10\n228903,2026-03-16,T07,6489,tarjeta,5.41\n229355,2026-03-18,T05,6719,efectivo,8.17\n229449,2026-03-19,T02,1771,transferencia,11.77\n229527,2026-03-19,T01,3777,transferencia,31.59\n229538,2026-03-19,T06,1813,tarjeta,10.83\n229797,2026-03-20,T05,4977,tarjeta,24.06\n229798,2026-03-20,T08,,tarjeta,9.11\n229823,2026-03-20,T02,3305,tarjeta,7.43\n229902,2026-03-20,T03,,efectivo,7.20\n229915,2026-03-20,T04,5572,tarjeta,31.12\n229995,2026-03-21,T10,1500,transferencia,13.99\n230193,2026-03-21,T03,2121,tarjeta,33.61\n230295,2026-03-21,T02,1928,efectivo,5.30\n230361,2026-03-22,T04,1679,tarjeta,5.30\n230389,2026-03-22,T12,3485,tarjeta,9.54\n230426,2026-03-22,T04,,tarjeta,7.59\n230448,2026-03-22,T06,,tarjeta,17.66\n230571,2026-03-22,T01,,tarjeta,3.24\n230590,2026-03-22,T01,4285,transferencia,33.20\n230627,2026-03-22,T07,5699,efectivo,36.94\n230650,2026-03-22,T07,3228,efectivo,22.81\n230765,2026-03-23,T08,,tarjeta,5.41\n230841,2026-03-23,T01,5467,efectivo,18.54\n230858,2026-03-23,T10,,tarjeta,2.23\n230918,2026-03-24,T05,21794,efectivo,1.70\n231106,2026-03-24,T01,,tarjeta,33.39\n231156,2026-03-25,T06,,tarjeta,6.79\n231178,2026-03-25,T11,6799,transferencia,6.94\n231242,2026-03-25,T02,6376,tarjeta,22.59\n231393,2026-03-25,T08,3293,tarjeta,11.35\n231395,2026-03-25,T04,,efectivo,12.82\n231407,2026-03-26,T01,3373,tarjeta,4.40\n231571,2026-03-26,T05,3108,transferencia,9.22\n231640,2026-03-26,T06,,tarjeta,10.67\n231807,2026-03-27,T11,4273,efectivo,13.03\n231841,2026-03-27,T04,4387,tarjeta,13.14\n231843,2026-03-27,T05,,transferencia,7.95\n231911,2026-03-27,T10,,tarjeta,8.28\n231954,2026-03-27,T01,3692,efectivo,46.56\n231971,2026-03-27,T07,,efectivo,21.80\n231981,2026-03-28,T10,1845,tarjeta,11.44\n232082,2026-03-28,T06,1036,tarjeta,7.73\n232251,2026-03-28,T07,2925,efectivo,16.33\n232368,2026-03-29,T09,5512,efectivo,5.63\n232370,2026-03-29,T01,,efectivo,25.97\n232464,2026-03-29,T07,,tarjeta,14.11\n232568,2026-03-29,T01,,tarjeta,3.50\n232655,2026-03-30,T10,,efectivo,26.88\n232801,2026-03-30,T06,5728,efectivo,5.20\n233051,2026-03-31,T11,5634,tarjeta,32.50\n233112,2026-03-31,T10,4814,transferencia,56.76\n233248,2026-04-01,T01,6877,tarjeta,4.40\n233335,2026-04-01,T10,4746,tarjeta,24.28\n233394,2026-04-01,T03,,tarjeta,3.40\n233585,2026-04-02,T07,2802,efectivo,22.57\n233718,2026-04-02,T02,4597,efectivo,21.73\n233799,2026-04-03,T07,6221,efectivo,16.12\n234032,2026-04-03,T02,3353,tarjeta,2.54\n234175,2026-04-04,T04,6316,efectivo,32.76\n234322,2026-04-04,T07,1220,tarjeta,18.93\n234418,2026-04-05,T02,5748,tarjeta,8.27\n234445,2026-04-05,T04,3729,tarjeta,15.78\n234467,2026-04-05,T10,,tarjeta,22.96\n234579,2026-04-05,T02,4359,tarjeta,10.38\n234807,2026-04-06,T11,1684,tarjeta,29.26\n234835,2026-04-06,T10,,efectivo,6.79\n234981,2026-04-06,T12,4145,tarjeta,32.65\n235129,2026-04-07,T05,,tarjeta,4.24\n235132,2026-04-07,T01,3607,tarjeta,55.23\n235147,2026-04-07,T08,6419,efectivo,29.72\n235166,2026-04-07,T02,,efectivo,16.43\n235236,2026-04-07,T08,6952,tarjeta,38.58\n235288,2026-04-08,T02,,tarjeta,13.00\n235300,2026-04-08,T12,6416,efectivo,16.65\n235345,2026-04-08,T02,2003,tarjeta,16.86\n235350,2026-04-08,T02,,tarjeta,17.71\n235553,2026-04-09,T04,2283,transferencia,11.56\n235585,2026-04-09,T11,5859,tarjeta,5.83\n235677,2026-04-09,T05,1216,efectivo,7.05\n235736,2026-04-09,T04,4949,transferencia,13.67\n235926,2026-04-10,T04,2600,efectivo,9.65\n236065,2026-04-10,T11,4240,tarjeta,5.41\n236107,2026-04-11,T07,4856,efectivo,31.17\n236448,2026-04-12,T07,6183,transferencia,34.61\n236537,2026-04-12,T02,3619,efectivo,30.00\n236539,2026-04-12,T11,,efectivo,5.15\n236823,2026-04-13,T04,,tarjeta,23.41\n236875,2026-04-13,T03,3105,tarjeta,23.31\n236960,2026-04-13,T04,,efectivo,20.46\n237158,2026-04-14,T04,6151,transferencia,3.82\n237235,2026-04-14,T03,4523,tarjeta,5.15\n237277,2026-04-14,T09,2378,tarjeta,4.77\n237631,2026-04-16,T10,,tarjeta,30.43\n237935,2026-04-17,T11,,efectivo,5.94\n237944,2026-04-17,T07,,tarjeta,10.23\n238043,2026-04-17,T11,,efectivo,9.54\n238070,2026-04-17,T09,,tarjeta,18.60\n238214,2026-04-18,T04,,tarjeta,44.72\n238225,2026-04-18,T03,,efectivo,5.83\n238275,2026-04-18,T04,4717,tarjeta,12.25\n238342,2026-04-18,T02,,efectivo,5.15\n238415,2026-04-18,T02,6668,efectivo,25.12\n238455,2026-04-18,T04,2424,efectivo,18.87\n238633,2026-04-19,T11,6699,efectivo,8.68\n238756,2026-04-19,T04,3346,tarjeta,10.55\n238889,2026-04-20,T06,3257,efectivo,5.52\n239008,2026-04-20,T07,6241,efectivo,41.33\n239022,2026-04-20,T10,,transferencia,1.33\n239121,2026-04-21,T04,4152,efectivo,10.98\n239303,2026-04-21,T08,,efectivo,16.34\n239329,2026-04-21,T02,4277,efectivo,52.57\n239338,2026-04-21,T04,1493,tarjeta,10.81\n239445,2026-04-22,T07,,transferencia,23.18\n239526,2026-04-22,T03,5893,transferencia,6.89\n239594,2026-04-22,T08,6239,transferencia,9.87\n239628,2026-04-23,T01,,tarjeta,20.78\n239629,2026-04-23,T07,,tarjeta,14.69\n239651,2026-04-23,T04,2497,tarjeta,24.61\n239710,2026-04-23,T02,4192,tarjeta,7.31\n239997,2026-04-24,T03,,efectivo,15.36\n240140,2026-04-24,T02,,efectivo,28.08\n240353,2026-04-25,T10,,efectivo,65.24\n240405,2026-04-25,T07,1774,efectivo,29.16\n240554,2026-04-25,T06,6819,tarjeta,3.18\n240767,2026-04-26,T02,4277,tarjeta,15.58\n240831,2026-04-26,T04,,tarjeta,20.03\n241038,2026-04-27,T03,5305,tarjeta,4.73\n241100,2026-04-27,T04,3852,tarjeta,15.00\n241218,2026-04-28,T10,5449,tarjeta,15.07\n241233,2026-04-28,T04,,efectivo,15.76\n241280,2026-04-28,T12,,efectivo,9.01\n241408,2026-04-29,T04,3827,tarjeta,6.89\n241482,2026-04-29,T10,,tarjeta,6.46\n241534,2026-04-29,T05,3120,transferencia,3.39\n241692,2026-04-30,T06,4085,tarjeta,8.17\n241706,2026-04-30,T07,3806,tarjeta,21.62\n241771,2026-04-30,T05,5948,efectivo,5.40\n241983,2026-05-01,T02,3928,efectivo,15.07\n242053,2026-05-01,T11,3575,tarjeta,0.95\n242123,2026-05-01,T10,,efectivo,14.75\n242239,2026-05-01,T03,6078,efectivo,1.48\n242243,2026-05-01,T08,,efectivo,24.19\n242255,2026-05-01,T02,,tarjeta,24.44\n242374,2026-05-02,T12,6509,tarjeta,6.99\n242397,2026-05-02,T12,,tarjeta,4.93\n242468,2026-05-02,T03,1302,efectivo,4.61\n242597,2026-05-02,T01,,efectivo,12.93\n242726,2026-05-03,T03,2830,tarjeta,3.24\n243090,2026-05-04,T10,3663,efectivo,20.45\n243120,2026-05-04,T04,,efectivo,12.46\n243263,2026-05-04,T08,3644,transferencia,14.84\n243318,2026-05-04,T03,6862,efectivo,5.40\n243342,2026-05-05,T05,5551,efectivo,2.76\n243395,2026-05-05,T04,4821,tarjeta,18.93\n243439,2026-05-05,T04,2400,efectivo,18.11\n243496,2026-05-05,T06,3859,efectivo,1.17\n243689,2026-05-06,T10,4610,tarjeta,25.97\n243710,2026-05-06,T07,,efectivo,10.29\n243879,2026-05-07,T01,2175,tarjeta,6.78\n243943,2026-05-07,T02,6968,efectivo,30.63\n243968,2026-05-07,T02,,tarjeta,59.97\n244069,2026-05-07,T06,,efectivo,1.70\n244175,2026-05-08,T12,,tarjeta,17.91\n244181,2026-05-08,T04,,tarjeta,5.84\n244298,2026-05-08,T04,,tarjeta,32.02\n244418,2026-05-08,T11,5928,transferencia,1.33\n244626,2026-05-09,T02,,transferencia,7.10\n244816,2026-05-09,T05,5016,efectivo,11.88\n245013,2026-05-10,T04,,tarjeta,10.17\n245112,2026-05-10,T10,,tarjeta,7.84\n245227,2026-05-10,T04,,tarjeta,12.30\n245290,2026-05-11,T01,2553,tarjeta,18.34\n245493,2026-05-11,T01,5558,tarjeta,11.03\n245580,2026-05-12,T04,1805,tarjeta,16.28\n245668,2026-05-12,T01,,transferencia,11.13\n245950,2026-05-13,T04,1429,tarjeta,14.85\n246377,2026-05-15,T03,3105,tarjeta,3.39\n246417,2026-05-15,T01,5274,tarjeta,59.98\n246509,2026-05-15,T02,,efectivo,28.18\n246696,2026-05-15,T06,,efectivo,3.71\n246769,2026-05-16,T09,,efectivo,6.47\n246784,2026-05-16,T01,4330,transferencia,2.76\n246822,2026-05-16,T02,2733,efectivo,52.03\n246854,2026-05-16,T04,1092,tarjeta,32.73\n246920,2026-05-16,T01,6315,efectivo,13.21\n247214,2026-05-17,T06,,transferencia,38.47\n247306,2026-05-17,T09,1286,tarjeta,4.77\n247353,2026-05-17,T03,6222,tarjeta,2.33\n247475,2026-05-17,T04,3799,efectivo,17.70\n247696,2026-05-18,T05,4266,efectivo,4.13\n247746,2026-05-18,T07,,tarjeta,45.37\n247797,2026-05-19,T05,4606,efectivo,17.22\n247807,2026-05-19,T08,,tarjeta,2.66\n248006,2026-05-19,T07,2802,tarjeta,18.45\n248119,2026-05-20,T04,,efectivo,7.69\n248338,2026-05-21,T07,,transferencia,9.55\n248372,2026-05-21,T05,6900,tarjeta,17.17\n248431,2026-05-21,T09,,tarjeta,4.98\n248744,2026-05-22,T10,,tarjeta,3.40\n248770,2026-05-22,T01,,transferencia,31.25\n248985,2026-05-23,T07,3856,tarjeta,19.83\n249073,2026-05-23,T07,3844,tarjeta,3.49\n249150,2026-05-23,T07,4299,tarjeta,6.36\n249195,2026-05-23,T08,4306,tarjeta,28.67\n249202,2026-05-23,T07,,efectivo,4.77\n249214,2026-05-23,T09,4093,tarjeta,4.46\n249336,2026-05-23,T07,1767,efectivo,10.39\n249369,2026-05-24,T07,4974,transferencia,45.50\n249423,2026-05-24,T01,6722,efectivo,11.13\n249610,2026-05-24,T04,,transferencia,28.63\n249665,2026-05-24,T02,1595,efectivo,27.31\n249781,2026-05-25,T04,,efectivo,14.00\n249943,2026-05-25,T04,3068,tarjeta,30.03\n250117,2026-05-26,T08,,efectivo,3.39\n250338,2026-05-27,T05,,tarjeta,16.80\n250656,2026-05-28,T12,1430,tarjeta,1.17\n250710,2026-05-28,T01,,efectivo,2.39\n250801,2026-05-29,T11,6041,efectivo,21.53\n250826,2026-05-29,T12,6331,efectivo,4.98\n250955,2026-05-29,T03,3321,tarjeta,23.85\n250988,2026-05-29,T10,,tarjeta,21.21\n251019,2026-05-29,T08,3375,tarjeta,6.79\n251037,2026-05-29,T01,,tarjeta,39.00\n251089,2026-05-29,T09,6813,transferencia,9.87\n251110,2026-05-30,T02,1510,efectivo,17.80\n251210,2026-05-30,T02,1928,tarjeta,11.61\n251310,2026-05-30,T11,6852,tarjeta,4.46\n251338,2026-05-30,T11,1877,transferencia,5.09\n251419,2026-05-30,T01,4044,transferencia,7.00\n251468,2026-05-30,T05,1373,tarjeta,7.85\n251597,2026-05-31,T10,,efectivo,17.07\n251636,2026-05-31,T07,,tarjeta,25.45\n251642,2026-05-31,T06,,tarjeta,8.90\n251650,2026-05-31,T02,6396,efectivo,12.08\n251774,2026-05-31,T07,4520,tarjeta,19.29\n251794,2026-05-31,T01,3972,transferencia,5.40\n251815,2026-05-31,T09,,tarjeta,8.27\n251890,2026-05-31,T01,3336,tarjeta,8.06\n252152,2026-06-01,T02,1191,efectivo,7.69\n252253,2026-06-02,T07,3371,transferencia,10.07\n252257,2026-06-02,T07,,efectivo,2.43\n252333,2026-06-02,T03,6630,efectivo,8.90\n252454,2026-06-02,T05,2747,efectivo,7.00\n252503,2026-06-03,T04,5505,tarjeta,33.36\n252531,2026-06-03,T10,,tarjeta,23.79\n252847,2026-06-04,T06,4893,tarjeta,6.78\n252930,2026-06-04,T02,3385,tarjeta,47.34\n253156,2026-06-05,T02,4177,tarjeta,38.75\n253234,2026-06-05,T07,5473,efectivo,3.72\n253258,2026-06-05,T01,,efectivo,27.68\n253329,2026-06-06,T09,,tarjeta,27.24\n253364,2026-06-06,T04,,tarjeta,3.82\n253398,2026-06-06,T08,1825,efectivo,21.01\n253645,2026-06-06,T02,3540,tarjeta,19.72\n253691,2026-06-06,T07,,tarjeta,31.45\n253739,2026-06-07,T04,3826,tarjeta,11.40\n253791,2026-06-07,T10,,efectivo,18.87\n254131,2026-06-08,T07,5109,tarjeta,5.09\n254181,2026-06-08,T07,,tarjeta,64.78\n254232,2026-06-08,T04,,tarjeta,16.16\n254239,2026-06-08,T06,5318,transferencia,7.94\n254289,2026-06-08,T05,,transferencia,17.18\n254336,2026-06-09,T05,,efectivo,8.85\n254352,2026-06-09,T09,5726,tarjeta,5.30\n254439,2026-06-09,T03,3866,tarjeta,21.22\n254560,2026-06-10,T10,,efectivo,10.40\n254976,2026-06-11,T04,4996,efectivo,14.85\n254988,2026-06-11,T12,6077,efectivo,3.82\n255072,2026-06-11,T09,,efectivo,30.94\n255128,2026-06-12,T03,6194,tarjeta,20.25\n255130,2026-06-12,T07,2802,tarjeta,30.20\n255176,2026-06-12,T03,,efectivo,10.59\n255229,2026-06-12,T02,4359,tarjeta,23.96\n255350,2026-06-12,T01,,tarjeta,15.38\n255544,2026-06-13,T02,5102,efectivo,7.63\n255778,2026-06-14,T02,4891,tarjeta,22.26\n255803,2026-06-14,T06,4954,efectivo,28.67\n255849,2026-06-14,T10,3463,transferencia,8.79\n256105,2026-06-15,T01,,tarjeta,27.88\n256203,2026-06-15,T07,3699,tarjeta,16.11\n256419,2026-06-16,T12,,tarjeta,8.85\n256424,2026-06-16,T02,6557,transferencia,31.76\n256522,2026-06-16,T07,,tarjeta,12.18\n256688,2026-06-17,T01,4919,efectivo,31.89\n256769,2026-06-17,T02,4243,tarjeta,2.23\n256843,2026-06-17,T04,6303,transferencia,4.62\n256852,2026-06-17,T07,,tarjeta,33.03\n256873,2026-06-17,T02,2733,efectivo,73.09\n256890,2026-06-17,T08,6112,tarjeta,25.02\n256899,2026-06-17,T07,3053,efectivo,15.27\n256932,2026-06-17,T10,5279,tarjeta,22.15\n256973,2026-06-18,T10,1780,efectivo,9.86\n256992,2026-06-18,T04,1675,tarjeta,46.95\n257106,2026-06-18,T07,,efectivo,9.60\n257120,2026-06-18,T04,,tarjeta,2.23\n257267,2026-06-19,T07,3906,tarjeta,15.80\n257333,2026-06-19,T09,,tarjeta,21.84\n257349,2026-06-19,T06,5343,efectivo,9.48\n257872,2026-06-20,T09,,tarjeta,7.53\n258009,2026-06-21,T07,1785,efectivo,23.95\n258118,2026-06-21,T04,6324,efectivo,12.40\n258484,2026-06-23,T09,,tarjeta,2.23\n258536,2026-06-23,T06,1638,tarjeta,9.86\n258600,2026-06-23,T08,4144,tarjeta,2.76\n258663,2026-06-23,T10,6503,tarjeta,18.45\n258671,2026-06-23,T12,,efectivo,9.11\n258702,2026-06-23,T07,1279,tarjeta,15.16\n258773,2026-06-24,T06,1328,tarjeta,20.03\n258851,2026-06-24,T01,1112,tarjeta,14.46\n258873,2026-06-24,T04,,efectivo,18.87\n259033,2026-06-25,T04,5505,efectivo,31.81\n259051,2026-06-25,T12,,tarjeta,17.27\n259249,2026-06-25,T07,,efectivo,3.39\n259363,2026-06-26,T04,5650,tarjeta,1.38\n259452,2026-06-26,T09,4481,tarjeta,13.47\n259619,2026-06-27,T04,5933,transferencia,3.82\n259656,2026-06-27,T04,,tarjeta,12.58\n259672,2026-06-27,T07,,tarjeta,11.45\n259827,2026-06-27,T05,4852,efectivo,5.72\n259828,2026-06-27,T08,3375,tarjeta,18.77\n259934,2026-06-27,T03,3291,tarjeta,5.63\n260049,2026-06-28,T04,6092,tarjeta,6.21\n260130,2026-06-28,T02,2448,efectivo,14.00\n260146,2026-06-28,T02,5957,,27.07\n260367,2026-06-29,T01,6781,transferencia,9.12\n260506,2026-06-29,T12,6098,tarjeta,6.04\n260554,2026-06-29,T10,,tarjeta,14.10\n260584,2026-06-30,T02,6373,tarjeta,23.85\n260622,2026-06-30,T10,6049,efectivo,17.55\n260661,2026-06-30,T04,4572,efectivo,19.88\n260672,2026-06-30,T01,1693,tarjeta,7.69\n260692,2026-06-30,T02,3405,tarjeta,12.73\n260778,2026-06-30,T12,4700,efectivo,5.20\n260780,2026-06-30,T05,,tarjeta,3.61\n260805,2026-06-30,T05,,tarjeta,4.35\n260852,2026-07-01,T10,,tarjeta,9.11\n260973,2026-07-01,T12,5145,tarjeta,14.73\n261010,2026-07-01,T08,6030,tarjeta,2.23\n261068,2026-07-01,T10,4739,efectivo,6.85\n261077,2026-07-01,T07,,tarjeta,27.04\n261106,2026-07-01,T07,,tarjeta,2.66\n261138,2026-07-02,T04,4027,efectivo,2.76\n261146,2026-07-02,T03,3455,tarjeta,0.95\n261176,2026-07-02,T10,4835,tarjeta,22.80\n261261,2026-07-02,T02,4744,tarjeta,12.62\n261346,2026-07-02,T09,,tarjeta,3.39\n261446,2026-07-03,T07,,tarjeta,12.45\n261498,2026-07-03,T07,,efectivo,18.35\n261706,2026-07-03,T04,,efectivo,9.43\n261735,2026-07-03,T07,1785,efectivo,6.15\n261863,2026-07-04,T08,1122,efectivo,11.55\n262012,2026-07-04,T07,,tarjeta,22.05\n262047,2026-07-04,T01,5374,efectivo,20.24\n262102,2026-07-04,T05,5435,efectivo,1.33\n262145,2026-07-05,T10,6560,tarjeta,11.34\n262191,2026-07-05,T01,5540,tarjeta,6.48\n262420,2026-07-05,T07,1729,efectivo,42.08\n262433,2026-07-05,T04,5676,efectivo,24.08\n262557,2026-07-06,T01,,tarjeta,24.37\n262679,2026-07-06,T10,1103,tarjeta,6.20\n262783,2026-07-07,T05,,tarjeta,5.94\n262955,2026-07-07,T04,,efectivo,8.70\n263020,2026-07-08,T01,2689,efectivo,55.11\n263057,2026-07-08,T01,4330,tarjeta,3.29\n263487,2026-07-09,T03,6192,tarjeta,4.13\n263504,2026-07-09,T04,,tarjeta,8.27\n263599,2026-07-10,T06,,efectivo,6.15\n263877,2026-07-10,T10,,tarjeta,10.39\n264199,2026-07-11,T09,6825,efectivo,11.67\n264295,2026-07-12,T02,,tarjeta,11.29\n264466,2026-07-12,T10,1304,tarjeta,8.48\n264585,2026-07-12,T10,4256,efectivo,6.05\n264747,2026-07-13,T06,2369,tarjeta,6.41\n264931,2026-07-14,T04,5620,efectivo,3.34\n265000,2026-07-14,T05,,efectivo,10.98\n265067,2026-07-14,T01,3751,transferencia,21.00\n265087,2026-07-14,T04,6590,tarjeta,16.65\n265142,2026-07-15,T11,,efectivo,29.46\n265268,2026-07-15,T07,3880,tarjeta,35.20\n265277,2026-07-15,T04,,transferencia,16.71\n265610,2026-07-16,T03,,tarjeta,26.94\n265862,2026-07-17,T10,1012,tarjeta,5.78\n265911,2026-07-17,T01,2178,tarjeta,12.40\n266010,2026-07-17,T04,,tarjeta,24.49\n266157,2026-07-18,T07,,efectivo,9.55\n266234,2026-07-18,T11,4797,tarjeta,13.36\n266299,2026-07-18,T07,5773,efectivo,6.47\n266387,2026-07-18,T10,6298,tarjeta,34.88\n266715,2026-07-19,T02,2742,tarjeta,7.11\n266742,2026-07-20,T10,4372,tarjeta,16.43\n266918,2026-07-20,T01,1827,tarjeta,6.63\n267057,2026-07-21,T04,,efectivo,18.51\n267060,2026-07-21,T04,3826,efectivo,13.46\n267170,2026-07-21,T07,4930,efectivo,14.32\n267246,2026-07-21,T09,4867,efectivo,15.48\n267354,2026-07-22,T01,,efectivo,33.71\n267383,2026-07-22,T09,,efectivo,16.07\n267564,2026-07-23,T02,,transferencia,55.33\n267737,2026-07-23,T02,,tarjeta,17.79\n267876,2026-07-24,T11,2676,tarjeta,14.74\n268053,2026-07-24,T11,,tarjeta,8.38\n268110,2026-07-24,T01,2815,tarjeta,1.33\n268144,2026-07-24,T02,,efectivo,9.34\n268154,2026-07-24,T10,4991,transferencia,7.21\n268243,2026-07-25,T07,3848,efectivo,11.34\n268508,2026-07-25,T11,,efectivo,2.54\n268509,2026-07-25,T06,1638,efectivo,2.01\n268547,2026-07-25,T08,6090,efectivo,28.72\n268601,2026-07-26,T02,,tarjeta,21.88\n268653,2026-07-26,T07,,efectivo,9.64\n268791,2026-07-26,T03,1219,efectivo,1.33\n269030,2026-07-27,T05,4266,tarjeta,27.34\n269058,2026-07-27,T04,,tarjeta,41.34\n269164,2026-07-28,T04,3136,tarjeta,33.22\n269271,2026-07-28,T05,2335,,24.87\n269348,2026-07-28,T07,,efectivo,6.25\n269362,2026-07-28,T06,,efectivo,6.46\n269530,2026-07-29,T01,1682,tarjeta,1.38\n269565,2026-07-29,T02,,tarjeta,3.71\n269707,2026-07-30,T08,,tarjeta,42.40\n269795,2026-07-30,T01,,transferencia,23.65\n269806,2026-07-30,T02,4071,efectivo,28.42\n269991,2026-07-30,T04,2541,tarjeta,13.68\n270139,2026-07-31,T01,5530,tarjeta,10.06\n270216,2026-07-31,T10,6883,tarjeta,28.83\n270335,2026-07-31,T07,,tarjeta,13.14\n270426,2026-08-01,T04,5620,tarjeta,9.71\n270576,2026-08-01,T09,4750,tarjeta,8.70\n271036,2026-08-02,T04,3181,tarjeta,10.92\n271136,2026-08-03,T01,1351,efectivo,3.71\n271226,2026-08-03,T10,2686,tarjeta,19.52\n271697,2026-08-05,T01,3662,transferencia,36.21\n271783,2026-08-05,T06,5035,efectivo,6.73\n271811,2026-08-05,T12,,efectivo,6.25\n272175,2026-08-07,T08,2050,tarjeta,8.87\n272205,2026-08-07,T07,,efectivo,4.35\n272381,2026-08-07,T09,,efectivo,42.19\n272505,2026-08-08,T02,,tarjeta,10.98\n272558,2026-08-08,T10,5202,tarjeta,2.76\n272674,2026-08-08,T05,,tarjeta,2.02\n272818,2026-08-08,T10,3553,tarjeta,10.60\n272864,2026-08-09,T09,3997,tarjeta,22.26\n272894,2026-08-09,T03,,efectivo,5.61\n273214,2026-08-10,T07,3960,tarjeta,37.09\n273265,2026-08-10,T06,2841,tarjeta,32.54\n273277,2026-08-10,T01,3640,tarjeta,37.43\n273365,2026-08-10,T08,1808,efectivo,16.54\n273400,2026-08-10,T06,5587,efectivo,9.71\n273516,2026-08-11,T01,4434,tarjeta,8.16\n273578,2026-08-11,T02,,efectivo,15.39\n273599,2026-08-11,T03,2295,efectivo,11.51\n273711,2026-08-12,T09,,tarjeta,6.78\n273777,2026-08-12,T04,,tarjeta,15.59\n273844,2026-08-12,T10,,transferencia,47.06\n273926,2026-08-12,T01,5497,tarjeta,6.46\n274014,2026-08-13,T10,,tarjeta,12.73\n274060,2026-08-13,T10,5033,efectivo,23.69\n274064,2026-08-13,T11,,tarjeta,10.81\n274132,2026-08-13,T10,,tarjeta,4.77\n274133,2026-08-13,T12,,efectivo,11.56\n274418,2026-08-14,T09,,transferencia,3.50\n274429,2026-08-14,T10,,tarjeta,17.60\n274532,2026-08-14,T03,,tarjeta,2.44\n274970,2026-08-16,T10,1486,transferencia,18.45\n274973,2026-08-16,T05,4753,efectivo,9.33\n275103,2026-08-16,T03,4264,tarjeta,4.62\n275239,2026-08-16,T06,,tarjeta,5.30\n275362,2026-08-17,T10,,tarjeta,29.68\n275372,2026-08-17,T10,3000,tarjeta,23.01\n275513,2026-08-17,T01,4044,tarjeta,23.11\n275625,2026-08-18,T02,,efectivo,45.36\n275807,2026-08-19,T05,4530,tarjeta,1.70\n275874,2026-08-19,T02,,tarjeta,43.45\n275914,2026-08-19,T09,6801,tarjeta,16.32\n275929,2026-08-19,T03,,tarjeta,51.83\n276127,2026-08-20,T01,2517,efectivo,6.05\n276169,2026-08-20,T11,,tarjeta,16.74\n276241,2026-08-20,T06,4893,tarjeta,24.49\n276245,2026-08-20,T01,,efectivo,11.61\n276250,2026-08-20,T12,,efectivo,6.10\n276259,2026-08-20,T12,5651,efectivo,4.77\n276356,2026-08-21,T04,,tarjeta,16.22\n276376,2026-08-21,T10,2141,efectivo,14.31\n276440,2026-08-21,T12,,transferencia,3.98\n276519,2026-08-21,T04,5073,tarjeta,32.50\n276521,2026-08-21,T02,,tarjeta,12.63\n276720,2026-08-22,T02,6380,efectivo,12.93\n276735,2026-08-22,T09,1180,tarjeta,14.10\n276825,2026-08-22,T01,5385,transferencia,10.91\n276897,2026-08-22,T06,,efectivo,18.94\n276925,2026-08-22,T02,,transferencia,56.37\n277066,2026-08-23,T04,,tarjeta,7.86\n277101,2026-08-23,T02,,tarjeta,5.82\n277175,2026-08-23,T01,,tarjeta,3.29\n277475,2026-08-24,T04,,transferencia,2.54\n277542,2026-08-24,T05,1116,transferencia,28.62\n277577,2026-08-24,T01,1055,tarjeta,27.84\n277643,2026-08-25,T01,1419,tarjeta,26.83\n277716,2026-08-25,T10,,transferencia,22.38\n277728,2026-08-25,T04,,tarjeta,1.48\n277771,2026-08-25,T10,6503,tarjeta,1.33\n277845,2026-08-25,T10,1954,efectivo,4.99\n277921,2026-08-26,T10,,efectivo,27.46\n277982,2026-08-26,T02,6836,efectivo,1.59\n278081,2026-08-26,T06,3681,efectivo,14.75\n278258,2026-08-27,T01,1339,efectivo,35.99\n278427,2026-08-28,T07,,tarjeta,37.31\n278641,2026-08-28,T01,5678,transferencia,9.43\n278803,2026-08-29,T01,4425,efectivo,13.14\n278871,2026-08-29,T06,2821,efectivo,13.90\n278927,2026-08-29,T05,,efectivo,3.29\n278996,2026-08-29,T12,4703,efectivo,11.62\n279141,2026-08-30,T06,,transferencia,3.99\n279215,2026-08-30,T09,6368,efectivo,6.47\n279241,2026-08-30,T01,3454,efectivo,49.94\n279334,2026-08-30,T02,1787,efectivo,16.91\n279392,2026-08-30,T11,,efectivo,7.32\n279489,2026-08-31,T03,6985,efectivo,14.95\n279493,2026-08-31,T04,,tarjeta,8.22\n279495,2026-08-31,T04,,transferencia,11.98\n279517,2026-08-31,T07,4661,efectivo,19.29\n279519,2026-08-31,T04,,tarjeta,2.23\n279721,2026-09-01,T10,6796,efectivo,25.46\n279729,2026-09-01,T10,1294,tarjeta,28.04\n279831,2026-09-01,T01,4361,tarjeta,12.41\n279914,2026-09-01,T10,2557,tarjeta,3.39\n279964,2026-09-01,T09,,efectivo,8.16\n280115,2026-09-02,T06,3594,transferencia,6.41\n280294,2026-09-03,T07,6827,tarjeta,13.67\n280362,2026-09-03,T08,,tarjeta,19.93\n280543,2026-09-04,T01,,tarjeta,14.54\n280627,2026-09-04,T11,4335,tarjeta,5.94\n280633,2026-09-04,T01,3423,tarjeta,6.47\n280650,2026-09-04,T09,4560,efectivo,2.44\n280655,2026-09-04,T04,3826,tarjeta,3.39\n280755,2026-09-04,T02,3875,tarjeta,21.36\n280765,2026-09-04,T01,,efectivo,16.29\n280766,2026-09-04,T09,3672,tarjeta,7.31\n280776,2026-09-04,T06,,tarjeta,8.69\n280858,2026-09-05,T10,,efectivo,12.84\n280892,2026-09-05,T04,,tarjeta,14.22\n280993,2026-09-05,T08,,tarjeta,19.87\n281208,2026-09-06,T01,,tarjeta,26.39\n281302,2026-09-06,T02,,efectivo,5.52\n281328,2026-09-06,T11,2453,tarjeta,12.72\n281423,2026-09-06,T12,3679,tarjeta,3.39\n281620,2026-09-07,T05,,tarjeta,10.18\n281632,2026-09-07,T04,3791,tarjeta,15.57\n281869,2026-09-08,T01,,tarjeta,4.77\n281902,2026-09-08,T02,,transferencia,20.41\n282025,2026-09-09,T11,,tarjeta,11.03\n282182,2026-09-09,T07,2741,tarjeta,52.20\n282205,2026-09-09,T01,,tarjeta,8.01\n282839,2026-09-12,T10,6613,tarjeta,3.87\n282931,2026-09-12,T05,2088,tarjeta,3.71\n283031,2026-09-12,T11,,efectivo,30.53\n283122,2026-09-12,T01,1339,efectivo,26.27\n283156,2026-09-12,T06,6329,tarjeta,9.64\n283901,2026-09-15,T01,,efectivo,17.49\n284007,2026-09-16,T08,5240,efectivo,10.38\n284237,2026-09-16,T04,3292,efectivo,20.79\n284470,2026-09-17,T08,,tarjeta,10.24\n284486,2026-09-17,T03,6117,efectivo,8.68\n284527,2026-09-17,T04,4278,tarjeta,7.47\n284583,2026-09-18,T06,3859,tarjeta,7.54\n284639,2026-09-18,T03,,tarjeta,14.00\n284678,2026-09-18,T08,,tarjeta,7.69\n284827,2026-09-19,T04,,tarjeta,9.82\n285010,2026-09-19,T12,,efectivo,13.88\n285047,2026-09-19,T04,5620,tarjeta,1.33\n285088,2026-09-19,T02,4704,transferencia,10.91\n285227,2026-09-20,T04,,efectivo,9.01\n285229,2026-09-20,T04,3835,tarjeta,18.56\n285251,2026-09-20,T10,5079,tarjeta,29.27\n285270,2026-09-20,T12,1639,transferencia,23.74\n285391,2026-09-20,T02,6505,transferencia,21.70\n285441,2026-09-20,T01,,tarjeta,8.69\n285558,2026-09-21,T06,,efectivo,8.16\n286016,2026-09-23,T03,3731,tarjeta,2.23\n286085,2026-09-23,T04,,efectivo,6.16\n286102,2026-09-23,T07,,tarjeta,4.99\n286173,2026-09-23,T04,4101,tarjeta,6.05\n286193,2026-09-23,T06,,tarjeta,6.89\n286208,2026-09-23,T01,6847,tarjeta,24.27\n286258,2026-09-24,T04,6544,tarjeta,18.87\n286266,2026-09-24,T01,3920,tarjeta,11.13\n286291,2026-09-24,T01,,tarjeta,31.38\n286356,2026-09-24,T05,,tarjeta,1.91\n286406,2026-09-24,T05,,efectivo,10.76\n286411,2026-09-24,T03,,tarjeta,14.52\n286619,2026-09-25,T06,1949,tarjeta,5.51\n286638,2026-09-25,T07,,efectivo,4.72\n286808,2026-09-26,T01,,tarjeta,12.57\n286882,2026-09-26,T08,5071,efectivo,14.31\n286982,2026-09-26,T02,6517,efectivo,2.23\n287086,2026-09-26,T10,2557,tarjeta,14.57\n287102,2026-09-26,T03,3175,tarjeta,23.23\n287136,2026-09-26,T05,,efectivo,14.31\n287168,2026-09-26,T12,2803,tarjeta,5.19\n287225,2026-09-27,T02,3428,efectivo,20.98\n287310,2026-09-27,T08,,tarjeta,22.91\n287336,2026-09-27,T01,,efectivo,6.15\n287345,2026-09-27,T09,,efectivo,9.38\n287500,2026-09-28,T04,,tarjeta,18.60\n287573,2026-09-28,T09,5955,tarjeta,23.00\n287614,2026-09-28,T07,4431,transferencia,20.56\n287787,2026-09-29,T01,3869,tarjeta,8.27\n287820,2026-09-29,T01,,tarjeta,37.83\n287851,2026-09-29,T04,3194,efectivo,29.05\n287921,2026-09-29,T09,,transferencia,8.39\n288105,2026-09-30,T04,,efectivo,21.09\n288182,2026-09-30,T04,,transferencia,11.34\n288245,2026-09-30,T05,,tarjeta,2.23\n288448,2026-10-01,T02,,tarjeta,1.38\n288507,2026-10-01,T11,2413,tarjeta,7.31\n288521,2026-10-01,T04,6070,tarjeta,17.34\n288768,2026-10-02,T03,,tarjeta,1.48\n288913,2026-10-03,T01,,tarjeta,10.34\n288929,2026-10-03,T01,,tarjeta,59.67\n289081,2026-10-03,T04,,tarjeta,18.99\n289260,2026-10-04,T05,,efectivo,3.03\n289306,2026-10-04,T11,,tarjeta,5.47\n289448,2026-10-04,T05,3656,efectivo,52.36\n289459,2026-10-04,T09,4028,transferencia,15.48\n289590,2026-10-05,T03,,tarjeta,4.77\n289639,2026-10-05,T04,3109,transferencia,13.63\n290311,2026-10-07,T10,,efectivo,30.91\n290357,2026-10-07,T08,6925,efectivo,38.05\n290406,2026-10-08,T10,3987,efectivo,35.71\n290408,2026-10-08,T02,4662,efectivo,34.77\n290574,2026-10-08,T04,,tarjeta,11.03\n290579,2026-10-08,T01,1809,tarjeta,6.94\n290607,2026-10-08,T04,5484,efectivo,37.52\n290615,2026-10-08,T04,1119,efectivo,14.96\n290904,2026-10-09,T02,1749,tarjeta,1.80\n290905,2026-10-09,T01,2609,tarjeta,29.15\n291280,2026-10-10,T01,6273,tarjeta,15.54\n291573,2026-10-11,T01,,tarjeta,5.09\n291774,2026-10-12,T07,2827,tarjeta,15.90\n291853,2026-10-12,T08,2927,tarjeta,17.39\n291881,2026-10-12,T07,3834,transferencia,3.71\n292025,2026-10-13,T02,,tarjeta,11.02\n292068,2026-10-13,T04,,efectivo,4.57\n292226,2026-10-14,T10,,efectivo,9.86\n292330,2026-10-14,T03,1128,efectivo,10.39\n292511,2026-10-15,T10,,tarjeta,22.38\n292728,2026-10-16,T04,,efectivo,13.85\n292732,2026-10-16,T03,1581,tarjeta,6.04\n292936,2026-10-16,T04,5633,efectivo,22.64\n293143,2026-10-17,T01,5972,efectivo,31.44\n293220,2026-10-17,T02,5761,tarjeta,1.48\n293318,2026-10-17,T04,3401,efectivo,56.29\n293329,2026-10-17,T07,3544,transferencia,14.83\n293426,2026-10-17,T11,3381,tarjeta,5.72\n293571,2026-10-18,T03,6148,efectivo,2.01\n293654,2026-10-18,T07,,efectivo,21.31\n293699,2026-10-18,T01,5679,tarjeta,22.85\n293716,2026-10-18,T04,5857,tarjeta,10.50\n293895,2026-10-19,T02,,transferencia,4.94\n294066,2026-10-20,T07,2212,tarjeta,15.05\n294289,2026-10-21,T12,,efectivo,21.63\n294468,2026-10-21,T07,,efectivo,13.52\n294482,2026-10-21,T12,4063,efectivo,4.02\n294640,2026-10-22,T01,,tarjeta,14.20\n294754,2026-10-22,T11,,efectivo,11.23\n294765,2026-10-22,T12,4564,transferencia,6.57\n294800,2026-10-23,T02,5591,efectivo,10.80\n294946,2026-10-23,T01,3454,tarjeta,12.62\n294971,2026-10-23,T10,,efectivo,39.30\n294974,2026-10-23,T02,6546,tarjeta,6.78\n295010,2026-10-23,T04,1777,tarjeta,7.16\n295203,2026-10-24,T04,1093,efectivo,22.58\n295318,2026-10-24,T06,,tarjeta,3.82\n295379,2026-10-24,T08,6620,transferencia,14.00\n295524,2026-10-25,T03,3112,efectivo,10.39\n295532,2026-10-25,T10,2750,tarjeta,10.82\n295577,2026-10-25,T10,,tarjeta,33.17\n295778,2026-10-25,T06,6890,tarjeta,13.36\n296076,2026-10-27,T10,5977,tarjeta,21.19\n296129,2026-10-27,T11,4784,efectivo,3.40\n296342,2026-10-28,T03,,tarjeta,6.47\n296369,2026-10-28,T02,3106,efectivo,40.97\n296372,2026-10-28,T06,6335,transferencia,6.47\n296489,2026-10-28,T01,,efectivo,10.08\n296533,2026-10-28,T10,,tarjeta,16.34\n296630,2026-10-29,T06,5318,tarjeta,5.83\n296665,2026-10-29,T03,,transferencia,9.80\n296746,2026-10-29,T04,2162,efectivo,3.50\n296771,2026-10-29,T04,6964,tarjeta,12.40\n296905,2026-10-30,T01,4227,efectivo,15.16\n297011,2026-10-30,T02,5805,efectivo,30.10\n297031,2026-10-30,T05,4740,efectivo,1.33\n297033,2026-10-30,T01,1790,tarjeta,2.60\n297140,2026-10-30,T02,4576,efectivo,24.39\n297148,2026-10-30,T02,6669,efectivo,33.72\n", "tiendas.csv": "tienda_id,nombre,region,formato,m2\nT01,Norte Mirador,Norte,grande,1800\nT02,Norte Estación,Norte,grande,1500\nT03,Norte Los Pinos,Norte,express,300\nT04,Centro Plaza Mayor,Centro,grande,2000\nT05,Centro Alameda,Centro,express,350\nT06,Centro Universidad,Centro,express,280\nT07,Sur Puerto,Sur,grande,1700\nT08,Sur Las Colinas,Sur,express,320\nT09,Sur Mercado Viejo,Sur,express,300\nT10,Oriente Río Claro,Oriente,grande,1600\nT11,Oriente La Loma,Oriente,express,300\nT12,Oriente Nuevo Sol,Oriente,express,260\n", "clientes.csv": "cliente_id,tienda_alta,fecha_alta\n1002,T01,2023-11-01\n1012,T10,2021-11-24\n1018,T10,2022-03-10\n1023,T01,2024-08-16\n1036,T06,2024-05-23\n1055,T01,2023-12-24\n1092,T04,2024-09-18\n1093,T04,2026-02-18\n1103,T10,2023-12-14\n1112,T01,2025-02-20\n1116,T05,2021-12-03\n1119,T04,2023-01-31\n1122,T08,2023-04-30\n1126,T04,2024-05-05\n1128,T03,2023-05-13\n1154,T07,2024-04-03\n1180,T09,2023-03-31\n1191,T02,2023-01-10\n1203,T10,2021-07-04\n1215,T11,2023-12-28\n1216,T05,2025-10-13\n1219,T03,2025-12-21\n1220,T07,2024-06-14\n1254,T04,2024-02-27\n1279,T07,2024-03-25\n1280,T11,2024-01-23\n1286,T09,2023-10-22\n1288,T05,2024-11-27\n1294,T10,2024-10-11\n1302,T03,2025-03-31\n1304,T10,2023-12-27\n1308,T06,2023-01-26\n1328,T06,2025-09-23\n1339,T01,2023-12-01\n1351,T01,2023-05-09\n1367,T09,2024-11-08\n1369,T07,2023-09-16\n1373,T05,2023-03-26\n1381,T04,2024-04-19\n1419,T01,2024-08-18\n1429,T04,2025-01-19\n1430,T12,2023-11-08\n1486,T10,2023-12-25\n1493,T04,2024-09-12\n1500,T10,2025-12-23\n1502,T11,2025-09-21\n1510,T02,2021-04-21\n1540,T04,2025-11-27\n1544,T04,2024-01-04\n1565,T04,2025-08-21\n1577,T03,2026-01-04\n1581,T03,2021-03-02\n1595,T02,2021-04-22\n1599,T06,2021-12-16\n1608,T02,2021-04-30\n1638,T06,2025-11-08\n1639,T12,2021-09-19\n1670,T02,2024-11-12\n1675,T04,2021-03-29\n1679,T04,2026-02-16\n1682,T01,2021-01-14\n1684,T11,2021-03-19\n1685,T04,2022-01-29\n1693,T01,2026-04-15\n1729,T07,2025-05-03\n1749,T02,2023-10-20\n1767,T07,2022-01-18\n1771,T02,2022-09-28\n1772,T02,2022-06-14\n1774,T07,2021-10-15\n1777,T04,2025-11-21\n1780,T10,2026-02-02\n1785,T07,2021-06-18\n1787,T02,2022-01-08\n1790,T01,2026-03-22\n1805,T04,2025-04-19\n1808,T08,2024-05-18\n1809,T01,2023-03-07\n1813,T06,2021-06-21\n1822,T10,2021-06-26\n1825,T08,2024-02-10\n1827,T01,2024-08-16\n1845,T10,2024-01-06\n1877,T11,2021-01-09\n1928,T02,2026-01-31\n1949,T06,2026-08-06\n1954,T10,2022-10-13\n1980,T10,2025-01-27\n1981,T04,2023-09-01\n2003,T02,2024-11-09\n2048,T10,2024-05-17\n2050,T08,2022-01-28\n2072,T07,2023-12-23\n2073,T10,2021-08-01\n2088,T05,2024-08-07\n2100,T09,2021-10-15\n2103,T09,2024-02-23\n2121,T03,2022-04-02\n2141,T10,2021-03-11\n2162,T04,2023-01-28\n2175,T01,2024-07-07\n2178,T01,2024-11-04\n2212,T07,2021-11-20\n2223,T01,2024-09-08\n2247,T02,2022-05-15\n2254,T01,2022-05-10\n2283,T04,2025-10-04\n2295,T03,2022-08-26\n2335,T05,2023-08-23\n2369,T06,2021-11-27\n2372,T05,2025-01-08\n2378,T09,2024-03-09\n2387,T04,2022-05-17\n2400,T04,2023-05-05\n2409,T05,2022-11-14\n2413,T11,2022-01-26\n2421,T10,2021-12-25\n2424,T04,2021-05-14\n2448,T02,2022-10-01\n2453,T11,2022-06-08\n2497,T04,2023-03-08\n2517,T01,2023-03-05\n2541,T04,2022-07-08\n2553,T01,2021-05-04\n2557,T10,2021-11-09\n2578,T02,2022-04-27\n2600,T04,2023-07-24\n2609,T01,2026-06-01\n2676,T11,2026-05-06\n2686,T10,2022-07-12\n2689,T01,2023-09-13\n2707,T08,2021-01-19\n2733,T02,2021-06-11\n2741,T07,2026-03-07\n2742,T02,2021-09-20\n2747,T05,2021-04-11\n2750,T10,2026-02-04\n2762,T05,2021-12-09\n2772,T01,2021-04-21\n2784,T08,2021-11-04\n2802,T07,2025-02-10\n2803,T12,2023-10-23\n2815,T01,2024-02-01\n2821,T06,2024-09-07\n2827,T07,2023-01-11\n2830,T03,2026-01-27\n2841,T06,2025-03-10\n2893,T04,2024-12-12\n2902,T02,2024-03-06\n2925,T07,2025-06-03\n2927,T08,2022-12-09\n2998,T06,2024-12-27\n3000,T10,2023-05-21\n3053,T07,2023-04-25\n3068,T04,2022-01-10\n3085,T10,2023-07-24\n3105,T03,2025-02-11\n3106,T02,2026-07-09\n3108,T05,2025-02-11\n3109,T04,2022-08-11\n3112,T03,2025-05-21\n3120,T05,2026-02-07\n3136,T04,2022-04-10\n3175,T03,2022-06-21\n3181,T04,2026-06-16\n3194,T04,2022-11-21\n3228,T07,2022-10-05\n3257,T06,2025-01-19\n3291,T03,2026-06-14\n3292,T04,2023-01-30\n3293,T08,2025-02-22\n3305,T02,2023-04-01\n3321,T03,2024-08-07\n3331,T02,2023-10-13\n3336,T01,2021-10-07\n3346,T04,2021-08-06\n3353,T02,2026-02-25\n3365,T04,2021-04-20\n3371,T07,2025-12-02\n3373,T01,2021-10-21\n3375,T08,2023-05-30\n3376,T04,2022-09-18\n3381,T11,2025-06-06\n3385,T02,2021-06-27\n3393,T05,2024-08-07\n3401,T04,2023-11-15\n3403,T04,2023-07-06\n3405,T02,2022-08-24\n3423,T01,2022-04-13\n3428,T02,2022-03-23\n3431,T02,2021-06-21\n3453,T02,2025-12-23\n3454,T01,2023-02-06\n3455,T03,2025-02-04\n3463,T10,2022-10-15\n3485,T12,2026-02-05\n3505,T01,2024-02-26\n3540,T02,2024-12-29\n3544,T07,2022-12-08\n3553,T10,2024-12-23\n3569,T07,2025-01-03\n3575,T11,2023-08-18\n3594,T06,2021-09-05\n3607,T01,2021-02-22\n3619,T02,2022-05-03\n3640,T01,2023-12-09\n3644,T08,2022-05-18\n3656,T05,2025-05-13\n3660,T01,2025-04-03\n3662,T01,2025-08-14\n3663,T10,2024-10-23\n3672,T09,2025-01-28\n3679,T12,2021-08-03\n3681,T06,2022-10-27\n3692,T01,2023-04-09\n3699,T07,2025-10-03\n3715,T03,2023-07-20\n3729,T04,2023-02-25\n3731,T03,2023-01-27\n3751,T01,2023-06-09\n3768,T06,2025-08-15\n3777,T01,2024-02-10\n3785,T06,2025-05-30\n3791,T04,2026-03-05\n3799,T04,2021-02-11\n3804,T02,2021-07-15\n3806,T07,2021-07-23\n3826,T04,2022-09-21\n3827,T04,2022-11-15\n3834,T07,2021-05-12\n3835,T04,2021-10-15\n3844,T07,2025-07-15\n3848,T07,2021-08-07\n3851,T02,2024-01-10\n3852,T04,2022-05-06\n3856,T07,2025-08-16\n3859,T06,2025-06-20\n3866,T03,2021-02-05\n3869,T01,2023-10-07\n3875,T02,2023-05-17\n3880,T07,2025-07-25\n3885,T12,2023-05-29\n3906,T07,2022-06-16\n3920,T01,2024-02-26\n3928,T02,2021-07-15\n3960,T07,2024-10-15\n3972,T01,2024-11-27\n3987,T10,2025-04-19\n3989,T01,2021-04-18\n3997,T09,2021-12-11\n4024,T06,2022-11-10\n4027,T04,2021-04-17\n4028,T09,2025-05-25\n4044,T01,2022-09-23\n4063,T12,2022-06-13\n4071,T02,2024-11-02\n4085,T06,2023-11-12\n4093,T09,2024-07-07\n4101,T04,2025-06-10\n4122,T12,2023-08-23\n4130,T08,2023-09-27\n4136,T05,2021-03-05\n4144,T08,2026-02-28\n4145,T12,2024-09-29\n4152,T04,2025-10-14\n4173,T01,2023-11-18\n4177,T02,2022-06-15\n4184,T10,2021-04-15\n4192,T02,2026-02-21\n4227,T01,2022-08-11\n4240,T11,2025-10-02\n4243,T02,2025-08-27\n4256,T10,2024-11-05\n4264,T03,2022-04-03\n4266,T05,2023-03-05\n4273,T11,2025-10-25\n4277,T02,2022-09-22\n4278,T04,2024-08-11\n4285,T01,2023-03-12\n4299,T07,2024-05-31\n4306,T08,2022-03-31\n4330,T01,2024-07-30\n4335,T11,2024-06-13\n4350,T09,2022-12-16\n4359,T02,2025-09-18\n4361,T01,2024-09-05\n4372,T10,2022-12-24\n4387,T04,2023-11-22\n4425,T01,2023-12-09\n4431,T07,2021-05-18\n4434,T01,2025-06-26\n4479,T07,2025-06-24\n4481,T09,2026-04-15\n4482,T09,2022-08-08\n4520,T07,2024-05-08\n4523,T03,2026-02-20\n4530,T05,2025-04-11\n4557,T06,2025-03-08\n4560,T09,2022-09-14\n4564,T12,2026-02-20\n4566,T07,2021-05-10\n4572,T04,2023-08-23\n4576,T02,2021-03-09\n4597,T02,2021-12-12\n4606,T05,2023-01-14\n4610,T10,2025-11-30\n4626,T07,2025-02-07\n4661,T07,2024-11-12\n4662,T02,2023-10-05\n4700,T12,2022-01-11\n4703,T12,2023-12-23\n4704,T02,2021-03-16\n4717,T04,2025-10-14\n4722,T04,2022-02-26\n4739,T10,2024-09-20\n4740,T05,2024-07-02\n4744,T02,2024-05-14\n4746,T10,2022-03-03\n4748,T01,2026-01-29\n4750,T09,2023-07-05\n4753,T05,2023-01-13\n4784,T11,2024-06-02\n4797,T11,2022-11-28\n4814,T10,2022-08-01\n4821,T04,2024-08-03\n4835,T10,2025-02-20\n4852,T05,2025-03-22\n4856,T07,2023-02-13\n4867,T09,2024-03-14\n4891,T02,2026-03-21\n4893,T06,2021-02-13\n4919,T01,2021-06-07\n4930,T07,2022-11-21\n4949,T04,2021-06-04\n4954,T06,2024-06-07\n4958,T04,2025-10-29\n4974,T07,2021-12-01\n4977,T05,2022-02-27\n4991,T10,2025-10-17\n4996,T04,2025-08-20\n5016,T05,2026-03-24\n5029,T05,2022-07-19\n5033,T10,2025-04-22\n5035,T06,2021-06-03\n5071,T08,2025-12-29\n5073,T04,2026-05-27\n5079,T10,2021-06-08\n5081,T07,2021-06-28\n5102,T02,2021-02-07\n5109,T07,2023-02-07\n5114,T01,2023-03-25\n5145,T12,2024-08-06\n5165,T02,2023-10-19\n5173,T02,2022-07-21\n5197,T06,2022-06-07\n5202,T10,2022-08-24\n5240,T08,2022-12-22\n5274,T01,2022-01-16\n5279,T10,2021-04-10\n5305,T03,2021-01-06\n5318,T06,2021-11-20\n5343,T06,2025-10-28\n5361,T09,2022-08-16\n5374,T01,2022-04-05\n5385,T01,2021-08-10\n5435,T05,2021-11-15\n5449,T10,2021-02-03\n5467,T01,2021-08-11\n5473,T07,2024-07-21\n5484,T04,2022-08-06\n5489,T07,2024-12-07\n5497,T01,2023-10-23\n5505,T04,2023-03-20\n5512,T09,2025-03-30\n5520,T01,2024-04-26\n5522,T06,2023-07-07\n5530,T01,2021-08-03\n5540,T01,2021-05-28\n5551,T05,2026-01-04\n5558,T01,2023-05-08\n5559,T03,2022-04-08\n5572,T04,2024-06-19\n5587,T06,2026-02-24\n5591,T02,2025-11-22\n5604,T03,2024-09-02\n5605,T07,2023-01-08\n5620,T04,2024-11-01\n5633,T04,2023-09-27\n5634,T11,2022-02-23\n5650,T04,2022-01-15\n5651,T12,2025-11-30\n5663,T12,2021-11-17\n5676,T04,2026-05-24\n5678,T01,2022-07-23\n5679,T01,2026-04-25\n5693,T02,2025-11-12\n5699,T07,2024-03-21\n5726,T09,2024-02-17\n5728,T06,2025-11-30\n5748,T02,2025-02-25\n5750,T07,2023-06-19\n5761,T02,2021-05-30\n5773,T07,2025-10-28\n5776,T07,2021-10-25\n5784,T01,2026-02-13\n5787,T04,2021-03-26\n5805,T02,2022-06-02\n5843,T10,2024-03-10\n5857,T04,2022-12-28\n5859,T11,2023-12-25\n5866,T01,2021-07-20\n5893,T03,2025-12-21\n5928,T11,2022-06-20\n5933,T04,2022-06-20\n5942,T01,2023-06-27\n5948,T05,2022-08-18\n5955,T09,2022-08-06\n5957,T02,2026-01-08\n5972,T01,2024-10-09\n5977,T10,2021-03-13\n6030,T08,2022-11-30\n6041,T11,2021-12-01\n6049,T10,2024-03-16\n6057,T07,2023-10-11\n6070,T04,2021-07-10\n6073,T08,2021-01-29\n6077,T12,2025-04-28\n6078,T03,2024-07-13\n6090,T08,2024-11-17\n6092,T04,2026-06-27\n6098,T12,2021-02-12\n6112,T08,2025-10-05\n6117,T03,2025-06-28\n6148,T03,2024-12-28\n6151,T04,2021-12-28\n6183,T07,2025-10-20\n6192,T03,2026-05-04\n6194,T03,2022-12-17\n6202,T03,2024-11-28\n6221,T07,2023-01-19\n6222,T03,2021-03-15\n6226,T07,2025-05-09\n6228,T10,2022-10-24\n6239,T08,2025-10-20\n6241,T07,2022-05-02\n6273,T01,2023-07-28\n6281,T02,2025-07-11\n6298,T10,2024-04-09\n6303,T04,2024-07-14\n6315,T01,2025-05-25\n6316,T04,2022-07-05\n6324,T04,2025-03-22\n6329,T06,2025-09-17\n6331,T12,2024-02-13\n6335,T06,2024-08-25\n6368,T09,2023-06-24\n6373,T02,2021-12-25\n6376,T02,2022-06-29\n6380,T02,2025-10-29\n6396,T02,2024-02-23\n6416,T12,2023-03-11\n6418,T05,2024-08-10\n6419,T08,2024-06-13\n6444,T07,2021-05-15\n6489,T07,2026-03-01\n6503,T10,2022-11-30\n6505,T02,2025-05-02\n6509,T12,2024-03-20\n6517,T02,2025-12-23\n6544,T04,2025-05-31\n6546,T02,2023-08-04\n6557,T02,2021-04-11\n6560,T10,2025-04-24\n6581,T07,2021-12-03\n6590,T04,2024-06-18\n6613,T10,2021-02-25\n6620,T08,2021-12-19\n6626,T08,2021-12-16\n6630,T03,2024-09-06\n6668,T02,2023-03-17\n6669,T02,2024-05-17\n6696,T12,2024-08-27\n6699,T11,2025-05-16\n6719,T05,2024-05-01\n6722,T01,2022-11-13\n6781,T01,2024-01-01\n6796,T10,2025-04-09\n6799,T11,2022-08-25\n6801,T09,2023-03-26\n6808,T08,2025-05-04\n6813,T09,2023-09-15\n6819,T06,2023-11-06\n6825,T09,2024-01-17\n6826,T02,2024-04-05\n6827,T07,2023-01-22\n6832,T02,2025-09-17\n6836,T02,2023-05-30\n6847,T01,2024-05-25\n6852,T11,2024-11-29\n6859,T02,2024-02-09\n6862,T03,2023-06-13\n6877,T01,2023-02-07\n6883,T10,2021-09-25\n6890,T06,2021-04-12\n6900,T05,2022-01-20\n6925,T08,2024-06-28\n6952,T08,2024-11-26\n6953,T06,2024-03-12\n6964,T04,2021-01-11\n6968,T02,2022-01-01\n6985,T03,2025-12-30\n"};
+  const EJ=[{"t": "Agrupar: ventas por región", "cod": "import pandas as pd\nventas = pd.read_csv(\"ventas.csv\")\ntiendas = pd.read_csv(\"tiendas.csv\")\nv = ventas.merge(tiendas, on=\"tienda_id\", how=\"left\", validate=\"many_to_one\")\n(v.groupby(\"region\")\n  .agg(ventas=(\"total\", \"sum\"), tickets=(\"ticket_id\", \"count\"),\n       ticket_promedio=(\"total\", \"mean\"))\n  .sort_values(\"ventas\", ascending=False)\n  .round(2))", "lee": "Divide los tickets por región, aplica tres agregaciones y combina el resultado en una fila por región. Es una muestra de 900 tickets de 2026, así que las cifras son más chicas que las del capítulo, pero se ve lo mismo que en la cadena: el Norte vende más y tiene el ticket más alto. Con tan pocos tickets, el orden de las otras tres regiones puede cambiar.", "r": {"salida": "", "tabla": {"columnas": ["ventas", "tickets", "ticket_promedio"], "tipos": ["float64", "int64", "float64"], "indice": ["Norte", "Centro", "Sur", "Oriente"], "forma": [4, 3], "motor": "pandas", "filas": [[4904.11, 291, 16.85], [3460.76, 252, 13.73], [3053.81, 191, 15.99], [2424.07, 168, 14.43]]}, "img": null}}, {"t": "Ventana: participación de cada tienda en su región", "cod": "import pandas as pd\nv = pd.read_csv(\"ventas.csv\").merge(pd.read_csv(\"tiendas.csv\"), on=\"tienda_id\")\npor_tienda = v.groupby([\"region\", \"tienda_id\", \"formato\"], as_index=False)[\"total\"].sum()\npor_tienda[\"part_region_%\"] = (\n    por_tienda[\"total\"] / por_tienda.groupby(\"region\")[\"total\"].transform(\"sum\") * 100\n).round(1)\npor_tienda[\"puesto\"] = por_tienda.groupby(\"region\")[\"total\"].rank(ascending=False).astype(int)\npor_tienda.sort_values([\"region\", \"puesto\"])", "lee": "<code>transform</code> calcula el total de la región pero lo devuelve repetido en cada fila: no colapsa la tabla. Así cada tienda queda junto a su participación y a su puesto dentro de la región. En casi todas las regiones la tienda grande se lleva más de la mitad.", "r": {"salida": "", "tabla": {"columnas": ["region", "tienda_id", "formato", "total", "part_region_%", "puesto"], "tipos": ["str", "str", "str", "float64", "float64", "int64"], "indice": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"], "forma": [12, 6], "motor": "pandas", "filas": [["Centro", "T04", "grande", 2301.73, 66.5, 1], ["Centro", "T05", "express", 627.7900000000001, 18.1, 2], ["Centro", "T06", "express", 531.24, 15.4, 3], ["Norte", "T01", "grande", 2189.44, 44.6, 1], ["Norte", "T02", "grande", 2150.41, 43.8, 2], ["Norte", "T03", "express", 564.26, 11.5, 3], ["Oriente", "T10", "grande", 1663.1299999999999, 68.6, 1], ["Oriente", "T11", "express", 431.41, 17.8, 2], ["Oriente", "T12", "express", 329.53, 13.6, 3], ["Sur", "T07", "grande", 1823.49, 59.7, 1], ["Sur", "T08", "express", 673.9, 22.1, 2], ["Sur", "T09", "express", 556.42, 18.2, 3]]}, "img": null}}, {"t": "Unir y verificar: indicator y validate", "cod": "import pandas as pd\nventas = pd.read_csv(\"ventas.csv\", dtype={\"cliente_id\": \"Int64\"})\nclientes = pd.read_csv(\"clientes.csv\")\nantes = len(ventas)\nm = ventas.merge(clientes, on=\"cliente_id\", how=\"left\",\n                 validate=\"many_to_one\", indicator=True)\nprint(\"filas antes:\", antes, \"· después:\", len(m))\nprint(m[\"_merge\"].value_counts())\n# anti join: tickets con un cliente que no existe\nm[(m[\"_merge\"] == \"left_only\") & m[\"cliente_id\"].notna()][[\"ticket_id\", \"tienda_id\", \"cliente_id\", \"total\"]]", "lee": "El join izquierdo conserva todos los tickets (mismas filas antes y después: <code>validate</code> garantiza que cada cliente aparece una sola vez). <code>indicator=True</code> agrega la columna <code>_merge</code>: los <code>left_only</code> son tickets anónimos o con un cliente que no existe. Filtrando los que sí traen <code>cliente_id</code> queda el <em>anti join</em>: dos números con un dígito de más.", "r": {"salida": "filas antes: 902 · después: 902\n_merge\nboth          549\nleft_only     353\nright_only      0\nName: count, dtype: int64\n", "tabla": {"columnas": ["ticket_id", "tienda_id", "cliente_id", "total"], "tipos": ["int64", "str", "Int64", "float64"], "indice": ["41", "231"], "forma": [2, 4], "motor": "pandas", "filas": [[211971, "T07", 16326, 22.15], [230918, "T05", 21794, 1.7]]}, "img": null}}, {"t": "Remodelar: de largo a ancho y de vuelta", "cod": "import pandas as pd\nv = pd.read_csv(\"ventas.csv\")\nv[\"mes\"] = v[\"fecha\"].str[:7]\nlargo = v.groupby([\"tienda_id\", \"mes\"], as_index=False)[\"total\"].sum()\nancho = largo.pivot(index=\"tienda_id\", columns=\"mes\", values=\"total\").round(0)\nprint(\"ancho:\", ancho.shape, \"· largo:\", largo.shape)\nde_vuelta = ancho.reset_index().melt(id_vars=\"tienda_id\", var_name=\"mes\", value_name=\"total\")\nancho", "lee": "<code>pivot</code> pasa de una fila por tienda y mes (formato largo) a una fila por tienda con un mes por columna (formato ancho, como el reporte de Hernán). <code>melt</code> hace el camino inverso y deja la tabla lista para agrupar o graficar.", "r": {"salida": "ancho: (12, 10) · largo: (119, 3)\n", "tabla": {"columnas": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"], "tipos": ["float64", "float64", "float64", "float64", "float64", "float64", "float64", "float64", "float64", "float64"], "indice": ["T01", "T02", "T03", "T04", "T05", "T06", "T07", "T08", "T09", "T10", "T11", "T12"], "forma": [12, 10], "motor": "pandas", "filas": [[237.0, 228.0, 231.0, 80.0, 240.0, 134.0, 220.0, 310.0, 273.0, 236.0], [261.0, 141.0, 145.0, 271.0, 286.0, 352.0, 167.0, 221.0, 103.0, 202.0], [53.0, 40.0, 57.0, 65.0, 44.0, 67.0, 33.0, 91.0, 63.0, 51.0], [276.0, 155.0, 204.0, 322.0, 272.0, 240.0, 235.0, 119.0, 211.0, 267.0], [93.0, 82.0, 93.0, 20.0, 78.0, 47.0, 70.0, 45.0, 43.0, 57.0], [64.0, 2.0, 78.0, 17.0, 54.0, 83.0, 21.0, 130.0, 53.0, 29.0], [216.0, 126.0, 180.0, 264.0, 219.0, 304.0, 237.0, 98.0, 96.0, 84.0], [39.0, 15.0, 92.0, 95.0, 81.0, 68.0, 85.0, 25.0, 105.0, 69.0], [52.0, 65.0, 27.0, 23.0, 39.0, 109.0, 47.0, 120.0, 59.0, 15.0], [135.0, 134.0, 175.0, 173.0, 111.0, 144.0, 174.0, 280.0, 117.0, 220.0], [7.0, 29.0, 95.0, 70.0, 33.0, null, 68.0, 35.0, 60.0, 33.0], [20.0, 18.0, 10.0, 58.0, 36.0, 50.0, 15.0, 44.0, 46.0, 32.0]]}, "img": null}}, {"t": "Tabla dinámica: región × medio de pago", "cod": "import pandas as pd\nv = pd.read_csv(\"ventas.csv\").merge(pd.read_csv(\"tiendas.csv\"), on=\"tienda_id\")\npd.pivot_table(v, index=\"region\", columns=\"medio_pago\", values=\"total\",\n               aggfunc=\"sum\", margins=True, margins_name=\"Total\").round(0)", "lee": "Una tabla dinámica agrupa por dos variables a la vez, una en filas y otra en columnas, y <code>margins=True</code> agrega los totales. Es lo mismo que arrastrar campos en una hoja de cálculo, pero queda escrito y se puede repetir.", "r": {"salida": "", "tabla": {"columnas": ["efectivo", "tarjeta", "transferencia", "Total"], "tipos": ["float64", "float64", "float64", "float64"], "indice": ["Centro", "Norte", "Oriente", "Sur", "Total"], "forma": [5, 4], "motor": "pandas", "filas": [[1374.0, 1743.0, 318.0, 3436.0], [1898.0, 2344.0, 635.0, 4877.0], [968.0, 1191.0, 266.0, 2424.0], [1076.0, 1583.0, 395.0, 3054.0], [5316.0, 6861.0, 1614.0, 13791.0]]}, "img": null}}, {"t": "Lo mismo en Polars", "cod": "import polars as pl\nventas = pl.read_csv(\"ventas.csv\")\ntiendas = pl.read_csv(\"tiendas.csv\")\n(ventas.join(tiendas, on=\"tienda_id\", how=\"left\", validate=\"m:1\")\n   .group_by(\"region\")\n   .agg(pl.col(\"total\").sum().round(2).alias(\"ventas\"),\n        pl.len().alias(\"tickets\"),\n        pl.col(\"total\").mean().round(2).alias(\"ticket_promedio\"))\n   .sort(\"ventas\", descending=True))", "lee": "El mismo resultado que el primer ejemplo, escrito con expresiones de Polars: <code>join</code> con <code>validate=\"m:1\"</code>, <code>group_by</code> y <code>agg</code> con una expresión por columna. Este ejemplo descarga Polars (unos 18 MB más).", "r": {"salida": "", "tabla": {"columnas": ["region", "ventas", "tickets", "ticket_promedio"], "tipos": ["String", "Float64", "UInt32", "Float64"], "indice": null, "forma": [4, 4], "motor": "polars", "filas": [["Norte", 4904.11, 291, 16.85], ["Centro", 3460.76, 252, 13.73], ["Sur", 3053.81, 191, 15.99], ["Oriente", 2424.07, 168, 14.43]]}, "img": null}}];
+  const q=s=>raiz.querySelector(s);
+  const sel=q('#c4l3-ej'),cod=q('#c4l3-cod'),bc=q('#c4l3-cargar'),br=q('#c4l3-correr'),est=q('#c4l3-est'),sal=q('#c4l3-sal'),tab=q('#c4l3-tab'),img=q('#c4l3-img'),out=q('#c4l3-out');
+  let py=null;
+  function estado(t,c){est.textContent=t;est.className='c4l3-est'+(c?' '+c:'');}
+  function mostrar(r,e,guardado){
+    sal.hidden=!(r.salida||r.error);sal.textContent=(r.salida||'')+(r.error?(r.salida?'\n':'')+r.error:'');sal.classList.toggle('err',!!r.error);
+    if(r.img){img.hidden=false;img.innerHTML='<img alt="Gráfico que dibujó el código" src="data:image/png;base64,'+r.img+'">';}else{img.hidden=true;img.innerHTML='';}
+    pintarTabla(tab,r.error?null:r.tabla);
+    out.innerHTML=r.error?'<span class="warn">El código falló.</span><span>Lee la última línea del error: dice qué tipo de problema es y dónde. Corrígelo o vuelve a elegir el ejemplo.</span>'
+      :(guardado?'<span class="hint">Resultado guardado (calculado con el mismo código). Carga Python para ejecutarlo y editarlo.</span>':'')+'<span>'+e.lee+'</span>';
+  }
+  function elegir(){const e=EJ[+sel.value];cod.value=e.cod;cod.rows=Math.min(26,e.cod.split('\n').length+1);if(py)correr();else mostrar(e.r,e,true);}
+  async function correr(){
+    if(!py)return;br.disabled=true;estado('Ejecutando…');
+    try{
+      const r=await PY.correr(py,LAB,cod.value);
+      
+      const e=EJ[+sel.value];mostrar(r,cod.value===e.cod?e:{lee:'Ejecutaste tu versión del código: compara la tabla con la del ejemplo original.'},false);
+      estado(r.error?'El código falló: lee el error abajo.':'Listo: Python 3.14 con '+PAQ.join(' y ')+'.',r.error?'warn':'ok');
+    }catch(err){estado('Algo falló al ejecutar: '+err.message,'warn');}
+    br.disabled=false;
+  }
+  bc.addEventListener('click',async()=>{
+    bc.disabled=true;
+    try{py=await PY.cargar(PAQ,t=>estado(t));PY.archivos(py,ARCH);bc.hidden=true;br.disabled=false;correr();}
+    catch(err){bc.disabled=false;estado('No se pudo cargar Python. Revisa tu conexión y vuelve a intentar; el resultado guardado sigue abajo.','warn');}
+  });
+  br.addEventListener('click',correr);
+  cod.addEventListener('keydown',ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key==='Enter'){ev.preventDefault();correr();}});
+  sel.addEventListener('change',elegir);
+  elegir();
+})();
+</script>
+</body>
+</html>

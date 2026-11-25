@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>pandas y Polars · Ciencia de datos · Ciencia de datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Del dato crudo a la decisión: hacer buenas preguntas, limpiar, explorar, visualizar, minar datos y texto y comunicar resultados con pandas y Polars, con código que corre en la página.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="datos-tabulares">
+<header class="topbar"><a class="brand" href="index.html">Ciencia de <b>datos</b></a><span class="eyebrow">Curso visual e interactivo · Datos e inteligencia artificial</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 02 DE 10</span><h1>Datos tabulares con pandas y Polars</h1><p class="lede">Casi todo análisis termina en una tabla: filas que son casos y columnas que son variables. Este capítulo enseña a cargarla desde CSV, Excel, Parquet o una base de datos, a seleccionar, filtrar y transformar sus datos con pandas y con Polars, y explica por qué pensar en columnas es mucho más rápido que recorrer filas.</p></header>
+<section><h2>La tabla como estructura: filas, columnas, tipos e índice</h2><div class="prose"><p>Beatriz Lugo, la responsable de los sistemas de caja, le manda a Mariana los archivos de ventas con un aviso: «Los del Oriente salen del sistema viejo, así que vienen distintos. Ábrelos con cuidado». Mariana los ha mirado en el Bloc de notas. Ahora tiene que cargarlos en algo que le permita sumar, filtrar y comparar 197.622 tickets sin volverse loca.</p><p>Ese algo es una <b>tabla de datos</b> (<i>data frame</i>, marco de datos): una estructura con filas y columnas como una hoja de cálculo, pero con reglas más estrictas. En Python, las dos bibliotecas más usadas para trabajar con ellas son <b>pandas</b>, creada en 2008 y la más extendida, y <b>Polars</b>, creada en 2020 y pensada para ser rápida.</p></div><div class="analogia"><b>Imagínalo así</b><p>Una hoja de cálculo es un cuaderno cuadriculado: en cada casilla puedes escribir lo que quieras, un número, una palabra o una nota al margen. Una tabla de datos es más parecida a un formulario impreso: cada columna tiene un título y solo acepta un tipo de respuesta («fecha», «número», «sí o no»), y cada fila es un formulario lleno. Pierdes libertad, pero ganas algo enorme: la computadora sabe qué hay en cada columna y puede trabajar con todas las filas a la vez.</p></div><div class="prose"><p>Una tabla tiene cuatro piezas:</p><ul><li><b>Filas</b> (<i>rows</i>): cada una es un caso, una <b>observación</b>. En <code>ventas.csv</code>, cada fila es un ticket.</li><li><b>Columnas</b> (<i>columns</i>): cada una es una <b>variable</b>, algo que se midió de cada caso: la fecha, la tienda, el total.</li><li><b>Tipos</b> (<i>dtypes</i>, <i>data types</i>): cada columna tiene uno solo. Los más comunes son entero (<code>int64</code>), decimal (<code>float64</code>), texto (<code>str</code> en pandas, <code>String</code> en Polars), fecha y hora (<code>datetime64</code>, <code>Datetime</code>) y lógico (<code>bool</code>, verdadero o falso). El tipo decide qué se puede hacer: se pueden sumar decimales, pero no textos.</li><li><b>Índice</b> (<i>index</i>): en pandas, cada fila tiene una etiqueta, que por omisión es su número (0, 1, 2…). Sirve para alinear tablas y buscar filas. Polars no tiene índice: las filas solo tienen posición, y para buscar se filtra por una columna.</li></ul><p>En pandas, la tabla se llama <code>DataFrame</code> y cada columna, sola, es una <code>Series</code>. En Polars los nombres son los mismos: <code>DataFrame</code> y <code>Series</code>.</p><p>Por dentro, las dos guardan cada columna como un bloque continuo de memoria, todos los valores juntos y del mismo tipo. Polars usa el formato <b>Apache Arrow</b>, un estándar para guardar tablas por columnas en memoria que comparten muchas herramientas (DuckDB, Spark, R). Desde la versión 3, pandas también guarda los textos con Arrow. Esa organización por columnas es la razón de casi todo lo que sigue en este capítulo.</p></div><figure class="fig fig-comparacion" id="02-diagrama-1"><div class="lienzo"><svg viewBox="0 0 900 430" style="min-width:740px" role="img" aria-label="La misma tabla de cinco tickets en pandas, con índice y tipos, y en Polars, sin índice; abajo, cómo se guarda en memoria: una columna detrás de otra">
+<text x="16" y="24" class="t t-xs t-b t-m">PANDAS · DataFrame</text>
+
+<rect x="16" y="34" width="34" height="44" class="caja" style="fill:var(--paper)"/>
+<rect x="50" y="34" width="76" height="44" class="caja"/><text x="58" y="52" class="t t-s t-b t-mono">ticket_id</text><text x="58" y="70" class="t t-xs t-m t-mono">int64</text>
+<rect x="126" y="34" width="132" height="44" class="c-fis"/><text x="134" y="52" class="t t-s t-b t-mono">fecha_hora</text><text x="134" y="70" class="t t-xs k-fis t-mono">str</text>
+<rect x="258" y="34" width="72" height="44" class="caja"/><text x="266" y="52" class="t t-s t-b t-mono">tienda_id</text><text x="266" y="70" class="t t-xs t-m t-mono">str</text>
+<rect x="330" y="34" width="70" height="44" class="caja"/><text x="338" y="52" class="t t-s t-b t-mono">total</text><text x="338" y="70" class="t t-xs t-m t-mono">float64</text>
+<g class="t t-s t-mono">
+<rect x="16" y="78" width="34" height="130" class="caja" style="fill:var(--paper)"/>
+<text x="28" y="96" class="t t-s t-mono t-m">0</text><text x="28" y="122" class="t t-s t-mono t-m">1</text><text x="28" y="148" class="t t-s t-mono t-m">2</text><text x="28" y="174" class="t t-s t-mono t-m">3</text><text x="28" y="200" class="t t-s t-mono t-m">4</text>
+<rect x="50" y="78" width="350" height="130" class="caja"/>
+<text x="58" y="96" class="t t-s t-mono">100003</text><text x="134" y="96" class="t t-s t-mono">2025-01-01 08:15</text><text x="266" y="96" class="t t-s t-mono">T01</text><text x="390" y="96" class="t t-s t-mono" text-anchor="end">5.20</text>
+<text x="58" y="122" class="t t-s t-mono">100005</text><text x="134" y="122" class="t t-s t-mono">2025-01-01 08:31</text><text x="266" y="122" class="t t-s t-mono">T07</text><text x="390" y="122" class="t t-s t-mono" text-anchor="end">4.20</text>
+<text x="58" y="148" class="t t-s t-mono">100006</text><text x="134" y="148" class="t t-s t-mono">2025-01-01 08:39</text><text x="266" y="148" class="t t-s t-mono">T02</text><text x="390" y="148" class="t t-s t-mono k-warm" text-anchor="end">NaN</text>
+<text x="58" y="174" class="t t-s t-mono">100007</text><text x="134" y="174" class="t t-s t-mono">2025-01-01 08:42</text><text x="266" y="174" class="t t-s t-mono">T04</text><text x="390" y="174" class="t t-s t-mono" text-anchor="end">19.90</text>
+<text x="58" y="200" class="t t-s t-mono">100008</text><text x="134" y="200" class="t t-s t-mono">2025-01-01 08:45</text><text x="266" y="200" class="t t-s t-mono">T01</text><text x="390" y="200" class="t t-s t-mono" text-anchor="end">23.45</text>
+</g>
+<text x="16" y="230" class="t t-s t-m">← índice: la etiqueta de cada fila</text>
+
+<text x="484" y="24" class="t t-xs t-b t-m">POLARS · DataFrame (sin índice)</text>
+<rect x="484" y="34" width="76" height="44" class="caja"/><text x="492" y="52" class="t t-s t-b t-mono">ticket_id</text><text x="492" y="70" class="t t-xs t-m t-mono">i64</text>
+<rect x="560" y="34" width="132" height="44" class="c-fis"/><text x="568" y="52" class="t t-s t-b t-mono">fecha_hora</text><text x="568" y="70" class="t t-xs k-fis t-mono">str</text>
+<rect x="692" y="34" width="72" height="44" class="caja"/><text x="700" y="52" class="t t-s t-b t-mono">tienda_id</text><text x="700" y="70" class="t t-xs t-m t-mono">str</text>
+<rect x="764" y="34" width="120" height="44" class="caja"/><text x="772" y="52" class="t t-s t-b t-mono">total</text><text x="772" y="70" class="t t-xs t-m t-mono">f64</text>
+<rect x="484" y="78" width="400" height="130" class="caja"/>
+<text x="492" y="96" class="t t-s t-mono">100003</text><text x="568" y="96" class="t t-s t-mono">2025-01-01 08:15</text><text x="700" y="96" class="t t-s t-mono">T01</text><text x="874" y="96" class="t t-s t-mono" text-anchor="end">5.2</text>
+<text x="492" y="122" class="t t-s t-mono">100005</text><text x="568" y="122" class="t t-s t-mono">2025-01-01 08:31</text><text x="700" y="122" class="t t-s t-mono">T07</text><text x="874" y="122" class="t t-s t-mono" text-anchor="end">4.2</text>
+<text x="492" y="148" class="t t-s t-mono">100006</text><text x="568" y="148" class="t t-s t-mono">2025-01-01 08:39</text><text x="700" y="148" class="t t-s t-mono">T02</text><text x="874" y="148" class="t t-s t-mono k-warm" text-anchor="end">null</text>
+<text x="492" y="174" class="t t-s t-mono">100007</text><text x="568" y="174" class="t t-s t-mono">2025-01-01 08:42</text><text x="700" y="174" class="t t-s t-mono">T04</text><text x="874" y="174" class="t t-s t-mono" text-anchor="end">19.9</text>
+<text x="492" y="200" class="t t-s t-mono">100008</text><text x="568" y="200" class="t t-s t-mono">2025-01-01 08:45</text><text x="700" y="200" class="t t-s t-mono">T01</text><text x="874" y="200" class="t t-s t-mono" text-anchor="end">23.45</text>
+<text x="484" y="230" class="t t-s t-m">el vacío: NaN en pandas, null en Polars</text>
+
+<rect x="16" y="256" width="868" height="158" rx="12" class="caja" style="stroke-dasharray:5 4"/>
+<text x="32" y="280" class="t t-xs t-b t-m">EN MEMORIA: UNA COLUMNA DETRÁS DE OTRA (FORMATO POR COLUMNAS)</text>
+<rect x="32" y="294" width="196" height="40" rx="6" class="caja"/>
+<text x="42" y="319" class="t t-s t-mono">100003 100005 100006 …</text>
+<rect x="238" y="294" width="250" height="40" rx="6" class="c-fis"/>
+<text x="248" y="319" class="t t-s t-mono">"2025-01-01 08:15" "…08:31" …</text>
+<rect x="498" y="294" width="150" height="40" rx="6" class="caja"/>
+<text x="508" y="319" class="t t-s t-mono">T01 T07 T02 …</text>
+<rect x="658" y="294" width="210" height="40" rx="6" class="caja"/>
+<text x="668" y="319" class="t t-s t-mono">5.20 4.20 ∅ 19.90 …</text>
+<text x="32" y="362" class="t t-s">Cada bloque guarda valores de un solo tipo, juntos: sumar «total» es recorrer un bloque</text>
+<text x="32" y="380" class="t t-s">continuo, sin tocar las demás columnas. Polars usa el formato Apache Arrow; pandas 3, para el texto.</text>
+<text x="32" y="400" class="t t-s k-fis t-b">fecha_hora todavía es texto en las dos tablas: convertirla es el primer paso de limpieza.</text>
+</svg></div><figcaption><b>La misma tabla en pandas y en Polars.</b> A la izquierda, un <code>DataFrame</code> de pandas con cinco tickets: la columna gris del borde es el índice, y bajo cada nombre de columna está su tipo. A la derecha, la misma tabla en Polars, sin índice. Abajo, cómo se guarda en memoria: no fila por fila, sino una columna detrás de otra, cada una del mismo tipo. La columna <code>fecha_hora</code>, en ámbar, es texto en las dos: todavía no se convirtió en fecha.</figcaption></figure></section>
+<section><h2>Leer CSV, Excel, Parquet y bases de datos</h2><div class="prose"><p>Los datos llegan en muchos formatos. Las dos bibliotecas leen los mismos con funciones casi iguales: en pandas empiezan con <code>pd.read_</code>, y en Polars con <code>pl.read_</code> o <code>pl.scan_</code>.</p></div><div class="analogia"><b>Imagínalo así</b><p>Leer un archivo es como recibir una carta en otro idioma. Si sabes de antemano que viene en portugués y que las fechas se escriben al revés, la entiendes a la primera. Si no, lees cualquier cosa. Las opciones de lectura son el aviso que le das a la biblioteca antes de abrir la carta.</p></div><div class="prose"><ul><li><b>CSV</b> (<i>comma-separated values</i>, valores separados por comas). Texto plano, el formato más común y el más traicionero: no dice qué tipo tiene cada columna, ni qué separador usa, ni cómo se escriben los decimales y las fechas. La biblioteca adivina, y a veces adivina mal. Las opciones clave son <code>sep</code> (el separador), <code>decimal</code> (el signo decimal), el tipo de cada columna y el formato de las fechas.</li><li><b>Excel</b> (<code>.xlsx</code>). Muy usado en las empresas. Se lee con <code>pd.read_excel</code> o <code>pl.read_excel</code>, que necesitan una biblioteca extra (openpyxl o fastexcel). Hay que decir qué hoja leer y desde qué fila empiezan los datos, porque muchos archivos tienen títulos y notas encima.</li><li><b>Parquet</b>. Un formato binario por columnas, comprimido y con los tipos guardados dentro: una fecha se lee como fecha, sin adivinar. Es el formato estándar de las plataformas de datos. Se lee con <code>pd.read_parquet</code> o <code>pl.read_parquet</code>. Los detalles de cómo está hecho por dentro están en <a href="https://aaramirez.github.io/ingenieria-de-datos/temario.html" target="_blank" rel="noopener">Ingeniería de datos</a>.</li><li><b>Bases de datos</b>. Con una consulta SQL y una conexión: <code>pd.read_sql</code> con una conexión de SQLAlchemy o de <code>sqlite3</code>, o <code>pl.read_database</code>. Cómo funciona SQL por dentro está en <a href="https://aaramirez.github.io/bases-de-datos/temario.html" target="_blank" rel="noopener">Bases de datos</a>.</li></ul><p>El archivo del Oriente es el ejemplo perfecto de por qué importan las opciones. Leído sin ellas, pandas ve una sola columna llamada <code>ticket_id;fecha_hora;tienda_id;cliente_id;medio_pago;total</code>, porque busca comas y no las hay. Con <code>sep=";"</code> separa bien las columnas, pero el total <code>3,20</code> queda como texto. Con <code>sep=";"</code> y <code>decimal=","</code>, todo cae en su lugar. Falta la fecha: <code>01/01/2025</code> se lee igual en cualquier orden, pero <code>02/01/2025</code> es el 2 de enero para nosotros y el 1 de febrero para un programa que espera el orden de Estados Unidos (mes/día/año). Por eso se le da el formato exacto: <code>format="%d/%m/%Y %H:%M"</code>.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Lee los archivos de la cadena con pandas y guárdalos en Parquet</h3></div><p>Vas a crear el entorno de Python del curso, leer los tres archivos de ventas con las opciones correctas y comparar un CSV con un Parquet. Necesitas los datos del capítulo 01 en <code>datos-cadena/crudo</code>. Crea el entorno virtual e instala las bibliotecas (son unos 150 MB; se hace una sola vez):</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python -m venv .venv</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>.venv\Scripts\activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install pandas polars pyarrow duckdb openpyxl</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>python3 -m venv .venv</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>source .venv/bin/activate</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>pip install pandas polars pyarrow duckdb openpyxl</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Guarda este script como <code>leer.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia"><pre><code>"""Lee los tres archivos de ventas de Almacenes Ejemplo, cada uno con sus opciones."""
+import time
+from pathlib import Path
+
+import pandas as pd
+
+CARPETA = Path.home() / "datos-cadena"
+CRUDO = CARPETA / "crudo"
+
+# 1. El archivo del sistema nuevo: basta con la ruta
+ventas = pd.read_csv(CRUDO / "ventas.csv")
+print("ventas.csv:", ventas.shape)
+print(ventas.dtypes, "\n")
+
+# 2. El del Oriente, leído sin opciones: todo cae en una sola columna
+mal = pd.read_csv(CRUDO / "ventas_oriente.csv")
+print("Oriente sin opciones:", mal.shape, list(mal.columns)[:1])
+
+# 3. El del Oriente, bien leído: separador, coma decimal y fecha día/mes/año
+oriente = pd.read_csv(CRUDO / "ventas_oriente.csv", sep=";", decimal=",")
+oriente["fecha_hora"] = pd.to_datetime(oriente["fecha_hora"], format="%d/%m/%Y %H:%M")
+print("Oriente bien leído:", oriente.shape, oriente["total"].dtype, "\n")
+
+# 4. Juntar los tres archivos con las fechas como fecha de verdad
+reenvio = pd.read_csv(CRUDO / "ventas_T09_reenvio.csv")
+for df in (ventas, reenvio):
+    df["fecha_hora"] = pd.to_datetime(df["fecha_hora"], format="%Y-%m-%d %H:%M")
+todas = pd.concat([ventas, oriente, reenvio], ignore_index=True)
+print("Todas las ventas:", todas.shape)
+print(todas.dtypes, "\n")
+
+# 5. Guardar en Parquet y comparar tamaño y tiempo de lectura con el CSV
+todas.to_parquet(CARPETA / "ventas_todas.parquet")
+todas.to_csv(CARPETA / "ventas_todas.csv", index=False)
+for nombre in ("ventas_todas.csv", "ventas_todas.parquet"):
+    ruta = CARPETA / nombre
+    inicio = time.perf_counter()
+    df = pd.read_parquet(ruta) if nombre.endswith(".parquet") else pd.read_csv(ruta)
+    ms = (time.perf_counter() - inicio) * 1000
+    print(f"{nombre:&lt;22} {ruta.stat().st_size / 1e6:6.1f} MB  {ms:7.0f} ms  fecha_hora: {df['fecha_hora'].dtype}")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo con el entorno activado:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python leer.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 leer.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Mira los tipos de <code>ventas.csv</code> y luego los de la tabla juntada. ¿Qué columna cambió de tipo?</span></li><li><span>Compara las dos últimas líneas: tamaño en disco y tipo de <code>fecha_hora</code> al volver a leer.</span></li></ol><p><b>Qué observar:</b> <code>ventas.csv</code> tiene 158.690 filas y 6 columnas, y <code>fecha_hora</code> sale como texto (<code>str</code>): el CSV no guarda tipos. <code>cliente_id</code> sale como decimal (<code>float64</code>) porque tiene vacíos. El Oriente sin opciones queda en una sola columna; bien leído, <code>total</code> es <code>float64</code>. La tabla juntada tiene 197.622 filas y <code>fecha_hora</code> ya es <code>datetime64</code>. El CSV guardado pesa unos 10 MB y el Parquet unos 3 MB, y al releerlo el Parquet devuelve la fecha como fecha, mientras que el CSV la devuelve otra vez como texto. Los tiempos dependen de tu equipo; con este tamaño son parecidos, y la diferencia crece con archivos grandes.</p></div></section>
+<section><h2>Seleccionar, filtrar, ordenar y crear columnas</h2><div class="prose"><p>Con la tabla cargada, el trabajo diario se reduce a cinco operaciones que se combinan: elegir columnas, elegir filas, ordenar, crear columnas nuevas y resumir. Las dos bibliotecas las hacen todas, con estilos distintos.</p></div><div class="analogia"><b>Imagínalo así</b><p>Piensa en un fichero de tarjetas de clientes. Seleccionar es tapar con la mano todo menos dos datos de cada tarjeta. Filtrar es sacar solo las tarjetas que cumplen una condición. Ordenar es barajarlas por apellido. Crear una columna es escribir en cada tarjeta un dato calculado a partir de los otros, como la edad a partir de la fecha de nacimiento.</p></div><div class="prose"><div class="tbl"><table><thead><tr><th>Operación</th><th>pandas</th><th>Polars</th></tr></thead><tbody><tr><td>Seleccionar columnas</td><td><code>ventas[["tienda_id", "total"]]</code></td><td><code>ventas.select("tienda_id", "total")</code></td></tr><tr><td>Filtrar filas</td><td><code>ventas[ventas["total"] &gt; 30]</code></td><td><code>ventas.filter(pl.col("total") &gt; 30)</code></td></tr><tr><td>Ordenar</td><td><code>ventas.sort_values("total", ascending=False)</code></td><td><code>ventas.sort("total", descending=True)</code></td></tr><tr><td>Crear columnas</td><td><code>ventas.assign(con_iva=ventas["total"] * 1.12)</code></td><td><code>ventas.with_columns(con_iva=pl.col("total") * 1.12)</code></td></tr><tr><td>Agrupar y resumir</td><td><code>ventas.groupby("tienda_id")["total"].sum()</code></td><td><code>ventas.group_by("tienda_id").agg(pl.col("total").sum())</code></td></tr></tbody></table></div><p>Para filtrar, las dos usan una <b>máscara booleana</b> (<i>boolean mask</i>): una columna de verdadero o falso, una por fila, que dice qué filas se quedan. <code>ventas["total"] &gt; 30</code> no es una pregunta sobre un número; es una operación sobre toda la columna que devuelve 240 verdaderos o falsos de una vez. Varias condiciones se combinan con <code>&amp;</code> (y), <code>|</code> (o) y <code>~</code> (no), cada una entre paréntesis. Usar <code>and</code> u <code>or</code> de Python da error, porque esas palabras esperan un solo verdadero o falso, no una columna entera.</p><p>En pandas, el índice añade dos formas de seleccionar: <code>.loc[]</code> busca por etiqueta (filas y columnas por nombre) y <code>.iloc[]</code> por posición (la fila número 3, la columna número 0). En Polars no existen: se filtra por columnas.</p><p>Hay una diferencia de estilo importante. En Polars, todo lo que va dentro de <code>select</code>, <code>filter</code> o <code>with_columns</code> es una <b>expresión</b> (<i>expression</i>): una descripción de un cálculo sobre columnas, como <code>pl.col("total") * 1.12</code>, que todavía no se ejecutó. Las expresiones se pueden guardar, combinar y reutilizar, y Polars decide cómo calcularlas de la forma más eficiente. pandas, en cambio, calcula cada paso en el momento.</p></div><div class="lab" id="02-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Operaciones sobre las ventas de la cadena, con el código y la tabla lado a lado</h3></div><p class="hint">Elige una operación y una biblioteca: verás el código y la tabla que produce, con 240 tickets de octubre de 2026. Pulsa «Cargar Python» para ejecutar el código en tu navegador; después, cámbialo y vuelve a ejecutarlo. Prueba a filtrar los tickets de otra tienda o a ordenar por fecha. Si cambias a Polars después de cargar, se descargan unos 18 MB más.</p><style>
+[id="02-lab-1"] .c2l1-rot{font:700 .7rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+[id="02-lab-1"] .btns{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+[id="02-lab-1"] .c2l1-estado{font:500 .85rem var(--f-display);color:var(--muted)}
+[id="02-lab-1"] .c2l1-estado.ok{color:var(--good)} [id="02-lab-1"] .c2l1-estado.warn{color:var(--warm)}
+[id="02-lab-1"] .c2l1-lado{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;align-items:start}
+[id="02-lab-1"] textarea{width:100%;box-sizing:border-box;min-height:190px;font:.82rem/1.5 var(--f-mono);padding:8px;border:1px solid var(--line);border-left:5px solid var(--c-fis);border-radius:6px;background:var(--card);color:var(--ink);resize:vertical;tab-size:4}
+[id="02-lab-1"] pre.c2l1-salida{margin:0;font:.78rem/1.45 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+[id="02-lab-1"] .c2l1-tabla{overflow-x:auto;max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:6px}
+[id="02-lab-1"] .c2l1-tabla table{font-size:.78rem;margin:0}
+[id="02-lab-1"] .c2l1-tabla th small{font:500 .66rem var(--f-mono);color:var(--muted)}
+[id="02-lab-1"] .c2l1-tabla .hint{margin:4px 8px}
+[id="02-lab-1"] .opciones{grid-template-columns:minmax(0,1fr);max-width:560px}
+[id="02-lab-1"] .c2l1-sello{font:700 .66rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--mark)}
+[id="02-lab-1"] .cdatos-valor{margin:6px 8px;font:.8rem/1.45 var(--f-mono);white-space:pre-wrap}
+</style>
+<div class="btns" role="group" aria-label="Biblioteca"><span class="c2l1-rot">Biblioteca</span>
+  <button type="button" data-m="pandas" aria-pressed="true">pandas</button>
+  <button type="button" data-m="polars" aria-pressed="false">Polars</button>
+</div>
+<div class="opciones"><label>Operación
+  <select id="c2l1-ej"></select></label></div>
+<div class="btns">
+  <button type="button" class="primary" id="c2l1-cargar">Cargar Python (unos 20 MB · tarda unos segundos)</button>
+  <span class="c2l1-estado" id="c2l1-estado" aria-live="polite">Python sin cargar · mientras tanto ves el resultado guardado</span>
+</div>
+<div class="c2l1-lado">
+  <div>
+    <label class="c2l1-rot" for="c2l1-cod">Código (puedes editarlo)</label>
+    <textarea id="c2l1-cod" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    <div class="btns"><button type="button" id="c2l1-run" disabled>Ejecutar (Ctrl+Enter)</button>
+      <button type="button" id="c2l1-rest">Restaurar el ejemplo</button></div>
+  </div>
+  <div>
+    <span class="c2l1-rot">Resultado</span> <span class="c2l1-sello" id="c2l1-sello">guardado</span>
+    <pre class="c2l1-salida" id="c2l1-salida" hidden></pre>
+    <div class="c2l1-tabla" id="c2l1-tabla"></div>
+  </div>
+</div>
+<div class="readout texto" id="c2l1-out" aria-live="polite"></div></div><div class="ml"><b>En la práctica</b><p><b>Un cuaderno, no un archivo suelto.</b> Mariana trabaja estas operaciones en un <b>cuaderno de Jupyter</b> (<i>Jupyter notebook</i>): un documento donde se mezclan celdas de código, sus resultados y texto. Ve cada tabla apenas la produce y puede volver atrás. Pero cuando un paso queda firme, lo pasa a un script como <code>leer.py</code>, que corre de principio a fin sin depender del orden en que ejecutó las celdas. El cuaderno es para explorar; el script, para repetir.</p></div></section>
+<section><h2>Operaciones vectorizadas frente a bucles</h2><div class="prose"><p>Quien viene de aprender Python con listas tiende a escribir así: «para cada fila, toma el total, multiplícalo por 1,12 y guárdalo». Funciona, pero con tablas grandes es muy lento. La forma de pandas y Polars es decir «multiplica la columna total por 1,12», y dejar que la biblioteca lo haga.</p></div><div class="analogia"><b>Imagínalo así</b><p>En la caja del supermercado, imagina que la cajera pesa cada naranja por separado: la toma, la pone en la balanza, anota el peso y la deja en la bolsa. Con una bolsa de veinte naranjas tarda un minuto. Si pone la bolsa entera en la balanza, tarda un segundo. La vectorización es pesar la bolsa: una sola operación para todos los valores.</p></div><div class="prose"><p>A una operación sobre la columna entera se le llama <b>vectorizada</b> (<i>vectorized</i>). Es más rápida por tres razones:</p><ol class="steps"><li><span><b>Corre en código compilado.</b> El bucle de Python decide en cada vuelta qué tipo tiene el valor, busca la operación y guarda el resultado en un objeto nuevo. La operación vectorizada hace el bucle en C o en Rust, sobre un bloque de memoria donde todos los valores son del mismo tipo.</span></li><li><span><b>Aprovecha el procesador.</b> Los procesadores modernos tienen instrucciones <b>SIMD</b> (<i>Single Instruction, Multiple Data</i>, una instrucción, muchos datos) que multiplican varios números a la vez.</span></li><li><span><b>Evita traer cada valor a Python.</b> Leer <code>total.iloc[i]</code> en cada vuelta convierte un número de la tabla en un objeto de Python, y esa conversión cuesta más que la multiplicación misma.</span></li></ol><p>La diferencia no es pequeña. Con 50.000 tickets, recorrer la columna fila por fila tarda alrededor de un segundo, y multiplicar la columna entera, menos de un milisegundo. Hay un caso intermedio: <code>apply</code>, que aplica una función de Python a cada valor. Parece vectorizado porque se escribe en una línea, pero por dentro es un bucle de Python.</p></div><div class="lab" id="02-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Un bucle frente a una operación vectorizada: el tiempo medido en la página</h3></div><p class="hint">Elige cuántos tickets usar y compara cuatro formas de agregar un 12 % al total: un bucle fila por fila, un bucle sobre una lista, <code>apply</code> y la operación vectorizada. Antes de cargar Python ves tiempos de referencia; después, pulsa «Medir en mi navegador» y compara con tu equipo. Fíjate en cuánto crece cada barra al pasar de 50.000 a 200.000 tickets.</p><style>
+[id="02-lab-2"] .c2l2-rot{font:700 .7rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+[id="02-lab-2"] .btns{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+[id="02-lab-2"] .c2l2-estado{font:500 .85rem var(--f-display);color:var(--muted)}
+[id="02-lab-2"] .c2l2-estado.ok{color:var(--good)} [id="02-lab-2"] .c2l2-estado.warn{color:var(--warm)}
+[id="02-lab-2"] pre.c2l2-cod{margin:0;font:.78rem/1.45 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c-fis);border-radius:6px;padding:8px}
+[id="02-lab-2"] details summary{cursor:pointer;font:600 .85rem var(--f-display)}
+[id="02-lab-2"] .c2l2-barras{display:grid;gap:8px}
+[id="02-lab-2"] .c2l2-fila{display:grid;grid-template-columns:minmax(0,10rem) minmax(0,1fr) minmax(0,6.5rem);gap:8px;align-items:center;font:500 .82rem var(--f-display)}
+[id="02-lab-2"] .c2l2-pista{height:20px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+[id="02-lab-2"] .c2l2-pista i{display:block;height:100%;background:var(--warm-soft);border-right:2px solid var(--warm);transition:width .4s}
+[id="02-lab-2"] .c2l2-pista i.v{background:var(--good-soft);border-right-color:var(--good)}
+[id="02-lab-2"] .c2l2-fila b{font-family:var(--f-mono);font-weight:600;text-align:right;white-space:nowrap}
+[id="02-lab-2"] .c2l2-fila small{display:block;color:var(--muted);font-weight:400}
+@media (prefers-reduced-motion: reduce){[id="02-lab-2"] .c2l2-pista i{transition:none}}
+@media (max-width:520px){[id="02-lab-2"] .c2l2-fila{grid-template-columns:minmax(0,1fr) minmax(0,5.5rem)}[id="02-lab-2"] .c2l2-pista{grid-column:1/-1;grid-row:2}}
+</style>
+<div class="btns" role="group" aria-label="Número de tickets"><span class="c2l2-rot">Tickets</span>
+  <button type="button" data-n="10000" aria-pressed="false">10.000</button>
+  <button type="button" data-n="50000" aria-pressed="true">50.000</button>
+  <button type="button" data-n="200000" aria-pressed="false">200.000</button>
+  <button type="button" data-n="1000000" aria-pressed="false">1.000.000</button>
+</div>
+<div class="btns">
+  <button type="button" class="primary" id="c2l2-cargar">Cargar Python (unos 20 MB · tarda unos segundos)</button>
+  <button type="button" id="c2l2-run" disabled>Medir en mi navegador</button>
+  <span class="c2l2-estado" id="c2l2-estado" aria-live="polite">Python sin cargar · ves tiempos de referencia medidos en un portátil</span>
+</div>
+<details><summary>Ver el código que se mide</summary><pre class="c2l2-cod" id="c2l2-cod"></pre></details>
+<div class="c2l2-barras" id="c2l2-barras" aria-hidden="true"></div>
+<p class="hint">Escala logarítmica: cada tramo igual de barra multiplica el tiempo por diez. Así caben en el mismo gráfico milisegundos y segundos.</p>
+<div class="readout texto" id="c2l2-out" aria-live="polite"></div></div><div class="prose"><p>La regla práctica: si estás escribiendo un <code>for</code> sobre las filas de una tabla, casi siempre hay una operación de pandas o de Polars que hace lo mismo en una línea. Las funciones de texto (<code>.str</code>), de fechas (<code>.dt</code>) y las condiciones (<code>np.where</code> en pandas, <code>pl.when</code> en Polars) cubren la mayoría de los casos.</p></div></section>
+<section><h2>Polars: expresiones, evaluación perezosa y paralelismo</h2><div class="prose"><p>Polars nació en 2020, escrito en el lenguaje Rust por Ritchie Vink, con una idea: rehacer la tabla de datos aprovechando lo que se aprendió de las bases de datos analíticas. Tiene tres ideas que lo hacen rápido.</p></div><div class="analogia"><b>Imagínalo así</b><p>Si le pides a alguien que vaya al supermercado por leche, después por pan y después por huevos, irá tres veces. Si le das la lista completa antes de salir, hará un solo viaje, ordenará el recorrido por pasillos y no cargará nada que no esté en la lista. La evaluación perezosa es darle a Polars la lista completa antes de que salga.</p></div><div class="prose"><p><b>Expresiones.</b> Ya las viste: <code>pl.col("total") * 1.12</code> describe un cálculo sin hacerlo. Como Polars recibe la descripción y no el resultado, puede decidir cómo ejecutarla.</p><p><b>Evaluación perezosa</b> (<i>lazy evaluation</i>). En el modo inmediato (<i>eager</i>), cada línea se ejecuta al momento, como en pandas. En el modo perezoso, empiezas con <code>pl.scan_csv</code> o <code>pl.scan_parquet</code> (o con <code>.lazy()</code> sobre una tabla ya cargada), encadenas pasos y nada se ejecuta hasta llamar a <code>.collect()</code>. Entre medio, Polars arma un <b>plan de consulta</b> (<i>query plan</i>) y lo optimiza. Dos optimizaciones importantes:</p><ul><li><b>Empujar el filtro hacia la lectura</b> (<i>predicate pushdown</i>): si al final solo quieres octubre, Polars filtra mientras lee el archivo, no después de cargarlo entero.</li><li><b>Leer solo las columnas necesarias</b> (<i>projection pushdown</i>): si la consulta usa tres columnas de seis, las otras tres no se leen.</li></ul><p>Con <code>.explain()</code> ves el plan antes de ejecutarlo. Es una idea que viene de las bases de datos: SQL siempre funcionó así.</p><p><b>Paralelismo</b> (<i>parallelism</i>). Polars reparte el trabajo entre todos los núcleos del procesador: un equipo con ocho núcleos agrupa ocho pedazos de la tabla a la vez. pandas usa casi siempre uno solo. En los laboratorios de esta página no se nota, porque Python en el navegador trabaja con un solo hilo; en tu computador, sí.</p></div><figure class="fig fig-flujo" id="02-diagrama-2"><div class="lienzo"><svg viewBox="0 0 900 430" style="min-width:740px" role="img" aria-label="Consulta perezosa de Polars: arriba los cinco pasos tal como se escriben; en el centro el plan optimizado, con el filtro de octubre y la selección de columnas bajando hasta la lectura del archivo; abajo, cuánto se lee del disco en modo inmediato y en modo perezoso">
+<defs>
+<marker id="c2d2-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+<marker id="c2d2-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="k-tra"/></marker>
+</defs>
+<text x="16" y="24" class="t t-xs t-b t-m">1 · LO QUE ESCRIBES</text>
+<rect x="16" y="34" width="160" height="50" rx="8" class="c-fis"/><text x="28" y="56" class="t t-s t-b">scan_parquet</text><text x="28" y="72" class="t t-s t-m">ventas_todas</text>
+<rect x="194" y="34" width="160" height="50" rx="8" class="caja"/><text x="206" y="56" class="t t-s t-b">join</text><text x="206" y="72" class="t t-s t-m">con tiendas</text>
+<rect x="372" y="34" width="160" height="50" rx="8" class="c-tra"/><text x="384" y="56" class="t t-s t-b">filter</text><text x="384" y="72" class="t t-s">solo octubre 2026</text>
+<rect x="550" y="34" width="160" height="50" rx="8" class="c-tra"/><text x="562" y="56" class="t t-s t-b">select</text><text x="562" y="72" class="t t-s">3 columnas</text>
+<rect x="728" y="34" width="156" height="50" rx="8" class="caja"/><text x="740" y="56" class="t t-s t-b">group_by + agg</text><text x="740" y="72" class="t t-s t-m">por región</text>
+<path d="M176 59H190" class="ln" marker-end="url(#c2d2-m)"/><path d="M354 59H368" class="ln" marker-end="url(#c2d2-m)"/>
+<path d="M532 59H546" class="ln" marker-end="url(#c2d2-m)"/><path d="M710 59H724" class="ln" marker-end="url(#c2d2-m)"/>
+<text x="16" y="124" class="t t-xs t-b k-tra">2 · EL PLAN QUE ARMA POLARS ANTES DE EJECUTAR (.explain())</text>
+<rect x="16" y="136" width="338" height="64" rx="8" class="c-fis"/>
+<text x="28" y="158" class="t t-s t-b">scan_parquet + filtro + columnas</text>
+<text x="28" y="176" class="t t-s">lee solo fecha_hora ≥ 2026-10-01, y solo</text>
+<text x="28" y="192" class="t t-s t-mono">ticket_id, fecha_hora, tienda_id, total</text>
+<rect x="394" y="136" width="160" height="64" rx="8" class="caja"/><text x="406" y="164" class="t t-s t-b">join</text><text x="406" y="182" class="t t-s t-m">9.313 filas</text>
+<rect x="594" y="136" width="160" height="64" rx="8" class="caja"/><text x="606" y="164" class="t t-s t-b">group_by + agg</text><text x="606" y="182" class="t t-s t-m">4 regiones</text>
+<path d="M354 168H390" class="ln" marker-end="url(#c2d2-m)"/><path d="M554 168H590" class="ln" marker-end="url(#c2d2-m)"/>
+<path d="M452 84C452 110 260 112 200 132" class="ln s-tra" style="stroke-width:2" marker-end="url(#c2d2-t)"/>
+<path d="M630 84C630 118 320 112 280 132" class="ln s-tra" style="stroke-width:2" marker-end="url(#c2d2-t)"/>
+<text x="560" y="112" class="t t-s k-tra t-b">el filtro y las columnas bajan hasta la lectura</text>
+<text x="16" y="244" class="t t-xs t-b t-m">3 · LO QUE SE LEE DEL DISCO</text>
+<text x="16" y="276" class="t t-s t-b">Inmediato</text>
+<text x="16" y="292" class="t t-s t-m">read_parquet</text>
+<rect x="130" y="262" width="740" height="36" rx="4" class="c-fis"/>
+<text x="142" y="285" class="t t-s">197.622 filas × 6 columnas: todo el archivo, y después se filtra</text>
+<text x="16" y="344" class="t t-s t-b">Perezoso</text>
+<text x="16" y="360" class="t t-s t-m">scan_parquet</text>
+<rect x="130" y="330" width="740" height="36" rx="4" class="caja" style="stroke-dasharray:4 4"/>
+<rect x="130" y="330" width="80" height="36" rx="4" class="c-tra"/>
+<text x="222" y="353" class="t t-s">unas 9.300 filas × 4 columnas: solo octubre y lo necesario</text>
+<text x="16" y="404" class="t t-s t-m">En la práctica, Parquet guarda estadísticas por bloques de filas: Polars salta los bloques que no pueden tener octubre.</text>
+</svg></div><figcaption><b>Lo que hace Polars con una consulta perezosa.</b> Arriba, la consulta tal como la escribiste: leer el archivo, unir con tiendas, filtrar octubre, quedarse con las columnas que usa y agrupar por región. En el centro, el plan que arma Polars antes de ejecutar: el filtro de fecha y la selección de columnas bajan hasta la lectura del archivo (flechas moradas). Abajo, lo que se lee del disco en cada caso: el archivo entero en la versión inmediata y solo las filas de octubre y cuatro columnas en la perezosa.</figcaption></figure><div class="prose"><p>¿Significa esto que pandas quedó viejo? No. pandas tiene quince años de bibliotecas construidas encima (de gráficos, de estadística, de aprendizaje automático), casi todos los ejemplos de internet lo usan y para tablas de miles o cientos de miles de filas es más que suficiente. Polars brilla con millones de filas y en procesos que se repiten. Muchos equipos usan los dos: Polars para preparar los datos pesados y pandas para el análisis final. Pasar de uno al otro es una línea: <code>df.to_pandas()</code> o <code>pl.from_pandas(df)</code>.</p></div></section>
+<section><h2>La misma consulta en pandas, Polars y SQL</h2><div class="prose"><p>Para cerrar, Mariana responde la primera pregunta descriptiva del análisis, cuántos tickets y cuántas ventas tuvo cada región en octubre de 2026, de tres formas. La tercera usa <b>SQL</b> (<i>Structured Query Language</i>, lenguaje de consulta estructurado) con <b>DuckDB</b>, una base de datos analítica que se instala con <code>pip</code>, no necesita servidor y consulta directamente archivos Parquet, CSV o tablas de pandas y Polars.</p></div><figure class="fig fig-comparacion" id="02-diagrama-3"><div class="lienzo"><svg viewBox="0 0 900 470" style="min-width:760px" role="img" aria-label="La misma consulta, ventas por región en octubre de 2026, escrita en pandas, en Polars y en SQL con DuckDB, con los pasos equivalentes alineados por color: leer, filtrar, unir, agrupar y ordenar; abajo, el resultado idéntico de las tres">
+<text x="16" y="24" class="t t-xs t-b t-m">PASO</text>
+<text x="110" y="24" class="t t-xs t-b t-m">PANDAS</text>
+<text x="370" y="24" class="t t-xs t-b t-m">POLARS</text>
+<text x="640" y="24" class="t t-xs t-b t-m">SQL · DUCKDB</text>
+
+<rect x="16" y="34" width="868" height="44" rx="6" class="c-fis"/>
+<text x="24" y="60" class="t t-s t-b k-fis">Leer</text>
+<text x="110" y="52" class="t t-s t-mono">v = pd.read_parquet(VENTAS)</text><text x="110" y="68" class="t t-s t-mono">t = pd.read_csv(TIENDAS)</text>
+<text x="370" y="52" class="t t-s t-mono">pl.scan_parquet(VENTAS)</text><text x="370" y="68" class="t t-s t-mono">t = pl.read_csv(TIENDAS)</text>
+<text x="640" y="52" class="t t-s t-mono">FROM 'ventas.parquet' AS v</text>
+
+<rect x="16" y="86" width="868" height="44" rx="6" class="c-tra"/>
+<text x="24" y="112" class="t t-s t-b k-tra">Filtrar</text>
+<text x="110" y="104" class="t t-s t-mono">v[(v.fecha_hora &gt;= "2026-10-01")</text><text x="110" y="120" class="t t-s t-mono">  &amp; (v.fecha_hora &lt; "2026-11-01")]</text>
+<text x="370" y="104" class="t t-s t-mono">.filter(pl.col("fecha_hora")</text><text x="370" y="120" class="t t-s t-mono">  .is_between(oct, nov))</text>
+<text x="640" y="104" class="t t-s t-mono">WHERE v.fecha_hora &gt;= '2026-10-01'</text><text x="640" y="120" class="t t-s t-mono">  AND v.fecha_hora &lt; '2026-11-01'</text>
+
+<rect x="16" y="138" width="868" height="44" rx="6" class="c-enl"/>
+<text x="24" y="164" class="t t-s t-b k-enl">Unir</text>
+<text x="110" y="164" class="t t-s t-mono">.merge(t, on="tienda_id")</text>
+<text x="370" y="164" class="t t-s t-mono">.join(t.lazy(), on="tienda_id")</text>
+<text x="640" y="164" class="t t-s t-mono">JOIN tiendas t USING (tienda_id)</text>
+
+<rect x="16" y="190" width="868" height="60" rx="6" class="c-red"/>
+<text x="24" y="224" class="t t-s t-b k-red">Agrupar</text>
+<text x="110" y="208" class="t t-s t-mono">.groupby("region")</text><text x="110" y="224" class="t t-s t-mono">.agg(tickets=("ticket_id","count"),</text><text x="110" y="240" class="t t-s t-mono">     ventas=("total","sum"))</text>
+<text x="370" y="208" class="t t-s t-mono">.group_by("region")</text><text x="370" y="224" class="t t-s t-mono">.agg(tickets=pl.col("ticket_id").count(),</text><text x="370" y="240" class="t t-s t-mono">     ventas=pl.col("total").sum())</text>
+<text x="640" y="208" class="t t-s t-mono">SELECT t.region,</text><text x="640" y="224" class="t t-s t-mono">  COUNT(v.ticket_id) AS tickets,</text><text x="640" y="240" class="t t-s t-mono">  SUM(v.total) AS ventas … GROUP BY 1</text>
+
+<rect x="16" y="258" width="868" height="44" rx="6" class="c-apl"/>
+<text x="24" y="284" class="t t-s t-b k-apl">Ordenar</text>
+<text x="110" y="284" class="t t-s t-mono">.sort_values("ventas", ascending=False)</text>
+<text x="370" y="284" class="t t-s t-mono">.sort("ventas", descending=True).collect()</text>
+<text x="640" y="284" class="t t-s t-mono">ORDER BY ventas DESC</text>
+<line x1="360" y1="34" x2="360" y2="302" class="ln" style="stroke-dasharray:2 4"/>
+<line x1="630" y1="34" x2="630" y2="302" class="ln" style="stroke-dasharray:2 4"/>
+
+<rect x="16" y="320" width="868" height="134" rx="10" class="caja"/>
+<text x="32" y="344" class="t t-xs t-b t-m">EL RESULTADO, IGUAL EN LAS TRES (DATOS AÚN SIN LIMPIAR)</text>
+<text x="32" y="370" class="t t-s t-b t-mono">region</text><text x="200" y="370" class="t t-s t-b t-mono">tickets</text><text x="330" y="370" class="t t-s t-b t-mono">ventas</text>
+<text x="32" y="390" class="t t-s t-mono">Norte</text><text x="200" y="390" class="t t-s t-mono">3.042</text><text x="330" y="390" class="t t-s t-mono">51.545,87</text>
+<text x="32" y="406" class="t t-s t-mono">Centro</text><text x="200" y="406" class="t t-s t-mono">2.624</text><text x="330" y="406" class="t t-s t-mono">39.928,72</text>
+<text x="32" y="422" class="t t-s t-mono">Oriente</text><text x="200" y="422" class="t t-s t-mono">1.888</text><text x="330" y="422" class="t t-s t-mono">28.387,59</text>
+<text x="32" y="438" class="t t-s t-mono">Sur</text><text x="200" y="438" class="t t-s t-mono">1.759</text><text x="330" y="438" class="t t-s t-mono">24.636,20</text>
+<text x="500" y="380" class="t t-s">En SQL el filtro se escribe después de unir,</text>
+<text x="500" y="398" class="t t-s">pero el motor elige el orden real, igual</text>
+<text x="500" y="416" class="t t-s">que el plan de Polars. pandas ejecuta</text>
+<text x="500" y="434" class="t t-s">los pasos en el orden en que los escribes.</text>
+</svg></div><figcaption><b>Una pregunta, tres idiomas.</b> Cada columna es la misma consulta escrita en pandas, en Polars y en SQL con DuckDB. Las filas alinean los pasos equivalentes con el mismo color: leer (ámbar), filtrar octubre, unir con las tiendas, agrupar por región y ordenar. Abajo, el resultado, idéntico en los tres. Fíjate en el orden: en SQL el filtro va después de unir porque así se escribe, pero el motor decide el orden real, como en el plan de Polars.</figcaption></figure><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Escribe la misma consulta en pandas, Polars y DuckDB</h3></div><p>Vas a calcular las ventas de octubre de 2026 por región de tres formas y comparar resultados y tiempos. Necesitas <code>ventas_todas.parquet</code>, que crea la práctica anterior, y el entorno activado.</p><ol class="steps"><li><span>Guarda este script como <code>consulta.py</code> en la carpeta <code>datos-cadena</code>:</span></li></ol><div class="code-copia"><pre><code>"""La misma consulta en pandas, Polars y DuckDB: ventas por región en octubre de 2026."""
+import time
+from pathlib import Path
+
+import duckdb
+import pandas as pd
+import polars as pl
+
+CARPETA = Path.home() / "datos-cadena"
+pl.Config.set_ascii_tables(True)  # tablas legibles en cualquier terminal
+VENTAS, TIENDAS = CARPETA / "ventas_todas.parquet", CARPETA / "crudo" / "tiendas.csv"
+
+
+def con_pandas():
+    v = pd.read_parquet(VENTAS)
+    t = pd.read_csv(TIENDAS)
+    octubre = v[(v["fecha_hora"] &gt;= "2026-10-01") &amp; (v["fecha_hora"] &lt; "2026-11-01")]
+    return (octubre.merge(t, on="tienda_id")
+                   .groupby("region", as_index=False)
+                   .agg(tickets=("ticket_id", "count"), ventas=("total", "sum"))
+                   .sort_values("ventas", ascending=False))
+
+
+def con_polars():
+    t = pl.read_csv(TIENDAS)
+    return (pl.scan_parquet(VENTAS)
+              .filter(pl.col("fecha_hora").is_between(pl.datetime(2026, 10, 1), pl.datetime(2026, 11, 1),
+                                                      closed="left"))
+              .join(t.lazy(), on="tienda_id")
+              .group_by("region")
+              .agg(tickets=pl.col("ticket_id").count(), ventas=pl.col("total").sum())
+              .sort("ventas", descending=True)
+              .collect())
+
+
+def con_duckdb():
+    return duckdb.sql(f"""
+        SELECT t.region, COUNT(v.ticket_id) AS tickets, SUM(v.total) AS ventas
+        FROM '{VENTAS.as_posix()}' AS v
+        JOIN read_csv('{TIENDAS.as_posix()}') AS t USING (tienda_id)
+        WHERE v.fecha_hora &gt;= '2026-10-01' AND v.fecha_hora &lt; '2026-11-01'
+        GROUP BY t.region
+        ORDER BY ventas DESC""").df()
+
+
+for nombre, funcion in (("pandas", con_pandas), ("Polars", con_polars), ("DuckDB", con_duckdb)):
+    inicio = time.perf_counter()
+    resultado = funcion()
+    ms = (time.perf_counter() - inicio) * 1000
+    print(f"--- {nombre} ({ms:.0f} ms)")
+    print(resultado, "\n")</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Córrelo:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python consulta.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 consulta.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Compara las tres tablas fila por fila. Después cambia el mes a septiembre en las tres funciones y vuelve a correr.</span></li></ol><p><b>Qué observar:</b> las tres dan lo mismo: el Norte con 3.042 tickets y unos US$ 51.546, y el Sur al final con 1.759 tickets y unos US$ 24.636. Los tiempos son de decenas o cientos de milisegundos y cambian de una corrida a otra; la primera consulta de DuckDB suele tardar más porque arranca el motor. Estas cifras todavía no son las definitivas: los datos tienen duplicados, totales vacíos y errores de digitación que el capítulo 03 limpia, y entonces el Norte de octubre sube a US$ 51.800,30.</p></div><div class="prose"><p>No hay una respuesta única sobre cuál usar. SQL es el idioma común con las bases de datos y con quien no programa en Python. pandas es el más conocido y el que más bibliotecas acepta. Polars es el más rápido con datos grandes y el que obliga a pensar en expresiones. Lo que vale la pena aprender es la forma de pensar que comparten: operaciones sobre columnas enteras, encadenadas, que describen qué resultado quieres y no cómo recorrer las filas para conseguirlo.</p></div></section>
+<section><h2>La idea clave</h2><div class="prose"><p>Una tabla de datos tiene filas que son casos, columnas que son variables y un tipo por columna; pandas agrega un índice y Polars no. Los formatos se leen con funciones parecidas, pero un CSV hay que leerlo con sus opciones (separador, decimal, fechas), mientras que Parquet guarda los tipos. Seleccionar, filtrar, ordenar, crear columnas y resumir son operaciones sobre columnas enteras: vectorizadas, son cientos de veces más rápidas que un bucle. Polars agrega expresiones, un plan optimizado en modo perezoso y trabajo en paralelo. La misma consulta se puede escribir en pandas, en Polars o en SQL con DuckDB, y el resultado es el mismo.</p></div></section>
+<section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Por qué <code>fecha_hora</code> aparece como texto al leer <code>ventas.csv</code> y como fecha al leer el Parquet?</summary><p>Porque el CSV es texto plano y no guarda tipos: la biblioteca no convierte la fecha si no se le pide. El Parquet guarda el tipo de cada columna dentro del archivo.</p></details><details><summary>¿Qué opciones hacen falta para leer bien <code>ventas_oriente.csv</code>?</summary><p>El separador <code>sep=";"</code>, el signo decimal <code>decimal=","</code> y convertir la fecha con el formato día/mes/año (<code>format="%d/%m/%Y %H:%M"</code>).</p></details><details><summary>¿Por qué <code>ventas[(ventas["total"] &gt; 30) and (ventas["tienda_id"] == "T07")]</code> da error?</summary><p>Porque <code>and</code> espera un solo verdadero o falso y las condiciones son columnas enteras. Se combinan con <code>&amp;</code>, cada una entre paréntesis.</p></details><details><summary>¿Por qué multiplicar una columna entera es mucho más rápido que un bucle sobre sus filas?</summary><p>Porque la operación vectorizada corre en código compilado sobre un bloque de memoria del mismo tipo, aprovecha instrucciones del procesador y no convierte cada valor en un objeto de Python.</p></details><details><summary>¿Qué gana Polars al leer con <code>scan_parquet</code> en lugar de <code>read_parquet</code> si la consulta filtra octubre y usa tres columnas?</summary><p>Con la evaluación perezosa arma un plan y lo optimiza: filtra mientras lee y solo lee las columnas necesarias, en vez de cargar el archivo entero.</p></details><details><summary>¿Qué es una expresión en Polars?</summary><p>La descripción de un cálculo sobre columnas, como <code>pl.col("total") * 1.12</code>, que no se ejecuta en el momento: Polars la recibe y decide cómo calcularla.</p></details></div></section>
+<section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es la codificación de caracteres UTF-8 y qué pasa cuando un CSV se guarda en otra, como Latin-1 o Windows-1252?<small>Pista: busca «mojibake» y el parámetro <code>encoding</code> de <code>read_csv</code>.</small></li><li>¿Qué es el <i>copy-on-write</i> de pandas 3 y por qué cambió la forma de modificar una tabla?</li><li>¿Qué es Apache Arrow y cómo permite que pandas, Polars y DuckDB se pasen tablas sin copiarlas?<small>Pista: busca «zero-copy» y «Arrow columnar format».</small></li><li>¿Qué es la memoria caché del procesador y por qué recorrer un bloque continuo de memoria es más rápido que saltar de objeto en objeto?</li><li>¿Cómo funciona Pyodide para ejecutar Python dentro del navegador?<small>Pista: busca «WebAssembly» y «Emscripten».</small></li></ol></div></section>
+<section><h2>Para saber más</h2><div class="vids"><span>Para saber más</span><a class="vid" href="https://pandas.pydata.org/docs/user_guide/10min.html" target="_blank" rel="noopener">pandas: 10 minutes to pandas <small>la introducción oficial, en inglés</small></a><a class="vid" href="https://docs.pola.rs/user-guide/getting-started/" target="_blank" rel="noopener">Polars user guide <small>la guía oficial, con expresiones y modo perezoso, en inglés</small></a><a class="vid" href="https://duckdb.org/docs/stable/clients/python/overview" target="_blank" rel="noopener">DuckDB: Python API <small>consultar tablas de pandas y Polars con SQL, en inglés</small></a><a class="vid" href="https://pyodide.org/en/stable/" target="_blank" rel="noopener">Pyodide <small>Python en el navegador, en inglés</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/ciencia-de-datos" target="_blank" rel="noopener">github.com/aaramirez/ciencia-de-datos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="02-lab-1"]');
+  /* ---- Componente Pyodide común del curso «Ciencia de datos» (copiar tal cual) ----
+     Pyodide 314.0.7 (Python 3.14.2; pandas 3.0.2, polars 1.33.1, numpy 2.4.6, duckdb 1.5.1).
+     Se descarga solo al pulsar el botón y se comparte entre todos los labs de la página. */
+  const PY=window.cdatosPy||(window.cdatosPy=(function(){
+    const VER='314.0.7',BASE='https://cdn.jsdelivr.net/pyodide/v'+VER+'/full/';
+    let base=null;const listos={};
+    const AYUDA=[
+      'import ast, io, json, sys',
+      '_cdatos_espacios = {}',
+      'def _cdatos_limpio(v):',
+      '    if v is None: return None',
+      '    if hasattr(v, "item") and not isinstance(v, (str, bytes)):',
+      '        try: v = v.item()',
+      '        except Exception: v = str(v)',
+      '    if isinstance(v, float) and v != v: return None',
+      '    if isinstance(v, (bool, int, float, str)): return v',
+      '    return str(v)',
+      'def _cdatos_tabla(x, n=12):',
+      '    mod = type(x).__module__.split(".")[0]',
+      '    if mod == "polars":',
+      '        import polars as pl',
+      '        if isinstance(x, pl.LazyFrame): x = x.collect()',
+      '        if isinstance(x, pl.Series): x = x.to_frame()',
+      '        if not isinstance(x, pl.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.rows(); indice = None',
+      '        cols = list(h.columns); tipos = [str(t) for t in h.dtypes]',
+      '    elif mod == "pandas":',
+      '        import pandas as pd',
+      '        if isinstance(x, pd.Series): x = x.to_frame()',
+      '        if not isinstance(x, pd.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.astype(object).values.tolist()',
+      '        indice = [str(i) for i in h.index]',
+      '        cols = [str(c) for c in h.columns]; tipos = [str(t) for t in h.dtypes]',
+      '    elif x is None: return None',
+      '    else: return {"valor": repr(x)}',
+      '    return {"columnas": cols, "tipos": tipos, "indice": indice, "forma": list(x.shape), "motor": mod,',
+      '            "filas": [[_cdatos_limpio(v) for v in f] for f in filas]}',
+      'def _cdatos_correr(lab, codigo):',
+      '    ns = _cdatos_espacios.setdefault(lab, {"__name__": "__main__"})',
+      '    buf, viejo = io.StringIO(), sys.stdout',
+      '    sys.stdout = buf',
+      '    try:',
+      '        arbol = ast.parse(codigo); ultimo = None',
+      '        if arbol.body and isinstance(arbol.body[-1], ast.Expr):',
+      '            exp = ast.Expression(arbol.body.pop().value)',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '            ultimo = eval(compile(exp, "<lab>", "eval"), ns)',
+      '        else:',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '        return json.dumps({"salida": buf.getvalue(), "tabla": _cdatos_tabla(ultimo)})',
+      '    except BaseException as e:',
+      '        return json.dumps({"salida": buf.getvalue(), "error": type(e).__name__ + ": " + str(e)})',
+      '    finally:',
+      '        sys.stdout = viejo'].join('\n');
+    function script(){return new Promise((ok,mal)=>{
+      if(window.loadPyodide)return ok();
+      const s=document.createElement('script');s.src=BASE+'pyodide.js';
+      s.onload=ok;s.onerror=()=>mal(new Error('No se pudo descargar Pyodide'));document.head.appendChild(s);});}
+    return {VER,
+      /* paquetes: ['pandas'] o ['pandas','polars']; aviso(texto) recibe el estado */
+      cargar(paquetes,aviso){
+        if(!base){aviso&&aviso('Descargando Python (Pyodide '+VER+')…');
+          base=script().then(()=>loadPyodide({indexURL:BASE})).then(py=>{py.runPython(AYUDA);return py;});
+          base.catch(()=>{base=null;});}
+        return base.then(async py=>{
+          const faltan=paquetes.filter(p=>!listos[p]);
+          if(faltan.length){aviso&&aviso('Instalando '+faltan.join(' y ')+'…');
+            await py.loadPackage(faltan);faltan.forEach(p=>listos[p]=1);}
+          return py;});
+      },
+      /* archivos: {'ventas.csv': 'texto…'}; se escriben en la carpeta de trabajo de Python */
+      archivos(py,archivos){for(const k in archivos)py.FS.writeFile(k,archivos[k]);},
+      async correr(py,lab,codigo){
+        py.globals.set('_cdatos_codigo',codigo);
+        const r=JSON.parse(py.runPython('_cdatos_correr('+JSON.stringify(lab)+', _cdatos_codigo)'));
+        return r;}
+    };
+  })());
+  /* Dibuja la tabla que devuelve PY.correr (r.tabla) dentro de un elemento */
+  function pintarTabla(el,t){
+    const nfx=(v,dec)=>{if(typeof v!=='number')return v===null?'<i>nulo</i>':String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const d=dec?2:(Number.isInteger(v)?0:2);const s=Math.abs(v).toFixed(d).split('.');
+      s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (v<0?'−':'')+s.join(',');};
+    if(!t){el.innerHTML='';return;}
+    if(t.valor!==undefined){el.innerHTML='<pre class="cdatos-valor">'+nfx(t.valor)+'</pre>';return;}
+    const idx=t.indice&&!t.indice.every((v,i)=>v===String(i));
+    let h='<table class="tbl"><thead><tr>'+(idx?'<th></th>':'')+t.columnas.map((c,i)=>'<th>'+nfx(c)+'<br><small>'+t.tipos[i]+'</small></th>').join('')+'</tr></thead><tbody>';
+    t.filas.forEach((f,j)=>{h+='<tr>'+(idx?'<th>'+nfx(t.indice[j])+'</th>':'')+f.map((v,i)=>'<td'+(typeof v==='number'?' style="text-align:right"':'')+'>'+(/(^|_)id$|^año$|^anio$/i.test(String(t.columnas[i]))&&typeof v==='number'?String(v):nfx(v,/float/i.test(t.tipos[i])))+'</td>').join('')+'</tr>';});
+    const n=t.forma[0];
+    el.innerHTML=h+'</tbody></table><p class="hint">'+(n>t.filas.length?'Primeras '+t.filas.length+' de ':'')+nfx(n)+' filas × '+t.forma[1]+' columnas · '+t.motor+'</p>';
+  }
+  /* ---- fin del componente ---- */
+  const DATOS={"csv":"ticket_id,fecha_hora,tienda_id,cliente_id,medio_pago,total\r\n288278,2026-10-01 09:12,T07,,efectivo,8.26\r\n288282,2026-10-01 09:23,T09,4265,efectivo,47.15\r\n288386,2026-10-01 14:13,T10,,tarjeta,10.71\r\n288402,2026-10-01 14:46,T01,,transferencia,4.55\r\n288455,2026-10-01 17:08,T10,,transferencia,57.87\r\n288503,2026-10-01 18:53,T10,5542,tarjeta,11.45\r\n288508,2026-10-01 18:59,T04,4717,transferencia,2.23\r\n288523,2026-10-01 19:33,T04,6875,tarjeta,44.61\r\n288531,2026-10-01 19:47,T04,3638,efectivo,24.44\r\n288553,2026-10-01 20:35,T01,6781,tarjeta,10.01\r\n288566,2026-10-01 21:47,T06,,tarjeta,6.04\r\n288693,2026-10-02 13:53,T07,,transferencia,6.25\r\n288730,2026-10-02 15:22,T01,4043,tarjeta,11.19\r\n288742,2026-10-02 15:52,T07,,efectivo,11.98\r\n288766,2026-10-02 16:42,T08,6095,efectivo,8.90\r\n288776,2026-10-02 16:58,T08,5889,tarjeta,4.77\r\n288789,2026-10-02 17:25,T06,1638,efectivo,11.04\r\n288858,2026-10-02 20:06,T04,,efectivo,23.01\r\n288894,2026-10-03 08:28,T02,3453,tarjeta,1.38\r\n288979,2026-10-03 11:59,T02,4412,efectivo,37.95\r\n289004,2026-10-03 12:22,T01,,tarjeta,36.15\r\n289087,2026-10-03 15:49,T09,4336,tarjeta,9.74\r\n289102,2026-10-03 16:19,T01,3520,transferencia,38.15\r\n289113,2026-10-03 16:34,T04,,efectivo,19.03\r\n289156,2026-10-03 18:03,T11,4769,tarjeta,1.33\r\n289159,2026-10-03 18:13,T04,,tarjeta,33.27\r\n289164,2026-10-03 18:21,T10,,tarjeta,21.73\r\n289249,2026-10-03 21:23,T09,,transferencia,7.69\r\n289388,2026-10-04 13:40,T05,7000,efectivo,13.31\r\n289537,2026-10-04 19:41,T12,5523,tarjeta,2.18\r\n289649,2026-10-05 12:29,T01,5421,transferencia,9.07\r\n289710,2026-10-05 16:23,T04,3799,transferencia,12.14\r\n289745,2026-10-05 18:14,T04,6861,efectivo,37.43\r\n289765,2026-10-05 19:14,T01,6252,tarjeta,41.50\r\n289787,2026-10-05 20:15,T04,3948,efectivo,27.93\r\n289791,2026-10-05 20:21,T03,3750,tarjeta,3.71\r\n289891,2026-10-06 12:14,T12,,tarjeta,18.10\r\n289934,2026-10-06 13:54,T03,,efectivo,5.15\r\n289946,2026-10-06 14:17,T09,,efectivo,12.39\r\n289958,2026-10-06 15:09,T10,2964,tarjeta,18.35\r\n289974,2026-10-06 16:13,T01,,efectivo,1.38\r\n290017,2026-10-06 18:37,T01,,tarjeta,44.50\r\n290022,2026-10-06 18:47,T01,,efectivo,17.59\r\n290055,2026-10-06 19:40,T07,,tarjeta,4.88\r\n290062,2026-10-06 19:52,T10,5017,efectivo,65.47\r\n290100,2026-10-07 09:09,T05,,tarjeta,28.72\r\n290142,2026-10-07 11:35,T02,2902,tarjeta,11.02\r\n290186,2026-10-07 13:00,T02,,efectivo,28.95\r\n290322,2026-10-07 19:35,T01,,tarjeta,5.51\r\n290324,2026-10-07 19:42,T10,1452,tarjeta,15.26\r\n290414,2026-10-08 11:48,T01,,tarjeta,36.78\r\n290421,2026-10-08 12:07,T03,,tarjeta,1.33\r\n290434,2026-10-08 12:23,T04,,efectivo,10.81\r\n290452,2026-10-08 13:00,T01,1852,tarjeta,8.11\r\n290463,2026-10-08 13:34,T04,,efectivo,5.08\r\n290472,2026-10-08 14:05,T06,3154,efectivo,8.37\r\n290491,2026-10-08 15:00,T04,4253,tarjeta,12.89\r\n290574,2026-10-08 18:43,T04,,tarjeta,11.03\r\n290635,2026-10-09 08:25,T09,,tarjeta,13.67\r\n290641,2026-10-09 08:51,T02,,efectivo,27.86\r\n290661,2026-10-09 10:02,T02,2682,transferencia,14.54\r\n290745,2026-10-09 13:12,T10,4991,tarjeta,6.47\r\n290884,2026-10-09 19:25,T09,,tarjeta,17.17\r\n290931,2026-10-09 21:50,T05,,tarjeta,17.70\r\n290939,2026-10-10 08:41,T05,3108,tarjeta,4.19\r\n290981,2026-10-10 10:36,T07,,efectivo,2.01\r\n291029,2026-10-10 12:16,T04,6524,tarjeta,19.25\r\n291049,2026-10-10 12:51,T10,,efectivo,30.94\r\n291081,2026-10-10 13:51,T10,1823,tarjeta,24.79\r\n291139,2026-10-10 16:13,T10,2632,tarjeta,19.50\r\n291166,2026-10-10 17:13,T08,2050,transferencia,15.97\r\n291214,2026-10-10 18:45,T01,6165,tarjeta,25.87\r\n291256,2026-10-10 19:55,T01,,transferencia,13.13\r\n291302,2026-10-10 21:25,T02,2902,tarjeta,27.80\r\n291317,2026-10-11 08:59,T01,1112,tarjeta,29.82\r\n291359,2026-10-11 11:48,T01,,efectivo,8.17\r\n291448,2026-10-11 14:46,T07,,tarjeta,15.81\r\n291478,2026-10-11 15:57,T12,,tarjeta,7.85\r\n291482,2026-10-11 16:20,T02,,transferencia,6.42\r\n291516,2026-10-11 17:22,T08,6419,tarjeta,3.82\r\n291524,2026-10-11 17:33,T05,,tarjeta,8.48\r\n291525,2026-10-11 17:36,T06,2821,tarjeta,12.40\r\n291536,2026-10-11 17:51,T03,5377,tarjeta,5.30\r\n291582,2026-10-11 19:26,T06,,tarjeta,3.71\r\n291595,2026-10-11 19:45,T01,3265,efectivo,41.57\r\n291604,2026-10-11 20:03,T04,6181,efectivo,14.16\r\n291658,2026-10-12 10:01,T02,,tarjeta,6.73\r\n291732,2026-10-12 14:01,T07,,tarjeta,22.68\r\n291735,2026-10-12 14:04,T09,,efectivo,32.11\r\n291754,2026-10-12 14:50,T12,5922,efectivo,7.84\r\n291813,2026-10-12 17:35,T01,4494,efectivo,11.99\r\n291860,2026-10-12 19:25,T03,,efectivo,3.92\r\n291920,2026-10-13 09:49,T12,4978,tarjeta,1.17\r\n291992,2026-10-13 13:14,T06,2813,tarjeta,6.79\r\n292029,2026-10-13 15:28,T10,1131,transferencia,26.03\r\n292056,2026-10-13 16:47,T07,,efectivo,28.18\r\n292085,2026-10-13 18:02,T10,,efectivo,57.28\r\n292091,2026-10-13 18:10,T11,,tarjeta,13.25\r\n292119,2026-10-13 19:26,T07,1320,efectivo,28.63\r\n292129,2026-10-13 19:52,T01,3589,tarjeta,13.20\r\n292167,2026-10-14 08:47,T04,1228,tarjeta,37.69\r\n292275,2026-10-14 14:59,T11,5485,efectivo,4.35\r\n292339,2026-10-14 17:46,T05,,efectivo,7.10\r\n292343,2026-10-14 18:00,T01,,efectivo,29.20\r\n292361,2026-10-14 18:42,T03,3414,efectivo,10.18\r\n292377,2026-10-14 19:18,T04,4717,tarjeta,10.98\r\n292390,2026-10-14 19:47,T01,,efectivo,4.98\r\n292444,2026-10-15 09:54,T02,,transferencia,17.18\r\n292468,2026-10-15 10:59,T06,,efectivo,9.01\r\n292486,2026-10-15 11:37,T01,3195,tarjeta,5.93\r\n292505,2026-10-15 12:19,T09,,efectivo,1.38\r\n292584,2026-10-15 16:12,T01,6944,tarjeta,7.75\r\n292599,2026-10-15 16:40,T10,5636,efectivo,20.10\r\n292649,2026-10-15 18:30,T04,6075,tarjeta,18.32\r\n292668,2026-10-15 19:25,T02,1968,tarjeta,4.78\r\n292672,2026-10-15 19:33,T12,3352,tarjeta,14.93\r\n292765,2026-10-16 10:28,T04,2530,efectivo,1.33\r\n292867,2026-10-16 14:48,T10,2926,tarjeta,2.66\r\n292976,2026-10-16 18:59,T12,,transferencia,2.01\r\n293013,2026-10-16 20:01,T03,4559,tarjeta,14.00\r\n293030,2026-10-16 20:51,T01,,tarjeta,30.43\r\n293077,2026-10-17 10:06,T04,,transferencia,35.70\r\n293092,2026-10-17 10:25,T01,2689,efectivo,15.05\r\n293130,2026-10-17 11:32,T10,1486,efectivo,12.10\r\n293170,2026-10-17 13:02,T01,1496,tarjeta,4.57\r\n293206,2026-10-17 14:20,T04,,tarjeta,9.61\r\n293257,2026-10-17 16:13,T01,2178,tarjeta,41.02\r\n293295,2026-10-17 17:03,T01,5379,tarjeta,23.43\r\n293316,2026-10-17 17:29,T06,,efectivo,20.21\r\n293334,2026-10-17 18:02,T01,4417,efectivo,33.49\r\n293344,2026-10-17 18:17,T01,,tarjeta,23.91\r\n293356,2026-10-17 18:35,T07,,tarjeta,15.48\r\n293407,2026-10-17 20:44,T03,6690,tarjeta,8.76\r\n293416,2026-10-17 21:23,T04,3276,tarjeta,1.80\r\n293470,2026-10-18 10:34,T09,,efectivo,9.22\r\n293488,2026-10-18 11:34,T02,,efectivo,14.01\r\n293526,2026-10-18 12:40,T06,6197,tarjeta,25.75\r\n293548,2026-10-18 13:27,T02,,efectivo,6.26\r\n293563,2026-10-18 14:00,T05,2409,efectivo,3.39\r\n293564,2026-10-18 14:03,T02,3431,transferencia,10.82\r\n293569,2026-10-18 14:35,T01,5169,efectivo,14.26\r\n293630,2026-10-18 17:41,T02,,efectivo,4.24\r\n293651,2026-10-18 18:22,T02,5683,tarjeta,27.34\r\n293653,2026-10-18 18:25,T04,3031,efectivo,20.36\r\n293671,2026-10-18 18:54,T07,,efectivo,16.32\r\n293681,2026-10-18 19:18,T02,3551,efectivo,6.36\r\n293710,2026-10-18 20:12,T03,5968,tarjeta,5.72\r\n293736,2026-10-18 21:40,T02,,tarjeta,27.66\r\n293773,2026-10-19 10:40,T03,2917,tarjeta,7.91\r\n293823,2026-10-19 12:58,T02,,transferencia,4.35\r\n293855,2026-10-19 15:52,T01,,efectivo,37.17\r\n293860,2026-10-19 16:06,T10,5847,tarjeta,24.69\r\n293919,2026-10-19 18:07,T08,,tarjeta,5.52\r\n293924,2026-10-19 18:16,T09,,efectivo,4.24\r\n293963,2026-10-19 19:16,T12,4886,transferencia,34.54\r\n293968,2026-10-19 19:26,T10,,tarjeta,21.73\r\n293988,2026-10-19 20:48,T09,6232,tarjeta,4.13\r\n293991,2026-10-19 21:09,T01,1747,efectivo,46.74\r\n294054,2026-10-20 11:20,T04,3031,tarjeta,11.65\r\n294059,2026-10-20 11:29,T10,,transferencia,13.89\r\n294146,2026-10-20 16:00,T04,6104,tarjeta,5.83\r\n294187,2026-10-20 18:03,T04,1591,tarjeta,16.32\r\n294208,2026-10-20 18:45,T12,6085,tarjeta,23.86\r\n294236,2026-10-20 19:57,T03,6892,tarjeta,28.51\r\n294295,2026-10-21 10:51,T05,,tarjeta,2.01\r\n294319,2026-10-21 11:46,T04,1721,efectivo,31.65\r\n294379,2026-10-21 15:05,T06,,tarjeta,22.20\r\n294597,2026-10-22 13:37,T01,,efectivo,5.20\r\n294599,2026-10-22 13:50,T02,,efectivo,6.53\r\n294667,2026-10-22 17:31,T05,,efectivo,5.94\r\n294687,2026-10-22 18:03,T06,,tarjeta,31.38\r\n294797,2026-10-23 09:46,T06,,tarjeta,7.31\r\n294811,2026-10-23 10:37,T07,3053,tarjeta,22.90\r\n294821,2026-10-23 11:01,T03,3683,efectivo,8.59\r\n294858,2026-10-23 12:17,T10,4746,efectivo,39.29\r\n294888,2026-10-23 13:30,T05,,efectivo,30.94\r\n294934,2026-10-23 15:31,T11,,tarjeta,4.77\r\n294935,2026-10-23 15:36,T07,5336,transferencia,32.84\r\n295058,2026-10-23 20:27,T02,4412,tarjeta,6.16\r\n295136,2026-10-24 10:56,T11,4902,efectivo,18.76\r\n295232,2026-10-24 13:43,T01,2482,tarjeta,27.56\r\n295262,2026-10-24 14:47,T01,1179,efectivo,21.26\r\n295364,2026-10-24 18:28,T08,4123,tarjeta,10.92\r\n295440,2026-10-24 20:44,T06,5997,efectivo,3.39\r\n295476,2026-10-25 09:08,T09,5018,tarjeta,7.85\r\n295509,2026-10-25 10:36,T04,,transferencia,36.74\r\n295536,2026-10-25 11:39,T02,,efectivo,13.36\r\n295541,2026-10-25 11:54,T05,6479,transferencia,34.46\r\n295625,2026-10-25 15:39,T06,,tarjeta,1.59\r\n295626,2026-10-25 15:43,T03,,tarjeta,2.01\r\n295630,2026-10-25 15:44,T10,,tarjeta,20.34\r\n295645,2026-10-25 16:48,T01,3290,tarjeta,53.59\r\n295698,2026-10-25 18:29,T04,5358,tarjeta,10.23\r\n295749,2026-10-25 19:42,T01,2544,tarjeta,34.83\r\n295775,2026-10-25 20:51,T07,1948,efectivo,42.62\r\n295802,2026-10-26 09:25,T07,1471,tarjeta,16.54\r\n295828,2026-10-26 10:57,T04,,tarjeta,11.55\r\n295898,2026-10-26 14:01,T08,4258,transferencia,2.55\r\n295903,2026-10-26 14:32,T04,1321,efectivo,9.97\r\n295922,2026-10-26 16:03,T04,3874,tarjeta,3.18\r\n295945,2026-10-26 17:09,T10,4737,tarjeta,7.21\r\n295964,2026-10-26 17:53,T01,6414,tarjeta,36.45\r\n296027,2026-10-26 20:26,T04,1509,efectivo,26.50\r\n296106,2026-10-27 12:17,T11,4240,tarjeta,5.83\r\n296179,2026-10-27 15:27,T04,,efectivo,21.16\r\n296194,2026-10-27 16:22,T04,2184,efectivo,9.43\r\n296247,2026-10-27 18:41,T01,4405,efectivo,7.43\r\n296277,2026-10-27 19:50,T02,4884,efectivo,6.80\r\n296358,2026-10-28 12:03,T10,6457,tarjeta,10.98\r\n296408,2026-10-28 14:15,T02,5034,tarjeta,25.24\r\n296492,2026-10-28 17:57,T01,2829,tarjeta,7.31\r\n296495,2026-10-28 18:00,T05,4260,efectivo,6.21\r\n296639,2026-10-29 12:05,T04,,transferencia,9.97\r\n296712,2026-10-29 15:57,T11,2561,transferencia,0.95\r\n296718,2026-10-29 16:11,T07,,tarjeta,17.67\r\n296745,2026-10-29 17:07,T06,1949,tarjeta,8.90\r\n296783,2026-10-29 18:29,T07,4483,efectivo,11.77\r\n296799,2026-10-29 19:23,T02,2449,tarjeta,16.65\r\n296846,2026-10-29 21:43,T04,2162,tarjeta,6.37\r\n296903,2026-10-30 11:21,T03,3377,efectivo,14.53\r\n296929,2026-10-30 12:20,T10,,tarjeta,22.97\r\n296933,2026-10-30 12:28,T02,,efectivo,2.18\r\n296935,2026-10-30 12:33,T05,,efectivo,11.62\r\n296957,2026-10-30 13:11,T12,5298,tarjeta,20.13\r\n296973,2026-10-30 13:46,T05,,efectivo,13.67\r\n297025,2026-10-30 16:00,T02,3740,tarjeta,50.14\r\n297047,2026-10-30 17:05,T02,4794,tarjeta,14.90\r\n297066,2026-10-30 17:31,T02,2095,efectivo,12.03\r\n297124,2026-10-30 19:06,T10,,efectivo,28.63\r\n297134,2026-10-30 19:22,T06,,tarjeta,11.44\r\n297181,2026-10-31 08:19,T01,,efectivo,65.82\r\n297183,2026-10-31 08:35,T07,4786,tarjeta,4.02\r\n297285,2026-10-31 12:17,T07,4974,tarjeta,11.44\r\n297296,2026-10-31 12:27,T02,3178,tarjeta,29.36\r\n297319,2026-10-31 12:52,T08,1243,tarjeta,17.07\r\n297374,2026-10-31 14:53,T07,,efectivo,8.27\r\n297399,2026-10-31 16:01,T04,6765,efectivo,13.58\r\n297414,2026-10-31 16:29,T04,1777,tarjeta,10.23\r\n297464,2026-10-31 18:01,T11,4231,tarjeta,5.46\r\n297567,2026-10-31 21:20,T02,5987,tarjeta,16.12\r\n","tiendas":"tienda_id,nombre,region,formato,m2\nT01,Norte Mirador,Norte,grande,1800\nT02,Norte Estación,Norte,grande,1500\nT03,Norte Los Pinos,Norte,express,300\nT04,Centro Plaza Mayor,Centro,grande,2000\nT05,Centro Alameda,Centro,express,350\nT06,Centro Universidad,Centro,express,280\nT07,Sur Puerto,Sur,grande,1700\nT08,Sur Las Colinas,Sur,express,320\nT09,Sur Mercado Viejo,Sur,express,300\nT10,Oriente Río Claro,Oriente,grande,1600\nT11,Oriente La Loma,Oriente,express,300\nT12,Oriente Nuevo Sol,Oriente,express,260\n","res":{"ver":{"pandas":{"salida":"","tabla":{"columnas":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total"],"tipos":["int64","str","str","float64","str","float64"],"indice":["0","1","2","3","4"],"forma":[5,6],"motor":"pandas","filas":[[288278,"2026-10-01 09:12","T07",null,"efectivo",8.26],[288282,"2026-10-01 09:23","T09",4265.0,"efectivo",47.15],[288386,"2026-10-01 14:13","T10",null,"tarjeta",10.71],[288402,"2026-10-01 14:46","T01",null,"transferencia",4.55],[288455,"2026-10-01 17:08","T10",null,"transferencia",57.87]]}},"polars":{"salida":"","tabla":{"columnas":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total"],"tipos":["Int64","String","String","Int64","String","Float64"],"indice":null,"forma":[5,6],"motor":"polars","filas":[[288278,"2026-10-01 09:12","T07",null,"efectivo",8.26],[288282,"2026-10-01 09:23","T09",4265,"efectivo",47.15],[288386,"2026-10-01 14:13","T10",null,"tarjeta",10.71],[288402,"2026-10-01 14:46","T01",null,"transferencia",4.55],[288455,"2026-10-01 17:08","T10",null,"transferencia",57.87]]}}},"tipos":{"pandas":{"salida":"(240, 6)\n","tabla":{"columnas":["0"],"tipos":["object"],"indice":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total"],"forma":[6,1],"motor":"pandas","filas":[["int64"],["str"],["str"],["float64"],["str"],["float64"]]}},"polars":{"salida":"(240, 6)\n","tabla":{"valor":"Schema({'ticket_id': Int64, 'fecha_hora': String, 'tienda_id': String, 'cliente_id': Int64, 'medio_pago': String, 'total': Float64})"}}},"selec":{"pandas":{"salida":"","tabla":{"columnas":["tienda_id","medio_pago","total"],"tipos":["str","str","float64"],"indice":["0","1","2","3","4","5","6","7","8","9","10","11"],"forma":[240,3],"motor":"pandas","filas":[["T07","efectivo",8.26],["T09","efectivo",47.15],["T10","tarjeta",10.71],["T01","transferencia",4.55],["T10","transferencia",57.87],["T10","tarjeta",11.45],["T04","transferencia",2.23],["T04","tarjeta",44.61],["T04","efectivo",24.44],["T01","tarjeta",10.01],["T06","tarjeta",6.04],["T07","transferencia",6.25]]}},"polars":{"salida":"","tabla":{"columnas":["tienda_id","medio_pago","total"],"tipos":["String","String","Float64"],"indice":null,"forma":[240,3],"motor":"polars","filas":[["T07","efectivo",8.26],["T09","efectivo",47.15],["T10","tarjeta",10.71],["T01","transferencia",4.55],["T10","transferencia",57.87],["T10","tarjeta",11.45],["T04","transferencia",2.23],["T04","tarjeta",44.61],["T04","efectivo",24.44],["T01","tarjeta",10.01],["T06","tarjeta",6.04],["T07","transferencia",6.25]]}}},"filtro":{"pandas":{"salida":"","tabla":{"columnas":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total"],"tipos":["int64","str","str","float64","str","float64"],"indice":["1","88","177","194"],"forma":[4,6],"motor":"pandas","filas":[[288282,"2026-10-01 09:23","T09",4265.0,"efectivo",47.15],[291735,"2026-10-12 14:04","T09",null,"efectivo",32.11],[294935,"2026-10-23 15:36","T07",5336.0,"transferencia",32.84],[295775,"2026-10-25 20:51","T07",1948.0,"efectivo",42.62]]}},"polars":{"salida":"","tabla":{"columnas":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total"],"tipos":["Int64","String","String","Int64","String","Float64"],"indice":null,"forma":[4,6],"motor":"polars","filas":[[288282,"2026-10-01 09:23","T09",4265,"efectivo",47.15],[291735,"2026-10-12 14:04","T09",null,"efectivo",32.11],[294935,"2026-10-23 15:36","T07",5336,"transferencia",32.84],[295775,"2026-10-25 20:51","T07",1948,"efectivo",42.62]]}}},"orden":{"pandas":{"salida":"","tabla":{"columnas":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total"],"tipos":["int64","str","str","float64","str","float64"],"indice":["230","44","4","96","191","225","1","157","7","41","194","84"],"forma":[240,6],"motor":"pandas","filas":[[297181,"2026-10-31 08:19","T01",null,"efectivo",65.82],[290062,"2026-10-06 19:52","T10",5017.0,"efectivo",65.47],[288455,"2026-10-01 17:08","T10",null,"transferencia",57.87],[292085,"2026-10-13 18:02","T10",null,"efectivo",57.28],[295645,"2026-10-25 16:48","T01",3290.0,"tarjeta",53.59],[297025,"2026-10-30 16:00","T02",3740.0,"tarjeta",50.14],[288282,"2026-10-01 09:23","T09",4265.0,"efectivo",47.15],[293991,"2026-10-19 21:09","T01",1747.0,"efectivo",46.74],[288523,"2026-10-01 19:33","T04",6875.0,"tarjeta",44.61],[290017,"2026-10-06 18:37","T01",null,"tarjeta",44.5],[295775,"2026-10-25 20:51","T07",1948.0,"efectivo",42.62],[291595,"2026-10-11 19:45","T01",3265.0,"efectivo",41.57]]}},"polars":{"salida":"","tabla":{"columnas":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total"],"tipos":["Int64","String","String","Int64","String","Float64"],"indice":null,"forma":[240,6],"motor":"polars","filas":[[297181,"2026-10-31 08:19","T01",null,"efectivo",65.82],[290062,"2026-10-06 19:52","T10",5017,"efectivo",65.47],[288455,"2026-10-01 17:08","T10",null,"transferencia",57.87],[292085,"2026-10-13 18:02","T10",null,"efectivo",57.28],[295645,"2026-10-25 16:48","T01",3290,"tarjeta",53.59],[297025,"2026-10-30 16:00","T02",3740,"tarjeta",50.14],[288282,"2026-10-01 09:23","T09",4265,"efectivo",47.15],[293991,"2026-10-19 21:09","T01",1747,"efectivo",46.74],[288523,"2026-10-01 19:33","T04",6875,"tarjeta",44.61],[290017,"2026-10-06 18:37","T01",null,"tarjeta",44.5],[295775,"2026-10-25 20:51","T07",1948,"efectivo",42.62],[291595,"2026-10-11 19:45","T01",3265,"efectivo",41.57]]}}},"crear":{"pandas":{"salida":"","tabla":{"columnas":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total","hora","con_iva"],"tipos":["int64","str","str","float64","str","float64","int32","float64"],"indice":["0","1","2","3","4","5","6","7","8","9","10","11"],"forma":[240,8],"motor":"pandas","filas":[[288278,"2026-10-01 09:12","T07",null,"efectivo",8.26,9,9.2512],[288282,"2026-10-01 09:23","T09",4265.0,"efectivo",47.15,9,52.80800000000001],[288386,"2026-10-01 14:13","T10",null,"tarjeta",10.71,14,11.995200000000002],[288402,"2026-10-01 14:46","T01",null,"transferencia",4.55,14,5.096],[288455,"2026-10-01 17:08","T10",null,"transferencia",57.87,17,64.8144],[288503,"2026-10-01 18:53","T10",5542.0,"tarjeta",11.45,18,12.824],[288508,"2026-10-01 18:59","T04",4717.0,"transferencia",2.23,18,2.4976000000000003],[288523,"2026-10-01 19:33","T04",6875.0,"tarjeta",44.61,19,49.96320000000001],[288531,"2026-10-01 19:47","T04",3638.0,"efectivo",24.44,19,27.372800000000005],[288553,"2026-10-01 20:35","T01",6781.0,"tarjeta",10.01,20,11.211200000000002],[288566,"2026-10-01 21:47","T06",null,"tarjeta",6.04,21,6.764800000000001],[288693,"2026-10-02 13:53","T07",null,"transferencia",6.25,13,7.000000000000001]]}},"polars":{"salida":"","tabla":{"columnas":["ticket_id","fecha_hora","tienda_id","cliente_id","medio_pago","total","hora","con_iva"],"tipos":["Int64","String","String","Int64","String","Float64","Int8","Float64"],"indice":null,"forma":[240,8],"motor":"polars","filas":[[288278,"2026-10-01 09:12","T07",null,"efectivo",8.26,9,9.2512],[288282,"2026-10-01 09:23","T09",4265,"efectivo",47.15,9,52.80800000000001],[288386,"2026-10-01 14:13","T10",null,"tarjeta",10.71,14,11.995200000000002],[288402,"2026-10-01 14:46","T01",null,"transferencia",4.55,14,5.096],[288455,"2026-10-01 17:08","T10",null,"transferencia",57.87,17,64.8144],[288503,"2026-10-01 18:53","T10",5542,"tarjeta",11.45,18,12.824],[288508,"2026-10-01 18:59","T04",4717,"transferencia",2.23,18,2.4976000000000003],[288523,"2026-10-01 19:33","T04",6875,"tarjeta",44.61,19,49.96320000000001],[288531,"2026-10-01 19:47","T04",3638,"efectivo",24.44,19,27.372800000000005],[288553,"2026-10-01 20:35","T01",6781,"tarjeta",10.01,20,11.211200000000002],[288566,"2026-10-01 21:47","T06",null,"tarjeta",6.04,21,6.764800000000001],[288693,"2026-10-02 13:53","T07",null,"transferencia",6.25,13,7.000000000000001]]}}},"agrupar":{"pandas":{"salida":"","tabla":{"columnas":["count","sum","mean"],"tipos":["int64","float64","float64"],"indice":["Norte","Centro","Oriente","Sur"],"forma":[4,3],"motor":"pandas","filas":[[88,1590.36,18.072272727272725],[69,1044.73,15.141014492753623],[43,777.75,18.087209302325583],[40,564.8100000000001,14.120250000000002]]}},"polars":{"salida":"","tabla":{"columnas":["region","count","sum","mean"],"tipos":["String","UInt32","Float64","Float64"],"indice":null,"forma":[4,4],"motor":"polars","filas":[["Norte",88,1590.36,18.072272727272725],["Centro",69,1044.73,15.141014492753623],["Oriente",43,777.75,18.087209302325583],["Sur",40,564.8100000000001,14.120250000000002]]}}},"lazy":{"pandas":{"salida":"","tabla":{"columnas":["tienda_id","total"],"tipos":["str","float64"],"indice":["1","4","7","19","20","22","25","32","33","41","44","50"],"forma":[37,2],"motor":"pandas","filas":[["T09",47.15],["T10",57.87],["T04",44.61],["T02",37.95],["T01",36.15],["T01",38.15],["T04",33.27],["T04",37.43],["T01",41.5],["T01",44.5],["T10",65.47],["T01",36.78]]}},"polars":{"salida":"FILTER col(\"total\") > 30.0\nFROM\n  DF [\"ticket_id\", \"fecha_hora\", \"tienda_id\", \"cliente_id\", ...]; PROJECT[\"tienda_id\", \"total\"] 2/6 COLUMNS\n","tabla":{"columnas":["tienda_id","total"],"tipos":["String","Float64"],"indice":null,"forma":[37,2],"motor":"polars","filas":[["T09",47.15],["T10",57.87],["T04",44.61],["T02",37.95],["T01",36.15],["T01",38.15],["T04",33.27],["T04",37.43],["T01",41.5],["T01",44.5],["T10",65.47],["T01",36.78]]}}}}};
+  const EJ={"ver":{"t":"Leer y mirar las primeras filas","pandas":"import pandas as pd\n\nventas = pd.read_csv(\"ventas.csv\")\nventas.head()","polars":"import polars as pl\n\nventas = pl.read_csv(\"ventas.csv\")\nventas.head()"},"tipos":{"t":"Forma y tipos de cada columna","pandas":"import pandas as pd\nventas = pd.read_csv(\"ventas.csv\")\n\nprint(ventas.shape)\nventas.dtypes","polars":"import polars as pl\nventas = pl.read_csv(\"ventas.csv\")\n\nprint(ventas.shape)\nventas.schema"},"selec":{"t":"Seleccionar columnas","pandas":"import pandas as pd\nventas = pd.read_csv(\"ventas.csv\")\n\nventas[[\"tienda_id\", \"medio_pago\", \"total\"]]","polars":"import polars as pl\nventas = pl.read_csv(\"ventas.csv\")\n\nventas.select(\"tienda_id\", \"medio_pago\", \"total\")"},"filtro":{"t":"Filtrar filas: tickets de más de US$ 30 en el Sur","pandas":"import pandas as pd\nventas = pd.read_csv(\"ventas.csv\")\n\nsur = [\"T07\", \"T08\", \"T09\"]\nventas[(ventas[\"total\"] > 30) & (ventas[\"tienda_id\"].isin(sur))]","polars":"import polars as pl\nventas = pl.read_csv(\"ventas.csv\")\n\nsur = [\"T07\", \"T08\", \"T09\"]\nventas.filter((pl.col(\"total\") > 30) & pl.col(\"tienda_id\").is_in(sur))"},"orden":{"t":"Ordenar: los tickets más grandes primero","pandas":"import pandas as pd\nventas = pd.read_csv(\"ventas.csv\")\n\nventas.sort_values(\"total\", ascending=False)","polars":"import polars as pl\nventas = pl.read_csv(\"ventas.csv\")\n\nventas.sort(\"total\", descending=True)"},"crear":{"t":"Crear columnas: hora del día y total con impuesto","pandas":"import pandas as pd\nventas = pd.read_csv(\"ventas.csv\")\n\nventas.assign(\n    hora=pd.to_datetime(ventas[\"fecha_hora\"]).dt.hour,\n    con_iva=ventas[\"total\"] * 1.12,\n)","polars":"import polars as pl\nventas = pl.read_csv(\"ventas.csv\")\n\nventas.with_columns(\n    hora=pl.col(\"fecha_hora\").str.to_datetime(\"%Y-%m-%d %H:%M\").dt.hour(),\n    con_iva=pl.col(\"total\") * 1.12,\n)"},"agrupar":{"t":"Unir con las tiendas y sumar por región","pandas":"import pandas as pd\nventas = pd.read_csv(\"ventas.csv\")\n\ntiendas = pd.read_csv(\"tiendas.csv\")\n(ventas.merge(tiendas, on=\"tienda_id\")\n       .groupby(\"region\")[\"total\"].agg([\"count\", \"sum\", \"mean\"])\n       .sort_values(\"sum\", ascending=False))","polars":"import polars as pl\nventas = pl.read_csv(\"ventas.csv\")\n\ntiendas = pl.read_csv(\"tiendas.csv\")\n(ventas.join(tiendas, on=\"tienda_id\")\n       .group_by(\"region\")\n       .agg(pl.len().alias(\"count\"), pl.col(\"total\").sum().alias(\"sum\"),\n            pl.col(\"total\").mean().alias(\"mean\"))\n       .sort(\"sum\", descending=True))"},"lazy":{"t":"Polars perezoso: el plan antes de ejecutar","pandas":"import pandas as pd\nventas = pd.read_csv(\"ventas.csv\")\n\n# pandas ejecuta cada paso en cuanto lo escribes: no tiene plan.\nfiltrado = ventas[ventas[\"total\"] > 30]\nfiltrado[[\"tienda_id\", \"total\"]]","polars":"import polars as pl\nventas = pl.read_csv(\"ventas.csv\")\n\nconsulta = (ventas.lazy()\n    .filter(pl.col(\"total\") > 30)\n    .select(\"tienda_id\", \"total\"))\nprint(consulta.explain())\nconsulta.collect()"}};
+  const EXPLICA={
+    ver:['<b>read_csv</b> lee el archivo y devuelve un DataFrame; <b>head()</b> muestra las primeras 5 filas. En pandas, a la izquierda aparece el índice (0, 1, 2…); Polars no tiene índice.','Mira el tipo bajo cada columna: los números se reconocieron solos, pero <code>fecha_hora</code> quedó como texto (<code>str</code> en pandas, <code>String</code> en Polars). Convertirla es trabajo del capítulo 03.'],
+    tipos:['<b>shape</b> da (filas, columnas) y <b>dtypes</b> o <b>schema</b>, el tipo de cada columna.','<code>cliente_id</code> es decimal en pandas (<code>float64</code>) porque tiene vacíos y el entero clásico de NumPy no admite nulos; en Polars es entero con nulos (<code>Int64</code>).'],
+    selec:['Seleccionar columnas devuelve otra tabla con solo esas columnas, en el orden pedido.','En pandas se pasa una lista entre corchetes dobles; en Polars, <b>select</b> con los nombres. Las filas no cambian: 240.'],
+    filtro:['Filtrar se hace con una <b>máscara</b>: una columna de verdadero o falso, una por fila, que se calcula de una vez para toda la columna.','Cada condición va entre paréntesis y se combinan con <code>&amp;</code> (y) o <code>|</code> (o), no con <code>and</code> u <code>or</code>. Solo 4 de los 240 tickets de octubre del Sur pasan de US$ 30.'],
+    orden:['Ordenar no cambia el contenido, solo el orden de las filas.','En pandas se conserva el índice original: por eso los números de la izquierda quedan desordenados y te dicen de qué fila venía cada ticket.'],
+    crear:['Las columnas nuevas se calculan con la columna entera a la vez: <code>total * 1.12</code> multiplica las 240 filas en una sola operación.','pandas usa <b>assign</b> y Polars <b>with_columns</b> con expresiones (<code>pl.col("total") * 1.12</code>). Ninguno modifica la tabla original: devuelven una nueva.'],
+    agrupar:['Une cada ticket con su tienda para saber la región, y luego agrupa y resume: cuántos tickets, cuánto suman y su promedio.','Es un adelanto del capítulo 04. El resultado de pandas trae la región como índice; el de Polars, como una columna más.'],
+    lazy:['pandas ejecuta cada línea apenas la escribes.','En modo perezoso, Polars primero arma un <b>plan</b> (lo que imprime <code>explain()</code>) y solo trabaja al llamar a <code>collect()</code>. Fíjate en el plan: el filtro se aplica sobre la tabla y solo se leen las columnas necesarias.']
+  };
+  let motor='pandas',py=null,ultimoGuardado=true;
+  const sel=$('#c2l1-ej'),cod=$('#c2l1-cod');
+  sel.innerHTML=Object.entries(EJ).map(([k,e])=>'<option value="'+k+'">'+e.t+'</option>').join('');
+  function estado(t,c){const e=$('#c2l1-estado');e.textContent=t;e.className='c2l1-estado'+(c?' '+c:'');}
+  function mostrar(r,guardado){
+    $('#c2l1-sello').textContent=guardado?'guardado':'en vivo';
+    const s=$('#c2l1-salida');s.hidden=!(r.salida||r.error);
+    s.textContent=(r.salida||'')+(r.error?(r.salida?'\n':'')+'Error: '+r.error:'');
+    s.style.color=r.error?'var(--warm)':'';
+    pintarTabla($('#c2l1-tabla'),r.error?null:r.tabla);
+    const k=sel.value,x=EXPLICA[k];
+    $('#c2l1-out').innerHTML=r.error?'<span class="warn">El código falló: lee el mensaje de error, que dice el tipo de problema y dónde.</span><span>Corrígelo o pulsa «Restaurar el ejemplo».</span>':
+      '<span class="big">'+EJ[k].t+' · '+(motor==='pandas'?'pandas':'Polars')+'</span><span>'+x[0]+'</span><span>'+x[1]+'</span>';
+  }
+  function cargarEjemplo(){cod.value=EJ[sel.value][motor];mostrar(DATOS.res[sel.value][motor],true);}
+  raiz.querySelectorAll('[data-m]').forEach(b=>b.addEventListener('click',()=>{
+    motor=b.dataset.m;raiz.querySelectorAll('[data-m]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+    cargarEjemplo();
+    if(py&&motor==='polars')preparar();
+  }));
+  sel.addEventListener('change',cargarEjemplo);
+  $('#c2l1-rest').addEventListener('click',cargarEjemplo);
+  async function preparar(){
+    const paq=motor==='polars'?['pandas','polars']:['pandas'];
+    $('#c2l1-run').disabled=true;$('#c2l1-cargar').disabled=true;
+    try{
+      py=await PY.cargar(paq,t=>estado(t));
+      PY.archivos(py,{'ventas.csv':DATOS.csv,'tiendas.csv':DATOS.tiendas});
+      estado('Listo: Python 3.14 con '+paq.join(' y ')+' · edita el código y pulsa Ejecutar','ok');
+      $('#c2l1-run').disabled=false;$('#c2l1-cargar').hidden=true;
+    }catch(e){
+      estado('No se pudo cargar Python. Revisa tu conexión y vuelve a intentar; el resultado guardado sigue abajo.','warn');
+      $('#c2l1-cargar').disabled=false;
+    }
+  }
+  $('#c2l1-cargar').addEventListener('click',preparar);
+  async function ejecutar(){
+    if(!py||$('#c2l1-run').disabled)return;
+    $('#c2l1-run').disabled=true;estado('Ejecutando…');
+    try{const r=await PY.correr(py,'02-lab-1-'+motor,cod.value);mostrar(r,false);
+      estado('Listo · ejecutado en tu navegador','ok');}
+    catch(e){mostrar({error:String(e)},false);estado('Python se detuvo; recarga la página si no responde','warn');}
+    $('#c2l1-run').disabled=false;
+  }
+  $('#c2l1-run').addEventListener('click',ejecutar);
+  cod.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();ejecutar();}});
+  cargarEjemplo();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="02-lab-2"]');
+  /* ---- Componente Pyodide común del curso «Ciencia de datos» (copiar tal cual) ----
+     Pyodide 314.0.7 (Python 3.14.2; pandas 3.0.2, polars 1.33.1, numpy 2.4.6, duckdb 1.5.1).
+     Se descarga solo al pulsar el botón y se comparte entre todos los labs de la página. */
+  const PY=window.cdatosPy||(window.cdatosPy=(function(){
+    const VER='314.0.7',BASE='https://cdn.jsdelivr.net/pyodide/v'+VER+'/full/';
+    let base=null;const listos={};
+    const AYUDA=[
+      'import ast, io, json, sys',
+      '_cdatos_espacios = {}',
+      'def _cdatos_limpio(v):',
+      '    if v is None: return None',
+      '    if hasattr(v, "item") and not isinstance(v, (str, bytes)):',
+      '        try: v = v.item()',
+      '        except Exception: v = str(v)',
+      '    if isinstance(v, float) and v != v: return None',
+      '    if isinstance(v, (bool, int, float, str)): return v',
+      '    return str(v)',
+      'def _cdatos_tabla(x, n=12):',
+      '    mod = type(x).__module__.split(".")[0]',
+      '    if mod == "polars":',
+      '        import polars as pl',
+      '        if isinstance(x, pl.LazyFrame): x = x.collect()',
+      '        if isinstance(x, pl.Series): x = x.to_frame()',
+      '        if not isinstance(x, pl.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.rows(); indice = None',
+      '        cols = list(h.columns); tipos = [str(t) for t in h.dtypes]',
+      '    elif mod == "pandas":',
+      '        import pandas as pd',
+      '        if isinstance(x, pd.Series): x = x.to_frame()',
+      '        if not isinstance(x, pd.DataFrame): return {"valor": repr(x)}',
+      '        h = x.head(n); filas = h.astype(object).values.tolist()',
+      '        indice = [str(i) for i in h.index]',
+      '        cols = [str(c) for c in h.columns]; tipos = [str(t) for t in h.dtypes]',
+      '    elif x is None: return None',
+      '    else: return {"valor": repr(x)}',
+      '    return {"columnas": cols, "tipos": tipos, "indice": indice, "forma": list(x.shape), "motor": mod,',
+      '            "filas": [[_cdatos_limpio(v) for v in f] for f in filas]}',
+      'def _cdatos_correr(lab, codigo):',
+      '    ns = _cdatos_espacios.setdefault(lab, {"__name__": "__main__"})',
+      '    buf, viejo = io.StringIO(), sys.stdout',
+      '    sys.stdout = buf',
+      '    try:',
+      '        arbol = ast.parse(codigo); ultimo = None',
+      '        if arbol.body and isinstance(arbol.body[-1], ast.Expr):',
+      '            exp = ast.Expression(arbol.body.pop().value)',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '            ultimo = eval(compile(exp, "<lab>", "eval"), ns)',
+      '        else:',
+      '            exec(compile(arbol, "<lab>", "exec"), ns)',
+      '        return json.dumps({"salida": buf.getvalue(), "tabla": _cdatos_tabla(ultimo)})',
+      '    except BaseException as e:',
+      '        return json.dumps({"salida": buf.getvalue(), "error": type(e).__name__ + ": " + str(e)})',
+      '    finally:',
+      '        sys.stdout = viejo'].join('\n');
+    function script(){return new Promise((ok,mal)=>{
+      if(window.loadPyodide)return ok();
+      const s=document.createElement('script');s.src=BASE+'pyodide.js';
+      s.onload=ok;s.onerror=()=>mal(new Error('No se pudo descargar Pyodide'));document.head.appendChild(s);});}
+    return {VER,
+      /* paquetes: ['pandas'] o ['pandas','polars']; aviso(texto) recibe el estado */
+      cargar(paquetes,aviso){
+        if(!base){aviso&&aviso('Descargando Python (Pyodide '+VER+')…');
+          base=script().then(()=>loadPyodide({indexURL:BASE})).then(py=>{py.runPython(AYUDA);return py;});
+          base.catch(()=>{base=null;});}
+        return base.then(async py=>{
+          const faltan=paquetes.filter(p=>!listos[p]);
+          if(faltan.length){aviso&&aviso('Instalando '+faltan.join(' y ')+'…');
+            await py.loadPackage(faltan);faltan.forEach(p=>listos[p]=1);}
+          return py;});
+      },
+      /* archivos: {'ventas.csv': 'texto…'}; se escriben en la carpeta de trabajo de Python */
+      archivos(py,archivos){for(const k in archivos)py.FS.writeFile(k,archivos[k]);},
+      async correr(py,lab,codigo){
+        py.globals.set('_cdatos_codigo',codigo);
+        const r=JSON.parse(py.runPython('_cdatos_correr('+JSON.stringify(lab)+', _cdatos_codigo)'));
+        return r;}
+    };
+  })());
+  /* Dibuja la tabla que devuelve PY.correr (r.tabla) dentro de un elemento */
+  function pintarTabla(el,t){
+    const nfx=(v,dec)=>{if(typeof v!=='number')return v===null?'<i>nulo</i>':String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const d=dec?2:(Number.isInteger(v)?0:2);const s=Math.abs(v).toFixed(d).split('.');
+      s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (v<0?'−':'')+s.join(',');};
+    if(!t){el.innerHTML='';return;}
+    if(t.valor!==undefined){el.innerHTML='<pre class="cdatos-valor">'+nfx(t.valor)+'</pre>';return;}
+    const idx=t.indice&&!t.indice.every((v,i)=>v===String(i));
+    let h='<table class="tbl"><thead><tr>'+(idx?'<th></th>':'')+t.columnas.map((c,i)=>'<th>'+nfx(c)+'<br><small>'+t.tipos[i]+'</small></th>').join('')+'</tr></thead><tbody>';
+    t.filas.forEach((f,j)=>{h+='<tr>'+(idx?'<th>'+nfx(t.indice[j])+'</th>':'')+f.map((v,i)=>'<td'+(typeof v==='number'?' style="text-align:right"':'')+'>'+(/(^|_)id$|^año$|^anio$/i.test(String(t.columnas[i]))&&typeof v==='number'?String(v):nfx(v,/float/i.test(t.tipos[i])))+'</td>').join('')+'</tr>';});
+    const n=t.forma[0];
+    el.innerHTML=h+'</tbody></table><p class="hint">'+(n>t.filas.length?'Primeras '+t.filas.length+' de ':'')+nfx(n)+' filas × '+t.forma[1]+' columnas · '+t.motor+'</p>';
+  }
+  /* ---- fin del componente ---- */
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  const ms=v=>v>=1000?nf(v/1000,1)+' s':v>=10?nf(v,0)+' ms':nf(v,2)+' ms';
+  const NOM={iloc:['Bucle fila por fila','for i … total.iloc[i]'],lista:['Bucle sobre una lista','[x * 1.12 for x in …]'],apply:['apply con lambda','total.apply(lambda x: …)'],vect:['Vectorizado','total * 1.12']};
+  // Referencia: Python 3.13 nativo con pandas 3 en un portátil (ms). El bucle con iloc se mide hasta 50.000 filas y se estima arriba.
+  const REF={10000:{iloc:186,lista:0.9,apply:1.7,vect:0.23},50000:{iloc:1051,lista:4.5,apply:10.2,vect:0.59},
+             200000:{iloc:4204,lista:16.7,apply:37.2,vect:1.8},1000000:{iloc:21020,lista:195,apply:551,vect:7.1}};
+  let n=50000,py=null,vivo={};
+  function codigo(n){return 'import json, time\nimport numpy as np, pandas as pd\n\nn = '+n+'\nrng = np.random.default_rng(42)\nventas = pd.DataFrame({"total": rng.gamma(2.0, 7.5, n).round(2)})\ntotal = ventas["total"]\nt = {}\n\n'+
+    '# 1. Bucle fila por fila (se mide hasta 50.000 filas y se estima el resto)\nm = min(n, 50_000)\ninicio = time.perf_counter()\ncon_iva = []\nfor i in range(m):\n    con_iva.append(total.iloc[i] * 1.12)\nt["iloc"] = (time.perf_counter() - inicio) * 1000 * n / m\n\n'+
+    '# 2. Bucle sobre una lista de Python\ninicio = time.perf_counter()\ncon_iva = [x * 1.12 for x in total.tolist()]\nt["lista"] = (time.perf_counter() - inicio) * 1000\n\n'+
+    '# 3. apply: una función de Python por cada fila\ninicio = time.perf_counter()\ncon_iva = total.apply(lambda x: x * 1.12)\nt["apply"] = (time.perf_counter() - inicio) * 1000\n\n'+
+    '# 4. Vectorizado: toda la columna en una operación\ninicio = time.perf_counter()\ncon_iva = total * 1.12\nt["vect"] = (time.perf_counter() - inicio) * 1000\n\nprint(json.dumps(t))';}
+  function estado(t,c){const e=$('#c2l2-estado');e.textContent=t;e.className='c2l2-estado'+(c?' '+c:'');}
+  function pintar(){
+    const v=vivo[n],r=v||REF[n],max=Math.log10(Math.max(...Object.values(REF[1000000]))*1.5),min=-1;
+    $('#c2l2-cod').textContent=codigo(n);
+    $('#c2l2-barras').innerHTML=Object.keys(NOM).map(k=>{const w=Math.max(2,(Math.log10(Math.max(r[k],0.1))-min)/(max-min)*100);
+      return '<div class="c2l2-fila"><span>'+NOM[k][0]+'<small>'+NOM[k][1]+'</small></span><div class="c2l2-pista"><i class="'+(k==='vect'?'v':'')+'" style="width:'+w.toFixed(1)+'%"></i></div><b>'+ms(r[k])+(k==='iloc'&&n>50000?'<small>estimado</small>':'')+'</b></div>';}).join('');
+    const veces=r.iloc/r.vect,lista=r.lista/r.vect;
+    $('#c2l2-out').innerHTML='<span class="big">Con '+nf(n)+' tickets, el vectorizado es unas '+nf(veces)+' veces más rápido que el bucle fila por fila</span>'+
+      '<span>'+(v?'<span class="ok">Medido ahora en tu navegador, con Pyodide.</span> ':'<span>Tiempos de referencia de Python nativo en un portátil; en tu navegador cambian, pero las proporciones se parecen.</span> ')+'</span>'+
+      '<span>Incluso un bucle sobre una lista de Python, sin pandas de por medio, tarda unas '+nf(lista)+' veces más que la versión vectorizada. La diferencia crece con los datos: multiplica los tickets por diez y el bucle tarda diez veces más, mientras que la operación vectorizada casi no se entera hasta que la tabla es grande.</span>';
+  }
+  raiz.querySelectorAll('[data-n]').forEach(b=>b.addEventListener('click',()=>{n=+b.dataset.n;raiz.querySelectorAll('[data-n]').forEach(x=>x.setAttribute('aria-pressed',x===b));pintar();}));
+  $('#c2l2-cargar').addEventListener('click',async()=>{
+    $('#c2l2-cargar').disabled=true;
+    try{py=await PY.cargar(['pandas'],t=>estado(t));estado('Listo: elige la cantidad de tickets y pulsa «Medir en mi navegador»','ok');
+      $('#c2l2-run').disabled=false;$('#c2l2-cargar').hidden=true;}
+    catch(e){estado('No se pudo cargar Python. Revisa tu conexión y vuelve a intentar; los tiempos de referencia siguen abajo.','warn');$('#c2l2-cargar').disabled=false;}
+  });
+  $('#c2l2-run').addEventListener('click',()=>{
+    if(!py)return;$('#c2l2-run').disabled=true;estado('Midiendo… la página puede quedarse quieta unos segundos');
+    setTimeout(async()=>{
+      try{const r=await PY.correr(py,'02-lab-2',codigo(n));
+        if(r.error)throw new Error(r.error);vivo[n]=JSON.parse(r.salida.trim().split('\n').pop());
+        estado('Medido en tu navegador con '+nf(n)+' tickets','ok');pintar();}
+      catch(e){estado('La medición falló: '+e.message,'warn');}
+      $('#c2l2-run').disabled=false;},60);
+  });
+  pintar();
+})();
+</script>
+</body>
+</html>

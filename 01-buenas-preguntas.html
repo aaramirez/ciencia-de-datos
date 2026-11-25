@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KX76XF8R');</script>
+<!-- End Google Tag Manager -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Buenas preguntas · Ciencia de datos · Ciencia de datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Del dato crudo a la decisión: hacer buenas preguntas, limpiar, explorar, visualizar, minar datos y texto y comunicar resultados con pandas y Polars, con código que corre en la página.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KX76XF8R"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div class="wrap" data-page="buenas-preguntas">
+<header class="topbar"><a class="brand" href="index.html">Ciencia de <b>datos</b></a><span class="eyebrow">Curso visual e interactivo · Datos e inteligencia artificial</span><a class="al-sitio" href="https://aaramirez.github.io/">← Todos los cursos</a></header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Ruta de aprendizaje"></nav>
+<main>
+<header class="page-head"><span class="num">CAPÍTULO 01 DE 10</span><h1>Hacer buenas preguntas y el ciclo de un análisis</h1><p class="lede">Un análisis no empieza abriendo un archivo, sino preguntando qué decisión depende de la respuesta. Este capítulo convierte un pedido vago en una pregunta medible, presenta los cinco tipos de pregunta y el ciclo completo de un análisis, y crea la cadena de tiendas que acompaña todo el curso.</p></header>
+<section><h2>Del pedido a la pregunta: qué decisión depende de la respuesta</h2><div class="prose"><p>Es lunes en la oficina central de Almacenes Ejemplo, una cadena de doce supermercados de barrio. Mariana Solís empezó la semana pasada como analista de datos. Lorena Quintero, la gerente comercial, se acerca a su escritorio con el celular en la mano: «Las ventas del Sur están mal. ¿Qué hacemos?».</p><p>Mariana tiene acceso a los archivos de las cajas, a los clientes del programa de puntos y a las reseñas. Lo primero que se le ocurre es abrir todo y empezar a graficar. Es el error más común del oficio: buscar en los datos sin saber qué se busca. Con 22 meses de tickets se pueden hacer cientos de gráficos, y casi todos mostrarán algo «interesante» que no sirve para nada.</p></div><div class="analogia"><b>Imagínalo así</b><p>Llegas al médico y le dices «me siento mal». Un buen médico no te manda a hacer todos los exámenes del laboratorio: te pregunta desde cuándo, dónde te duele, qué cambió. Cada pregunta descarta caminos. Recién cuando sabe qué quiere averiguar, pide el examen que lo responde. Un pedido como «las ventas están mal» es el «me siento mal» de una empresa.</p></div><div class="prose"><p>Mariana hace la pregunta que ordena todo lo demás: «¿Qué vas a decidir con la respuesta?». Lorena lo piensa. Si el Sur cae por algo propio de la región, quiere saber qué es para actuar allí: una promoción, un cambio de personal, una inversión. Si cae igual que toda la cadena, el problema es otro y la conversación es con el directorio. Esa es la <b>decisión</b> que depende del análisis, y define cuánta precisión hace falta, cuánto tiempo vale la pena invertir y qué comparación importa.</p><p>Con la decisión clara, el pedido se convierte en una <b>pregunta medible</b> (<i>measurable question</i>): una que dice qué se cuenta, de quién, en qué período y contra qué se compara. Le faltan cuatro piezas al «las ventas están mal»:</p><ol class="steps"><li><span><b>La métrica</b>: ¿ventas en dinero, cantidad de tickets, ticket promedio?</span></li><li><span><b>El ámbito</b>: ¿toda la región Sur, una tienda, un tipo de producto?</span></li><li><span><b>El período</b>: ¿el último mes, el último trimestre, el año?</span></li><li><span><b>La comparación</b>: ¿contra el mes anterior, contra el mismo período del año pasado, contra las otras regiones?</span></li></ol><p>Después de diez minutos de conversación, la pregunta queda así: «¿Cuánto cambiaron las ventas de la región Sur de agosto a octubre de 2026 frente al mismo período de 2025, y cuánto cambiaron las otras regiones?». Ahora Mariana sabe qué columnas necesita, qué filas filtra y qué número tiene que entregar. Y sabe cuándo terminó.</p></div><figure class="fig fig-flujo" id="01-diagrama-1"><div class="lienzo"><svg viewBox="0 0 900 340" style="min-width:720px" role="img" aria-label="Del pedido vago de Lorena a una pregunta medible: primero la decisión que depende de la respuesta, luego cuatro piezas (métrica, ámbito, período y comparación) y al final la pregunta con los datos que necesita">
+<defs>
+<marker id="c1d1-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+</defs>
+<rect x="16" y="40" width="150" height="150" rx="12" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="30" y="62" class="t t-xs t-b k-warm">EL PEDIDO</text>
+<text x="30" y="88" class="t t-b">«Las ventas</text>
+<text x="30" y="106" class="t t-b">del Sur están</text>
+<text x="30" y="124" class="t t-b">mal. ¿Qué</text>
+<text x="30" y="142" class="t t-b">hacemos?»</text>
+<text x="30" y="174" class="t t-s t-m">Lorena, gerente</text>
+<path d="M166 115H186" class="ln" marker-end="url(#c1d1-m)"/>
+<rect x="190" y="40" width="160" height="150" rx="12" class="c-apl"/>
+<text x="204" y="62" class="t t-xs t-b k-apl">0 · LA DECISIÓN</text>
+<text x="204" y="88" class="t t-b">¿Qué vas a decidir</text>
+<text x="204" y="106" class="t t-b">con la respuesta?</text>
+<text x="204" y="132" class="t t-s">Actuar en el Sur, o</text>
+<text x="204" y="148" class="t t-s">llevar un problema de</text>
+<text x="204" y="164" class="t t-s">toda la cadena al</text>
+<text x="204" y="180" class="t t-s">directorio</text>
+<path d="M350 115H370" class="ln" marker-end="url(#c1d1-m)"/>
+<rect x="374" y="40" width="140" height="70" rx="10" class="caja"/>
+<text x="386" y="60" class="t t-xs t-b k-apl">1 · MÉTRICA</text>
+<text x="386" y="80" class="t t-s">Ventas en US$</text>
+<text x="386" y="96" class="t t-s t-m">no tickets ni promedio</text>
+<rect x="524" y="40" width="140" height="70" rx="10" class="caja"/>
+<text x="536" y="60" class="t t-xs t-b k-apl">2 · ÁMBITO</text>
+<text x="536" y="80" class="t t-s">Región Sur y sus</text>
+<text x="536" y="96" class="t t-s">3 tiendas</text>
+<rect x="374" y="120" width="140" height="70" rx="10" class="caja"/>
+<text x="386" y="140" class="t t-xs t-b k-apl">3 · PERÍODO</text>
+<text x="386" y="160" class="t t-s">Agosto a octubre</text>
+<text x="386" y="176" class="t t-s">de 2026</text>
+<rect x="524" y="120" width="140" height="70" rx="10" class="caja"/>
+<text x="536" y="140" class="t t-xs t-b k-apl">4 · COMPARACIÓN</text>
+<text x="536" y="160" class="t t-s">Mismo período 2025</text>
+<text x="536" y="176" class="t t-s">y las otras regiones</text>
+<path d="M664 115H684" class="ln" marker-end="url(#c1d1-m)"/>
+<rect x="688" y="40" width="196" height="150" rx="12" class="c-apl" style="stroke-width:2"/>
+<text x="702" y="62" class="t t-xs t-b k-apl">LA PREGUNTA MEDIBLE</text>
+<text x="702" y="86" class="t t-s">¿Cuánto cambiaron las</text>
+<text x="702" y="102" class="t t-s">ventas del Sur de agosto</text>
+<text x="702" y="118" class="t t-s">a octubre de 2026 frente</text>
+<text x="702" y="134" class="t t-s">al mismo período de 2025,</text>
+<text x="702" y="150" class="t t-s">y cuánto cambiaron las</text>
+<text x="702" y="166" class="t t-s">otras regiones?</text>
+<path d="M786 190V226" class="ln" marker-end="url(#c1d1-m)"/>
+<rect x="16" y="232" width="868" height="92" rx="12" class="caja" style="stroke-dasharray:5 4"/>
+<text x="32" y="256" class="t t-xs t-b t-m">LOS DATOS QUE HACEN FALTA (Y NINGUNO MÁS)</text>
+<rect x="32" y="270" width="190" height="40" rx="8" class="c-fis"/>
+<text x="44" y="295" class="t t-s t-mono">ventas: fecha_hora, total</text>
+<rect x="236" y="270" width="190" height="40" rx="8" class="c-fis"/>
+<text x="248" y="295" class="t t-s t-mono">tiendas: region</text>
+<rect x="440" y="270" width="190" height="40" rx="8" class="c-fis"/>
+<text x="452" y="295" class="t t-s t-mono">ventas: tienda_id</text>
+<text x="650" y="286" class="t t-s t-m">Y sabes cuándo terminaste:</text>
+<text x="650" y="302" class="t t-s t-m">cuando tienes esas dos cifras.</text>
+</svg></div><figcaption><b>Del pedido vago a la pregunta medible.</b> Se lee de izquierda a derecha. A la izquierda está el pedido de Lorena, tal como llega. La primera caja rosa es la pregunta que destraba todo: qué decisión depende de la respuesta. Las cuatro cajas siguientes son las piezas que convierten el pedido en pregunta (métrica, ámbito, período, comparación), cada una con la opción elegida para Almacenes Ejemplo. A la derecha, la pregunta final y, debajo, los datos que hacen falta para responderla.</figcaption></figure><div class="lab" id="01-lab-1"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Convierte un pedido en una pregunta medible</h3></div><p class="hint">Elige la métrica, el período y la comparación para el pedido de Lorena. La pregunta se arma sola, las barras muestran las cifras reales de la cadena y la lectura te avisa cuándo la comparación engaña. Prueba «ventas» contra «el período anterior» y después contra «el mismo período de 2025».</p><style>
+[id="01-lab-1"] .c1l1-pedido{border-left:5px solid var(--warm);background:var(--warm-soft);border-radius:0 8px 8px 0;padding:8px 12px;font-style:italic}
+[id="01-lab-1"] .c1l1-rot{font:700 .7rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+[id="01-lab-1"] .c1l1-grupo{display:grid;gap:6px}
+[id="01-lab-1"] .btns{display:flex;flex-wrap:wrap;gap:6px}
+[id="01-lab-1"] .c1l1-preg{border:1.5px solid var(--c-apl);background:var(--c-apl-s);border-radius:10px;padding:10px 12px;font:600 1rem/1.4 var(--f-display)}
+[id="01-lab-1"] .c1l1-barras{display:grid;gap:6px}
+[id="01-lab-1"] .c1l1-fila{display:grid;grid-template-columns:minmax(0,9.5rem) minmax(0,1fr) auto;gap:8px;align-items:center;font:500 .82rem var(--f-display)}
+[id="01-lab-1"] .c1l1-pista{height:18px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+[id="01-lab-1"] .c1l1-pista i{display:block;height:100%;background:var(--c-red-s);border-right:2px solid var(--c-red);transition:width .35s}
+[id="01-lab-1"] .c1l1-pista i.yo{background:var(--c-apl-s);border-right-color:var(--c-apl)}
+[id="01-lab-1"] .c1l1-fila b{font-family:var(--f-mono);font-weight:600;white-space:nowrap}
+[id="01-lab-1"] .c1l1-datos{font:.8rem/1.5 var(--f-mono);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px;overflow-wrap:anywhere}
+@media (prefers-reduced-motion: reduce){[id="01-lab-1"] .c1l1-pista i{transition:none}}
+@media (max-width:520px){[id="01-lab-1"] .c1l1-fila{grid-template-columns:minmax(0,6.5rem) minmax(0,1fr) auto}}
+</style>
+<p class="c1l1-pedido">Lorena, gerente comercial: «Las ventas del Sur están mal. ¿Qué hacemos?»</p>
+<div class="c1l1-grupo"><span class="c1l1-rot">Métrica</span>
+  <div class="btns" id="c1l1-met" role="group" aria-label="Métrica">
+    <button type="button" data-v="v" aria-pressed="true">Ventas (US$)</button>
+    <button type="button" data-v="n" aria-pressed="false">Tickets</button>
+    <button type="button" data-v="t" aria-pressed="false">Ticket promedio</button>
+    <button type="button" data-v="m" aria-pressed="false">Ventas por m²</button>
+  </div></div>
+<div class="c1l1-grupo"><span class="c1l1-rot">Período</span>
+  <div class="btns" id="c1l1-per" role="group" aria-label="Período">
+    <button type="button" data-v="mes" aria-pressed="true">Octubre de 2026</button>
+    <button type="button" data-v="tri" aria-pressed="false">Agosto a octubre de 2026</button>
+    <button type="button" data-v="ytd" aria-pressed="false">Enero a octubre de 2026</button>
+  </div></div>
+<div class="c1l1-grupo"><span class="c1l1-rot">Comparada con</span>
+  <div class="btns" id="c1l1-cmp" role="group" aria-label="Comparación">
+    <button type="button" data-v="ant" aria-pressed="false">El período anterior</button>
+    <button type="button" data-v="ia" aria-pressed="true">El mismo período de 2025</button>
+    <button type="button" data-v="reg" aria-pressed="false">Las otras regiones</button>
+  </div></div>
+<div class="c1l1-preg" id="c1l1-preg"></div>
+<div class="c1l1-barras" id="c1l1-barras" aria-hidden="true"></div>
+<div><span class="c1l1-rot">Datos que hacen falta</span><div class="c1l1-datos" id="c1l1-datos"></div></div>
+<div class="readout texto" id="c1l1-out" aria-live="polite"></div></div><div class="prose"><p>Una buena pregunta, además, se puede responder con un «no sé» honesto. Si los datos no alcanzan, es mejor descubrirlo ahora que después de dos semanas de trabajo.</p></div></section>
+<section><h2>Preguntas descriptivas, exploratorias, inferenciales, predictivas y causales</h2><div class="prose"><p>No todas las preguntas piden lo mismo. En 2015, los estadísticos Jeffrey Leek y Roger Peng propusieron, en un artículo breve de la revista <i>Science</i>, clasificarlas en seis tipos según lo que se quiere saber. Aquí se usan cinco, porque el sexto (la pregunta «mecanicista», que pide el mecanismo exacto de una causa) casi nunca aparece en un negocio.</p></div><div class="analogia"><b>Imagínalo así</b><p>Piensa en el pronóstico del clima. «¿Cuánto llovió ayer?» se responde mirando el pluviómetro. «¿En qué meses llueve más?» se responde revisando años de registros. «Si llovió más en esta ciudad que en la vecina, ¿es casualidad?» pide comparar con cuidado. «¿Lloverá mañana?» pide un modelo. «¿La deforestación hizo que llueva menos?» pide probar una causa, y es la más difícil de todas. Las cinco hablan de lluvia, pero piden herramientas muy distintas.</p></div><div class="prose"><div class="tbl"><table><thead><tr><th>Tipo</th><th>Qué pregunta</th><th>Ejemplo en Almacenes Ejemplo</th><th>Con qué se responde</th></tr></thead><tbody><tr><td><b>Descriptiva</b> (<i>descriptive</i>)</td><td>Qué pasó, en números</td><td>¿Cuánto vendió cada región en octubre?</td><td>Sumas, conteos, promedios</td></tr><tr><td><b>Exploratoria</b> (<i>exploratory</i>)</td><td>Qué patrones hay que no buscábamos</td><td>¿Qué productos se compran juntos?</td><td>Gráficos, agrupaciones, minería de datos</td></tr><tr><td><b>Inferencial</b> (<i>inferential</i>)</td><td>Si lo que veo en estos datos vale más allá de ellos</td><td>¿La diferencia de ticket entre el Norte y el Sur puede ser azar?</td><td>Pruebas estadísticas, intervalos de confianza</td></tr><tr><td><b>Predictiva</b> (<i>predictive</i>)</td><td>Qué va a pasar, caso por caso</td><td>¿Cuánto venderá T07 en diciembre? ¿Qué socio dejará de venir?</td><td>Modelos de pronóstico y de aprendizaje automático</td></tr><tr><td><b>Causal</b> (<i>causal</i>)</td><td>Qué pasa si cambio algo</td><td>Si bajamos el precio de la leche, ¿vendrá más gente?</td><td>Experimentos, o métodos causales con supuestos fuertes</td></tr></tbody></table></div><p>Los tipos forman una escalera: cada escalón pide más que el anterior, y casi siempre hay que subir los primeros para llegar a los últimos. El pedido de Lorena empieza siendo descriptivo (cuánto cayó), se vuelve exploratorio (dónde y en qué se concentra la caída) y termina rozando lo causal (por qué cayó). El curso recorre los primeros dos escalones a fondo; la inferencia está en el curso de <a href="https://aaramirez.github.io/mate-inferencia/temario.html" target="_blank" rel="noopener">Inferencia estadística</a> y la predicción, en <a href="https://aaramirez.github.io/aprendizaje-estadistico/temario.html" target="_blank" rel="noopener">Aprendizaje automático</a>.</p></div><figure class="fig fig-esquema" id="01-diagrama-2"><div class="lienzo"><svg viewBox="0 0 900 420" style="min-width:720px" role="img" aria-label="Escalera de cinco tipos de pregunta, de abajo hacia arriba: descriptiva, exploratoria, inferencial, predictiva y causal, cada una con un ejemplo de la cadena y la herramienta que la responde; abajo, una franja que muestra que cuanto más alto el escalón, más hay que suponer">
+<defs>
+<marker id="c1d2-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+</defs>
+<rect x="16" y="262" width="168" height="84" rx="10" class="c-red"/>
+<text x="28" y="282" class="t t-xs t-b k-red">1 · DESCRIPTIVA</text>
+<text x="28" y="302" class="t t-s">¿Cuánto vendió cada</text>
+<text x="28" y="316" class="t t-s">región en octubre?</text>
+<text x="28" y="336" class="t t-s t-m">sumas y conteos</text>
+<rect x="190" y="206" width="168" height="140" rx="10" class="c-red"/>
+<text x="202" y="226" class="t t-xs t-b k-red">2 · EXPLORATORIA</text>
+<text x="202" y="246" class="t t-s">¿Qué productos se</text>
+<text x="202" y="260" class="t t-s">compran juntos?</text>
+<text x="202" y="280" class="t t-s t-m">gráficos, grupos,</text>
+<text x="202" y="294" class="t t-s t-m">minería de datos</text>
+<rect x="364" y="150" width="168" height="196" rx="10" class="c-tra"/>
+<text x="376" y="170" class="t t-xs t-b k-tra">3 · INFERENCIAL</text>
+<text x="376" y="190" class="t t-s">¿La diferencia Norte-</text>
+<text x="376" y="204" class="t t-s">Sur puede ser azar?</text>
+<text x="376" y="224" class="t t-s t-m">pruebas e intervalos</text>
+<text x="376" y="238" class="t t-s t-m">de confianza</text>
+<rect x="538" y="94" width="168" height="252" rx="10" class="c-tra"/>
+<text x="550" y="114" class="t t-xs t-b k-tra">4 · PREDICTIVA</text>
+<text x="550" y="134" class="t t-s">¿Cuánto venderá T07</text>
+<text x="550" y="148" class="t t-s">en diciembre?</text>
+<text x="550" y="168" class="t t-s t-m">modelos de pronóstico</text>
+<text x="550" y="182" class="t t-s t-m">y de aprendizaje</text>
+<rect x="712" y="38" width="172" height="308" rx="10" class="c-apl"/>
+<text x="724" y="58" class="t t-xs t-b k-apl">5 · CAUSAL</text>
+<text x="724" y="78" class="t t-s">Si bajamos la leche,</text>
+<text x="724" y="92" class="t t-s">¿vendrá más gente?</text>
+<text x="724" y="112" class="t t-s t-m">experimentos, o</text>
+<text x="724" y="126" class="t t-s t-m">supuestos fuertes</text>
+<rect x="40" y="40" width="290" height="44" rx="10" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="54" y="58" class="t t-s t-b k-warm">El pedido de Lorena</text>
+<text x="54" y="75" class="t t-s">cuánto cayó → dónde → ¿por qué?</text>
+<path d="M110 84V256" class="ln s-warm" style="stroke-dasharray:4 4" marker-end="url(#c1d2-m)"/>
+<path d="M280 84V200" class="ln s-warm" style="stroke-dasharray:4 4" marker-end="url(#c1d2-m)"/>
+<path d="M330 60C480 18 620 18 706 52" class="ln s-warm" style="stroke-dasharray:4 4" marker-end="url(#c1d2-m)"/>
+<text x="470" y="68" class="t t-s k-warm">«se acerca» en el cap. 10</text>
+<rect x="16" y="362" width="868" height="40" rx="8" class="caja"/>
+<text x="30" y="387" class="t t-s t-m">Cuánto hay que suponer:</text>
+<text x="200" y="387" class="t t-s t-b">casi nada</text>
+<path d="M280 382H720" class="ln" marker-end="url(#c1d2-m)"/>
+<text x="740" y="387" class="t t-s t-b">mucho</text>
+</svg></div><figcaption><b>Los cinco tipos de pregunta, como una escalera.</b> Se sube de abajo a la izquierda (descriptiva) hacia arriba a la derecha (causal). En cada escalón, la pregunta de ejemplo de la cadena y la herramienta que la responde. La franja de abajo indica cuánto hay que suponer para responder: casi nada en lo descriptivo, mucho en lo causal. El pedido de Lorena, marcado con su nombre, pasa por los dos primeros escalones y se acerca al quinto.</figcaption></figure><div class="prose"><p>Confundir el tipo de pregunta es la fuente de los peores errores. El más famoso es responder una pregunta causal con un análisis descriptivo: «las tiendas que hicieron la promoción vendieron más, así que la promoción funciona». Quizá la promoción se hizo justo en las tiendas que ya venían creciendo.</p></div><div class="lab" id="01-lab-2"><div class="lab-title"><span class="tag">Laboratorio</span><h3>Clasifica diez preguntas y descubre cuáles no se pueden responder</h3></div><p class="hint">Para cada pregunta, elige su tipo y si los datos de la cadena (ventas, clientes, reseñas) alcanzan para responderla. Pulsa «Revisar» y lee por qué. Fíjate en las que no se pueden responder: ¿qué dato faltaría?</p><style>
+[id="01-lab-2"] .c1l2-lista{display:grid;gap:8px;counter-reset:q}
+[id="01-lab-2"] .c1l2-q{border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:6px;background:var(--card)}
+[id="01-lab-2"] .c1l2-q.ok{border-left-color:var(--good)}
+[id="01-lab-2"] .c1l2-q.mal{border-left-color:var(--warm)}
+[id="01-lab-2"] .c1l2-q p{margin:0;font:600 .92rem/1.35 var(--f-display)}
+[id="01-lab-2"] .c1l2-sel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+[id="01-lab-2"] .c1l2-sel select{font-size:.85rem}
+[id="01-lab-2"] .c1l2-exp{font-size:.86rem;line-height:1.4;color:var(--ink)}
+[id="01-lab-2"] .c1l2-exp b.si{color:var(--good)} [id="01-lab-2"] .c1l2-exp b.no{color:var(--warm)}
+[id="01-lab-2"] .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+[id="01-lab-2"] .c1l2-nav{display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:520px){[id="01-lab-2"] .c1l2-sel{grid-template-columns:minmax(0,1fr)}}
+</style>
+<div class="c1l2-lista" id="c1l2-lista"></div>
+<div class="c1l2-nav">
+  <button type="button" class="primary" id="c1l2-rev">Revisar</button>
+  <button type="button" id="c1l2-sol">Ver las respuestas</button>
+  <button type="button" id="c1l2-otra">Empezar de nuevo</button>
+</div>
+<div class="readout texto" id="c1l2-out" aria-live="polite"><span>Elige el tipo de cada pregunta y si los datos de la cadena alcanzan para responderla. Después pulsa «Revisar».</span></div></div></section>
+<section><h2>El ciclo de un análisis: preguntar, obtener, limpiar, explorar, modelar, comunicar</h2><div class="prose"><p>Con la pregunta escrita, Mariana sigue un recorrido que casi todos los análisis comparten. Tiene seis pasos y se dibuja como un ciclo, porque el último casi siempre termina en una pregunta nueva.</p></div><div class="analogia"><b>Imagínalo así</b><p>Cocinar una receta para invitados sigue el mismo orden. Decides qué vas a servir y para quién (preguntar). Compras los ingredientes (obtener). Los lavas, los pelas y botas lo que está malo (limpiar). Pruebas, hueles y ajustas la sazón (explorar). Cocinas con una técnica (modelar). Y sirves el plato de forma que den ganas de comerlo (comunicar). Si los invitados piden otro plato, vuelves a empezar.</p></div><div class="prose"><ol class="steps"><li><span><b>Preguntar</b> (<i>ask</i>). Convertir el pedido en una pregunta medible, como en la primera sección. Es el paso más corto y el que más se salta.</span></li><li><span><b>Obtener</b> (<i>get</i>, <i>acquire</i>). Conseguir los datos: archivos de las cajas, una base de datos, una API, una encuesta. Saber qué representa cada columna y quién la llena.</span></li><li><span><b>Limpiar</b> (<i>clean</i>, <i>wrangle</i>). Dejar los datos en forma: tipos correctos, sin duplicados, con los faltantes tratados y las tablas unidas. Suele llevarse más de la mitad del tiempo.</span></li><li><span><b>Explorar</b> (<i>explore</i>). Mirar distribuciones, comparar grupos, graficar. Aquí aparecen las sorpresas, y muchas veces la pregunta se ajusta.</span></li><li><span><b>Modelar</b> (<i>model</i>). Aplicar una técnica que resume o descubre algo que a simple vista no se ve: reglas de asociación, segmentos de clientes, análisis de texto, un modelo estadístico.</span></li><li><span><b>Comunicar</b> (<i>communicate</i>). Convertir el hallazgo en algo que la persona que decide entiende y usa: un gráfico, un informe, un tablero.</span></li></ol><p>No es un invento de este curso. La industria lo formalizó en 1999 con <b>CRISP-DM</b> (<i>Cross-Industry Standard Process for Data Mining</i>, proceso estándar intersectorial para la minería de datos), un método de seis fases que empieza por «entender el negocio» y termina en «desplegar». Hadley Wickham, autor de muchas herramientas de análisis en R, lo resume en su libro <i>R for Data Science</i> como importar, ordenar, transformar, visualizar, modelar y comunicar. Los nombres cambian; la idea de que la pregunta va primero y la comunicación al final, no.</p></div><figure class="fig fig-esquema" id="01-diagrama-3"><div class="lienzo"><svg viewBox="0 0 900 490" style="min-width:720px" role="img" aria-label="El ciclo del análisis en seis pasos con sus colores, capítulos y herramientas: preguntar, obtener, limpiar, explorar, modelar y comunicar, y una flecha que vuelve a preguntar; en el centro, la pregunta de Lorena sobre la caída de ventas del Sur">
+<defs>
+<marker id="c1d3-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+</defs>
+
+<rect x="345" y="16" width="210" height="92" rx="12" class="c-apl"/>
+<text x="359" y="38" class="t t-xs t-b k-apl">1 · PREGUNTAR · CAP. 01</text>
+<text x="359" y="60" class="t t-b">Decisión y pregunta</text>
+<text x="359" y="78" class="t t-s">métrica, ámbito, período,</text>
+<text x="359" y="94" class="t t-s">comparación</text>
+
+<rect x="672" y="108" width="212" height="92" rx="12" class="c-fis"/>
+<text x="686" y="130" class="t t-xs t-b k-fis">2 · OBTENER · CAP. 02</text>
+<text x="686" y="152" class="t t-b">Leer los archivos</text>
+<text x="686" y="170" class="t t-s">CSV, Excel, Parquet, SQL</text>
+<text x="686" y="186" class="t t-s t-mono">pandas · Polars · DuckDB</text>
+
+<rect x="672" y="288" width="212" height="92" rx="12" class="c-enl"/>
+<text x="686" y="310" class="t t-xs t-b k-enl">3 · LIMPIAR · CAP. 03 · 04</text>
+<text x="686" y="332" class="t t-b">Datos en forma</text>
+<text x="686" y="350" class="t t-s">tipos, faltantes, duplicados,</text>
+<text x="686" y="366" class="t t-s">uniones y remodelado</text>
+
+<rect x="345" y="382" width="210" height="92" rx="12" class="c-red"/>
+<text x="359" y="404" class="t t-xs t-b k-red">4 · EXPLORAR · CAP. 05 · 06</text>
+<text x="359" y="426" class="t t-b">Mirar antes de concluir</text>
+<text x="359" y="444" class="t t-s">distribuciones y gráficos</text>
+<text x="359" y="460" class="t t-s t-mono">Matplotlib · Plotly</text>
+
+<rect x="16" y="288" width="212" height="92" rx="12" class="c-tra"/>
+<text x="30" y="310" class="t t-xs t-b k-tra">5 · MODELAR · CAP. 07 · 08</text>
+<text x="30" y="332" class="t t-b">Minar datos y texto</text>
+<text x="30" y="350" class="t t-s">reglas, segmentos, TF-IDF</text>
+<text x="30" y="366" class="t t-s t-mono">mlxtend · scikit-learn</text>
+
+<rect x="16" y="108" width="212" height="92" rx="12" class="d-casa"/>
+<text x="30" y="130" class="t t-xs t-b k-casa">6 · COMUNICAR · CAP. 09</text>
+<text x="30" y="152" class="t t-b">Del hallazgo a la decisión</text>
+<text x="30" y="170" class="t t-s">informes y tableros</text>
+<text x="30" y="186" class="t t-s t-mono">Quarto · Streamlit</text>
+
+<path d="M555 62C620 66 700 80 760 104" class="ln" marker-end="url(#c1d3-m)"/>
+<path d="M778 200V284" class="ln" marker-end="url(#c1d3-m)"/>
+<path d="M760 380C700 420 620 428 559 428" class="ln" marker-end="url(#c1d3-m)"/>
+<path d="M345 428C280 428 200 420 140 384" class="ln" marker-end="url(#c1d3-m)"/>
+<path d="M122 288V204" class="ln" marker-end="url(#c1d3-m)"/>
+<path d="M140 108C200 76 280 62 341 62" class="ln" style="stroke-dasharray:5 4" marker-end="url(#c1d3-m)"/>
+<text x="24" y="66" class="t t-s t-m">una respuesta abre</text>
+<text x="24" y="80" class="t t-s t-m">otra pregunta</text>
+
+<rect x="300" y="168" width="300" height="160" rx="14" style="fill:var(--warm-soft);stroke:var(--warm)"/>
+<text x="318" y="194" class="t t-xs t-b k-warm">EN EL CENTRO, LA PREGUNTA DE LORENA</text>
+<text x="318" y="222" class="t t-b">¿Por qué bajaron las</text>
+<text x="318" y="242" class="t t-b">ventas del Sur?</text>
+<text x="318" y="270" class="t t-s">El capítulo 10 recorre el ciclo</text>
+<text x="318" y="286" class="t t-s">completo para responderla, con</text>
+<text x="318" y="302" class="t t-s">los datos de Almacenes Ejemplo.</text>
+</svg></div><figcaption><b>El ciclo del análisis en Almacenes Ejemplo.</b> Es la figura guía del curso. Los seis pasos van en el sentido de las agujas del reloj, cada uno con su color: preguntar (rosa), obtener (ámbar), limpiar (verde), explorar (azul), modelar (morado) y comunicar (verde azulado). Junto a cada paso, los capítulos que lo tratan y algunas herramientas. En el centro, la pregunta de Lorena, que el capítulo 10 responde recorriendo el ciclo completo. La flecha punteada que vuelve de comunicar a preguntar recuerda que una respuesta suele abrir otra pregunta.</figcaption></figure><div class="prose"><p>Cada paso tiene su tecnología. En este curso todo se hace con <b>Python</b> y sus bibliotecas: <b>pandas</b> y <b>Polars</b> para leer, limpiar y transformar tablas; <b>DuckDB</b> para consultar con SQL sin instalar un servidor; Matplotlib, seaborn y Plotly para graficar; mlxtend y scikit-learn para minar datos y texto; Jupyter y Quarto para los informes. Los laboratorios ejecutan Python dentro de la página con <b>Pyodide</b>, una versión de Python que corre en el navegador. Las herramientas del mercado para tableros, como Power BI, Looker Studio o Metabase, aparecen en el capítulo 09 como ejemplos públicos.</p></div><div class="ml"><b>En la práctica</b><p><b>El cuaderno de Mariana.</b> Antes de abrir un solo archivo, Mariana escribió una página con cuatro líneas: la decisión de Lorena, la pregunta medible, la definición de cada métrica y la fecha de entrega. Le mandó la página a Lorena para que la confirmara. Esa página es el primer artefacto del análisis, y la que va a releer cada vez que un gráfico interesante la tiente a desviarse.</p></div></section>
+<section><h2>Métricas: definir bien lo que se cuenta</h2><div class="prose"><p>«Ventas» parece una palabra clara hasta que tres personas la calculan. ¿Con impuestos o sin ellos? ¿Se restan las devoluciones? ¿Cuenta la fecha en que se cobró o la del ticket? ¿Se incluyen los tickets anulados? Una <b>métrica</b> (<i>metric</i>) es una cifra con una definición escrita: qué se suma o se cuenta, sobre qué filas, en qué unidad y en qué período.</p></div><div class="analogia"><b>Imagínalo así</b><p>Dos amigos dicen que corrieron «diez». Uno habla de kilómetros y el otro de minutos. Ninguno miente, pero comparar sus números no tiene sentido. Con las métricas de una empresa pasa lo mismo, solo que las unidades no siempre están a la vista.</p></div><div class="prose"><p>Para Almacenes Ejemplo, Mariana y Lorena dejan escritas cuatro métricas:</p><ul><li><b>Ventas</b>: suma de cantidad por precio unitario de cada línea de los tickets, en US$, sin impuestos. En los datos de la cadena no hay devoluciones.</li><li><b>Tickets</b>: número de compras distintas (cada ticket de caja cuenta una vez, aunque tenga diez productos).</li><li><b>Ticket promedio</b>: ventas divididas por tickets. Es un <b>cociente</b> (<i>ratio</i>): tiene numerador y denominador, y cualquiera de los dos puede mover el resultado.</li><li><b>Variación interanual</b> (<i>year over year</i>, YoY): cuánto cambió una métrica frente al mismo período del año anterior, en porcentaje.</li></ul><p>La última no es un capricho. Las ventas de un supermercado suben en diciembre y bajan en febrero todos los años: eso se llama <b>estacionalidad</b> (<i>seasonality</i>). Si comparas octubre con septiembre, mezclas el cambio real con el ritmo normal del calendario. Si comparas octubre con el octubre anterior, el calendario se cancela. En los datos de la cadena, el Sur vendió US$ 22.867,27 en septiembre de 2026 y US$ 24.688,91 en octubre: contra el mes anterior parece que mejora un 8 %. Contra octubre de 2025 (US$ 32.276,35) cayó un 23,5 %.</p><p>Hay otras trampas frecuentes al definir una métrica:</p><ul><li><b>Totales que miden tamaño.</b> El Norte vende el doble que el Sur, pero tiene dos tiendas grandes y el Sur una. Para comparar regiones distintas hacen falta métricas relativas: ventas por metro cuadrado, ticket promedio o la variación de cada región contra sí misma.</li><li><b>Promedios que esconden.</b> Un ticket promedio estable puede esconder que vienen menos clientes que compran más. Una métrica casi nunca va sola.</li><li><b>Métricas que se vuelven metas.</b> Si a los cajeros se les premia por «tickets por hora», aparecerán tickets partidos en dos. Cuando una medida se convierte en objetivo, deja de medir bien.</li></ul></div><div class="caso"><b>Un caso real</b><p><b>Un error de unidades de 125 millones de dólares.</b> En septiembre de 1999, la sonda Mars Climate Orbiter de la NASA se perdió al llegar a Marte. La investigación encontró que un programa de un contratista entregaba la fuerza de los impulsores en libras-fuerza por segundo, mientras el software de navegación esperaba newtons por segundo. Durante meses, cada corrección de rumbo se calculó con un número 4,45 veces menor de lo debido, y la sonda bajó demasiado. Nadie había sumado mal: dos equipos usaban la misma cifra con definiciones distintas. Es la misma razón por la que una métrica de negocio necesita su definición escrita.</p></div></section>
+<section><h2>Correlación no es causa: el límite de cada tipo de pregunta</h2><div class="prose"><p>Mariana encuentra un dato curioso: las tiendas con más reseñas en internet son las que más venden. Hernán Ibáñez, el gerente regional del Sur, se entusiasma: «Entonces pidamos a los clientes que escriban reseñas y venderemos más». Mariana lo frena.</p></div><div class="analogia"><b>Imagínalo así</b><p>En las ciudades costeras, los meses en que se venden más helados son también los meses con más ahogados. Nadie cree que el helado ahogue a la gente: hay una tercera cosa, el calor del verano, que hace que la gente compre helados y también que vaya a nadar. Si prohibieras los helados, los ahogados no bajarían.</p></div><div class="prose"><p>Dos variables tienen <b>correlación</b> (<i>correlation</i>) cuando tienden a moverse juntas. Eso no dice que una cause la otra. Puede haber una <b>variable de confusión</b> (<i>confounder</i>), una tercera que mueve a las dos, como el calor. En la cadena, la variable escondida es el tamaño: una tienda grande recibe más clientes, y más clientes significa más ventas y también más reseñas. Las reseñas no hacen vender; las dos cosas crecen con la tienda.</p><p>Hay otras explicaciones posibles para una correlación: la causa puede ir al revés (vender más produce más reseñas, no al revés), puede ser casualidad (con suficientes variables, siempre aparecen pares que se mueven juntos) o los datos pueden estar filtrados (solo vemos las tiendas que siguen abiertas).</p></div><figure class="fig fig-esquema" id="01-diagrama-4"><div class="lienzo"><svg viewBox="0 0 900 360" style="min-width:700px" role="img" aria-label="Correlación con causa escondida: arriba, Hernán cree que las reseñas producen ventas; abajo, el tamaño de la tienda produce a la vez más reseñas y más ventas; a la derecha, otras tres explicaciones de una correlación: causa al revés, casualidad y datos filtrados">
+<defs>
+<marker id="c1d4-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-muted"/></marker>
+<marker id="c1d4-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="k-red"/></marker>
+<marker id="c1d4-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="k-warm"/></marker>
+</defs>
+<text x="20" y="30" class="t t-xs t-b k-warm">LO QUE VE HERNÁN</text>
+<rect x="20" y="44" width="170" height="52" rx="10" class="caja"/>
+<text x="38" y="75" class="t t-b">Más reseñas</text>
+<rect x="400" y="44" width="170" height="52" rx="10" class="caja"/>
+<text x="418" y="75" class="t t-b">Más ventas</text>
+<path d="M192 70H396" class="ln s-warm" style="stroke-dasharray:6 5" marker-end="url(#c1d4-w)"/>
+<text x="270" y="60" class="t t-b k-warm">¿causa?</text>
+<line x1="20" y1="118" x2="580" y2="118" class="ln" style="stroke-dasharray:2 4"/>
+<text x="20" y="146" class="t t-xs t-b k-red">LO QUE PASA DE VERDAD</text>
+<rect x="210" y="160" width="170" height="60" rx="10" class="c-red"/>
+<text x="226" y="186" class="t t-b">Tamaño de</text>
+<text x="226" y="204" class="t t-b">la tienda</text>
+<rect x="20" y="276" width="170" height="52" rx="10" class="caja"/>
+<text x="38" y="307" class="t t-b">Más reseñas</text>
+<rect x="400" y="276" width="170" height="52" rx="10" class="caja"/>
+<text x="418" y="307" class="t t-b">Más ventas</text>
+<path d="M250 220L130 272" class="ln s-red" style="stroke-width:2" marker-end="url(#c1d4-r)"/>
+<path d="M340 220L460 272" class="ln s-red" style="stroke-width:2" marker-end="url(#c1d4-r)"/>
+<text x="20" y="236" class="t t-s">más clientes, más opiniones</text>
+<text x="420" y="236" class="t t-s">más clientes, más compras</text>
+<text x="200" y="306" class="t t-s t-m">van juntas, sin causarse</text>
+<rect x="612" y="20" width="272" height="320" rx="12" class="caja"/>
+<text x="628" y="44" class="t t-xs t-b t-m">OTRAS EXPLICACIONES</text>
+<text x="628" y="76" class="t t-b">Causa al revés</text>
+<text x="628" y="94" class="t t-s">vender más produce reseñas,</text>
+<text x="628" y="110" class="t t-s">no al revés</text>
+<text x="628" y="150" class="t t-b">Casualidad</text>
+<text x="628" y="168" class="t t-s">con muchas variables, siempre</text>
+<text x="628" y="184" class="t t-s">hay pares que se mueven juntos</text>
+<text x="628" y="224" class="t t-b">Datos filtrados</text>
+<text x="628" y="242" class="t t-s">solo ves las tiendas que</text>
+<text x="628" y="258" class="t t-s">siguen abiertas</text>
+<text x="628" y="300" class="t t-s t-b k-red">Para probar una causa:</text>
+<text x="628" y="318" class="t t-s">un experimento con grupos al azar</text>
+</svg></div><figcaption><b>Una correlación con una causa escondida.</b> Arriba, lo que ve Hernán: una flecha punteada de «reseñas» a «ventas», con un signo de pregunta. Abajo, lo que pasa de verdad: el tamaño de la tienda (en azul) empuja a las dos variables, y las flechas sólidas salen de él. A la derecha, las otras tres explicaciones de una correlación: causa al revés, casualidad y datos filtrados.</figcaption></figure><div class="prose"><p>Por eso cada tipo de pregunta tiene un límite. Una pregunta descriptiva o exploratoria puede mostrar que dos cosas van juntas; no puede decir que una causa la otra. Para afirmar una causa hace falta un <b>experimento</b> (<i>experiment</i>): cambiar una cosa en un grupo elegido al azar y compararlo con otro donde no se cambió, como en un ensayo clínico. Cuando un experimento no es posible, existen métodos para datos observacionales, pero todos descansan en supuestos que hay que escribir y defender. Las pruebas formales están en <a href="https://aaramirez.github.io/mate-inferencia/temario.html" target="_blank" rel="noopener">Inferencia estadística</a>.</p><p>En el capítulo 10, Mariana va a encontrar una causa muy probable de la caída del Sur. La va a llamar así, «probable», y va a explicar por qué no puede llamarla de otra forma.</p></div></section>
+<section><h2>La cadena de tiendas: el ejemplo que se analiza en todo el curso</h2><div class="prose"><p>Para que cada técnica tenga un caso concreto, el curso analiza una sola empresa: <b>Almacenes Ejemplo</b>, una cadena ficticia de doce supermercados de barrio que venden alimentos, artículos de aseo y algo de hogar. Todos los datos son inventados.</p><p>Las tiendas están en cuatro regiones y tienen dos formatos: <b>grande</b> (más de 1.500 m², compras para la semana) y <b>express</b> (unos 300 m², compras rápidas).</p><div class="tbl"><table><thead><tr><th>Región</th><th>Tiendas grandes</th><th>Tiendas express</th></tr></thead><tbody><tr><td>Norte</td><td>T01 Norte Mirador, T02 Norte Estación</td><td>T03 Norte Los Pinos</td></tr><tr><td>Centro</td><td>T04 Centro Plaza Mayor</td><td>T05 Centro Alameda, T06 Centro Universidad</td></tr><tr><td>Sur</td><td>T07 Sur Puerto</td><td>T08 Sur Las Colinas, T09 Sur Mercado Viejo</td></tr><tr><td>Oriente</td><td>T10 Oriente Río Claro</td><td>T11 Oriente La Loma, T12 Oriente Nuevo Sol</td></tr></tbody></table></div><p>Cada mes, las cajas de cada tienda mandan sus archivos a la oficina central. Hay ocho, todos en formato <b>CSV</b> (<i>comma-separated values</i>, valores separados por comas), un archivo de texto donde cada línea es una fila:</p><div class="tbl"><table><thead><tr><th>Archivo</th><th>Qué guarda</th><th>Filas</th></tr></thead><tbody><tr><td><code>ventas.csv</code></td><td>Un ticket por fila: fecha y hora, tienda, socio, medio de pago y total (tiendas T01 a T09)</td><td>158.690</td></tr><tr><td><code>ventas_oriente.csv</code></td><td>Lo mismo para T10 a T12, que usan un sistema de caja viejo</td><td>38.809</td></tr><tr><td><code>ventas_T09_reenvio.csv</code></td><td>Unos tickets de T09 que llegaron tarde</td><td>123</td></tr><tr><td><code>detalle.csv</code></td><td>Una línea por producto de cada ticket: cantidad y precio</td><td>736.371</td></tr><tr><td><code>clientes.csv</code></td><td>Los socios del programa de puntos Club Ejemplo</td><td>6.040</td></tr><tr><td><code>productos.csv</code></td><td>Los 48 productos y su categoría</td><td>48</td></tr><tr><td><code>tiendas.csv</code></td><td>Las 12 tiendas: región, formato y metros cuadrados</td><td>12</td></tr><tr><td><code>resenas.csv</code></td><td>Reseñas de los clientes, con estrellas y texto</td><td>1.130</td></tr></tbody></table></div><p>Los datos cubren del 1 de enero de 2025 al 31 de octubre de 2026, y vienen <b>sucios a propósito</b>, como los de cualquier empresa: archivos con formatos distintos, filas repetidas, valores vacíos, categorías escritas de varias formas y algunos números imposibles. Los capítulos 02 a 04 aprenden a leerlos, limpiarlos y unirlos. Además, los datos esconden varias historias que el curso irá descubriendo, y una de ellas responde la pregunta de Lorena.</p><p>Las personas que aparecen en el curso:</p><ul><li><b>Mariana Solís</b>, analista de datos: hace el análisis, de la pregunta al tablero.</li><li><b>Lorena Quintero</b>, gerente comercial: pide, decide y es la dueña de las métricas.</li><li><b>Hernán Ibáñez</b>, gerente regional del Sur: tiene sus propias teorías sobre su región.</li><li><b>Beatriz Lugo</b>, responsable de los sistemas de caja: sabe de dónde sale cada archivo.</li><li><b>Verónica Peña</b>, jefa de mercadeo: quiere saber qué se compra junto y qué dicen los clientes.</li><li><b>Octavio Ruiz</b>, encargado de la tienda T07 Sur Puerto.</li><li>Y una clienta que se sigue: <b>Gloria Méndez</b>, socia número 2077 del Club, que compra en T07 desde 2022.</li></ul></div><figure class="fig fig-arquitectura" id="01-diagrama-5"><div class="lienzo"><svg viewBox="0 0 900 450" style="min-width:720px" role="img" aria-label="Los ocho archivos de Almacenes Ejemplo y sus llaves: las ventas (tres archivos con las mismas columnas) se unen con el detalle por ticket_id, con clientes por cliente_id y con tiendas por tienda_id; el detalle se une con productos por producto_id; las reseñas se unen con tiendas y, a veces, con clientes">
+
+<rect x="336" y="22" width="228" height="196" rx="12" class="c-fis"/>
+<text x="350" y="44" class="t t-xs t-b k-fis">VENTAS · 1 FILA POR TICKET</text>
+<text x="350" y="62" class="t t-s t-m">ventas.csv · ventas_oriente.csv</text>
+<text x="350" y="76" class="t t-s t-m">ventas_T09_reenvio.csv</text>
+<text x="350" y="100" class="t t-s t-mono t-b">ticket_id</text>
+<text x="350" y="118" class="t t-s t-mono">fecha_hora</text>
+<text x="350" y="136" class="t t-s t-mono t-b">tienda_id</text>
+<text x="350" y="154" class="t t-s t-mono t-b">cliente_id</text>
+<text x="350" y="172" class="t t-s t-mono">medio_pago</text>
+<text x="350" y="190" class="t t-s t-mono">total</text>
+<text x="350" y="208" class="t t-s t-m">197.622 filas en total</text>
+
+<rect x="662" y="22" width="222" height="150" rx="12" class="caja"/>
+<text x="676" y="44" class="t t-xs t-b t-m">DETALLE · 1 FILA POR PRODUCTO</text>
+<text x="676" y="68" class="t t-s t-mono t-b">ticket_id</text>
+<text x="676" y="86" class="t t-s t-mono">linea</text>
+<text x="676" y="104" class="t t-s t-mono t-b">producto_id</text>
+<text x="676" y="122" class="t t-s t-mono">cantidad</text>
+<text x="676" y="140" class="t t-s t-mono">precio_unitario</text>
+<text x="676" y="160" class="t t-s t-m">736.371 filas</text>
+
+<rect x="662" y="262" width="222" height="112" rx="12" class="caja"/>
+<text x="676" y="284" class="t t-xs t-b t-m">PRODUCTOS</text>
+<text x="676" y="308" class="t t-s t-mono t-b">producto_id</text>
+<text x="676" y="326" class="t t-s t-mono">nombre · categoria</text>
+<text x="676" y="344" class="t t-s t-mono">precio_lista_2025</text>
+<text x="676" y="364" class="t t-s t-m">48 filas</text>
+
+<rect x="16" y="22" width="222" height="150" rx="12" class="caja"/>
+<text x="30" y="44" class="t t-xs t-b t-m">CLIENTES · CLUB EJEMPLO</text>
+<text x="30" y="68" class="t t-s t-mono t-b">cliente_id</text>
+<text x="30" y="86" class="t t-s t-mono">nombre · email</text>
+<text x="30" y="104" class="t t-s t-mono">fecha_nacimiento</text>
+<text x="30" y="122" class="t t-s t-mono">tienda_id · fecha_alta</text>
+<text x="30" y="160" class="t t-s t-m">6.040 filas</text>
+
+<rect x="16" y="262" width="222" height="112" rx="12" class="caja"/>
+<text x="30" y="284" class="t t-xs t-b t-m">TIENDAS</text>
+<text x="30" y="308" class="t t-s t-mono t-b">tienda_id</text>
+<text x="30" y="326" class="t t-s t-mono">nombre · region</text>
+<text x="30" y="344" class="t t-s t-mono">formato · m2</text>
+<text x="30" y="364" class="t t-s t-m">12 filas</text>
+
+<rect x="336" y="290" width="228" height="140" rx="12" class="caja"/>
+<text x="350" y="312" class="t t-xs t-b t-m">RESEÑAS</text>
+<text x="350" y="336" class="t t-s t-mono">resena_id · fecha_hora</text>
+<text x="350" y="354" class="t t-s t-mono t-b">tienda_id · cliente_id</text>
+<text x="350" y="372" class="t t-s t-mono">estrellas · texto</text>
+<text x="350" y="418" class="t t-s t-m">1.130 filas</text>
+
+<path d="M564 96H658" class="ln" style="stroke-width:2"/>
+<text x="580" y="88" class="t t-s t-mono">ticket_id</text>
+<path d="M772 172V258" class="ln" style="stroke-width:2"/>
+<text x="780" y="220" class="t t-s t-mono">producto_id</text>
+<path d="M336 154H242" class="ln" style="stroke-width:2"/>
+<text x="250" y="146" class="t t-s t-mono">cliente_id</text>
+<path d="M336 200H290V318H242" class="ln" style="stroke-width:2"/>
+<text x="248" y="310" class="t t-s t-mono">tienda_id</text>
+<path d="M336 352H242" class="ln" style="stroke-dasharray:4 4"/>
+<text x="248" y="346" class="t t-s t-mono">tienda_id</text>
+<text x="350" y="388" class="t t-s t-m">se une por tienda y, a veces,</text>
+<text x="350" y="402" class="t t-s t-m">por socio (cliente_id)</text>
+</svg></div><figcaption><b>Los archivos de la cadena y cómo se relacionan.</b> Cada caja es un archivo, con sus columnas principales. Las líneas unen las columnas que se repiten entre archivos, que son las llaves para unirlos: <code>ticket_id</code> une cada ticket con sus líneas de detalle, <code>cliente_id</code> con el socio, <code>tienda_id</code> con la tienda y <code>producto_id</code> con el producto. Los tres archivos de ventas (en ámbar) tienen las mismas columnas en dos formatos distintos. La tabla de reseñas se une por tienda y, a veces, por socio.</figcaption></figure><div class="prose"><p>Los archivos salen de un <b>generador de datos sintéticos</b> (<i>synthetic data generator</i>): un programa que fabrica datos realistas pero inventados a partir de una <b>semilla</b> (<i>random seed</i>), un número que fija la secuencia de azar. La misma semilla produce siempre los mismos datos, así que tus cifras serán idénticas a las del curso.</p></div><div class="practica"><div class="practica-title"><span class="tag">En la terminal</span><h3>Crea los datos de Almacenes Ejemplo</h3></div><p>Vas a guardar el generador del curso y crear los ocho archivos de la cadena. Solo necesitas Python 3.10 o más reciente: no hay que instalar nada más. Crea primero la carpeta de trabajo del curso:</p><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>mkdir $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd $HOME\datos-cadena</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>mkdir -p ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div><div class="cmd-l"><code>cd ~/datos-cadena</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps"><li><span>Guarda este script como <code>generar_cadena.py</code> en la carpeta <code>datos-cadena</code>. Es el generador de todo el curso. No hace falta entenderlo ahora; si lo lees, vas a encontrar pistas de las historias que esconden los datos.</span></li></ol><div class="code-copia"><pre><code>"""Datos sintéticos de Almacenes Ejemplo para el curso «Ciencia de datos».
+
+Crea los archivos que las 12 tiendas de la cadena mandan cada mes a la oficina
+central: ventas (un ticket por fila), detalle (una línea por producto), clientes
+del programa de puntos, productos, tiendas y reseñas, del 1 de enero de 2025 al
+31 de octubre de 2026. Todo es inventado y sale de una semilla: la misma semilla
+da siempre los mismos datos. Los archivos vienen sucios a propósito, como los de
+verdad: el curso aprende a limpiarlos.
+
+Uso:
+  python generar_cadena.py                 crea los archivos en ~/datos-cadena/crudo
+  python generar_cadena.py --semilla 7     otros datos, la misma historia
+  python generar_cadena.py --carpeta RUTA  otra carpeta
+Solo usa la biblioteca estándar de Python 3.10 o más reciente.
+"""
+import argparse
+import bisect
+import csv
+import datetime as dt
+import random
+from itertools import accumulate
+from pathlib import Path
+
+INICIO, FIN = dt.date(2025, 1, 1), dt.date(2026, 10, 31)
+OBRAS = dt.date(2026, 8, 3)                               # cierran el estacionamiento de T07
+SIN_ARCHIVO = (dt.date(2026, 9, 8), dt.date(2026, 9, 16))  # T09 no cargó sus ventas
+REENVIOS = [("T05", dt.date(2026, 3, 2)), ("T02", dt.date(2025, 11, 17))]  # lotes repetidos
+
+#         id     nombre               región     formato   m²   tickets por día
+TIENDAS = [("T01", "Norte Mirador",      "Norte",   "grande", 1800, 37),
+           ("T02", "Norte Estación",     "Norte",   "grande", 1500, 32),
+           ("T03", "Norte Los Pinos",    "Norte",   "express", 300, 14),
+           ("T04", "Centro Plaza Mayor", "Centro",  "grande", 2000, 40),
+           ("T05", "Centro Alameda",     "Centro",  "express", 350, 15),
+           ("T06", "Centro Universidad", "Centro",  "express", 280, 17),
+           ("T07", "Sur Puerto",         "Sur",     "grande", 1700, 35),
+           ("T08", "Sur Las Colinas",    "Sur",     "express", 320, 14),
+           ("T09", "Sur Mercado Viejo",  "Sur",     "express", 300, 13),
+           ("T10", "Oriente Río Claro",  "Oriente", "grande", 1600, 30),
+           ("T11", "Oriente La Loma",    "Oriente", "express", 300, 12),
+           ("T12", "Oriente Nuevo Sol",  "Oriente", "express", 260, 11)]
+
+#             id  nombre                  categoría             precio 2025
+PRODUCTOS = [(1, "Pan de molde", "Panadería", 2.40), (2, "Pan francés (bolsa)", "Panadería", 1.80),
+             (3, "Galletas de avena", "Panadería", 2.10), (4, "Leche entera 1 L", "Lácteos", 1.25),
+             (5, "Mantequilla 250 g", "Lácteos", 2.90), (6, "Queso fresco 500 g", "Lácteos", 4.60),
+             (7, "Yogur natural 1 L", "Lácteos", 2.70), (8, "Queso rallado 100 g", "Lácteos", 2.20),
+             (9, "Huevos (docena)", "Despensa", 3.10), (10, "Café molido 250 g", "Despensa", 4.80),
+             (11, "Arroz 1 kg", "Despensa", 1.60), (12, "Pasta larga 500 g", "Despensa", 1.30),
+             (13, "Salsa de tomate", "Despensa", 1.90), (14, "Aceite 1 L", "Despensa", 3.80),
+             (15, "Azúcar 1 kg", "Despensa", 1.40), (16, "Atún en lata", "Despensa", 1.70),
+             (17, "Agua 2 L", "Bebidas", 0.90), (18, "Gaseosa 2 L", "Bebidas", 2.10),
+             (19, "Jugo de naranja 1 L", "Bebidas", 2.30), (20, "Cerveza (six pack)", "Bebidas", 6.90),
+             (21, "Vino tinto", "Bebidas", 8.50), (22, "Papas fritas 150 g", "Snacks", 1.90),
+             (23, "Chocolate en barra", "Snacks", 1.50), (24, "Maní salado", "Snacks", 1.60),
+             (25, "Carne para asar 1 kg", "Carnes", 9.80), (26, "Pollo entero", "Carnes", 6.40),
+             (27, "Chorizo (paquete)", "Carnes", 4.30), (28, "Carbón 3 kg", "Hogar", 4.20),
+             (29, "Detergente 1 kg", "Limpieza", 4.50), (30, "Cloro 1 L", "Limpieza", 1.30),
+             (31, "Esponjas (pack)", "Limpieza", 1.60), (32, "Papel higiénico (4)", "Limpieza", 3.20),
+             (33, "Lavaplatos", "Limpieza", 2.10), (34, "Pañales (paquete)", "Bebé", 12.90),
+             (35, "Toallitas húmedas", "Bebé", 3.40), (36, "Shampoo", "Cuidado personal", 4.10),
+             (37, "Jabón de baño (3)", "Cuidado personal", 2.60), (38, "Pasta dental", "Cuidado personal", 2.30),
+             (39, "Manzanas 1 kg", "Frutas y verduras", 2.20), (40, "Bananos 1 kg", "Frutas y verduras", 1.10),
+             (41, "Tomates 1 kg", "Frutas y verduras", 1.70), (42, "Cebollas 1 kg", "Frutas y verduras", 1.30),
+             (43, "Papas 2 kg", "Frutas y verduras", 2.40), (44, "Limones 1 kg", "Frutas y verduras", 1.50),
+             (45, "Lechuga", "Frutas y verduras", 0.95), (46, "Helado 1 L", "Congelados", 4.90),
+             (47, "Pizza congelada", "Congelados", 5.60), (48, "Comida para perro 2 kg", "Mascotas", 7.80)]
+
+# Misiones de compra: (peso, [(producto, probabilidad de llevarlo)]). Dan las reglas de asociación.
+MISIONES = [(30, [(1, .40), (2, .35), (4, .70), (10, .30), (5, .30), (9, .25), (6, .15), (7, .12)]),
+            (12, [(12, .95), (13, .75), (8, .45), (21, .12), (41, .15)]),
+            (10, [(25, .85), (27, .35), (28, .60), (20, .70), (22, .40), (18, .30), (2, .20), (44, .25)]),
+            (12, [(29, .60), (30, .40), (31, .30), (32, .45), (33, .35)]),
+            (16, [(18, .50), (22, .50), (23, .35), (24, .15), (3, .20), (46, .10)]),
+            (4,  [(34, .95), (35, .70), (4, .30)]),
+            (14, [(39, .35), (40, .45), (41, .40), (42, .35), (43, .30), (44, .15), (45, .20)]),
+            (8,  [(11, .50), (14, .35), (15, .35), (16, .30), (9, .15), (17, .30)]),
+            (4,  [(36, .45), (37, .45), (38, .50)]),
+            (3,  [(47, .70), (46, .45), (18, .40)]),
+            (3,  [(48, .95), (17, .20)])]
+CUM_MISION = list(accumulate(m[0] for m in MISIONES))
+CUM_GRANDE, CUM_EXPRESS = (40, 82, 100), (92, 100, 100)
+HORAS = range(8, 22)
+CUM_HORA = list(accumulate([3, 5, 7, 8, 9, 8, 6, 6, 7, 9, 10, 9, 7, 4]))
+CANON = ["tarjeta", "efectivo", "transferencia"]
+MEDIO_TIENDA = {"T04": str.capitalize, "T08": str.upper}  # cajas que escriben distinto
+NOMBRES = ["Gloria", "Ernesto", "Rosa", "Fabián", "Marisol", "Héctor", "Liliana", "Óscar", "Pilar",
+           "Ricardo", "Yolanda", "Germán", "Teresa", "Alfredo", "Beatriz", "Mauricio", "Adriana",
+           "Rafael", "Susana", "Jorge", "Verónica", "Arturo", "Claudia", "Wilson", "Norma",
+           "Fernando", "Silvia", "Javier", "Miriam", "César", "Lucero", "Ignacio"]
+APELLIDOS = ["Méndez", "Castillo", "Romero", "Suárez", "Acosta", "Benítez", "Cabrera", "Delgado",
+             "Escobar", "Figueroa", "Guzmán", "Herrera", "Jiménez", "Lara", "Molina", "Núñez",
+             "Ortega", "Pineda", "Quiroga", "Ramos", "Sandoval", "Toledo", "Valencia", "Zapata"]
+# Reseñas: fragmentos que se combinan
+BIEN = ["la atención fue muy amable", "los precios están bien", "las frutas estaban frescas",
+        "la tienda está limpia y ordenada", "encontré todo lo que buscaba", "las cajas fueron rápidas",
+        "buena variedad de productos", "el personal ayuda a buscar", "las ofertas valen la pena"]
+MAL = ["la fila de la caja era eterna", "los precios subieron mucho", "las frutas estaban golpeadas",
+       "faltaban productos básicos", "solo había una caja abierta", "el pan no estaba fresco",
+       "el personal no sabía dónde estaba nada", "la tienda estaba desordenada"]
+OBRA = ["no hay dónde estacionar por las obras", "cerraron el estacionamiento por las obras de la avenida",
+        "con las obras es imposible llegar en carro", "las obras de la avenida tapan la entrada",
+        "ya no vengo en carro: sin estacionamiento no se puede"]
+IRONIA = ["Excelente servicio: solo 40 minutos en la fila. Volveré cuando tenga el día libre.",
+          "Me encanta que las frutas vengan ya golpeadas, así no tengo que hacerlo yo.",
+          "Genial, otra vez sin leche. Muy buena estrategia para que uno camine más.",
+          "Qué maravilla pagar más por lo mismo. Gracias por la sorpresa de cada semana.",
+          "Felicito al cajero por su paciencia infinita para no abrir otra caja.",
+          "Buenísimo que el pan de ayer lo vendan como de hoy. Ahorro de tiempo."]
+
+
+def ts(m):
+    return m.strftime("%Y-%m-%d %H:%M")
+
+
+def dia_factor(d):
+    semana = [0.92, 0.90, 0.93, 0.97, 1.10, 1.35, 1.15][d.weekday()]
+    mes = [0.90, 0.88, 0.95, 0.97, 1.03, 0.98, 1.00, 1.00, 0.97, 1.00, 1.05, 1.38][d.month - 1]
+    quincena = 1.10 if d.day in (15, 16, 30, 31, 1) else 1.0
+    crecimiento = 1 + 0.05 * (d - INICIO).days / 365
+    return semana * mes * quincena * crecimiento
+
+
+def armar_canasta(rng, formato, region, precio):
+    """Devuelve una lista de (producto_id, cantidad, precio_unitario)."""
+    n_mis = rng.choices([1, 2, 3], cum_weights=CUM_GRANDE if formato == "grande" else CUM_EXPRESS)[0]
+    elegidos = {}
+    for _ in range(n_mis):
+        items = rng.choices(MISIONES, cum_weights=CUM_MISION)[0][1]
+        for pid, p in items:
+            if rng.random() &lt; p:
+                elegidos[pid] = elegidos.get(pid, 0) + 1
+    for _ in range(rng.choices([0, 1, 2], cum_weights=(70, 95, 100))[0]):  # compras sueltas
+        pid = rng.randint(1, len(PRODUCTOS))
+        elegidos[pid] = elegidos.get(pid, 0) + 1
+    if not elegidos:
+        elegidos[rng.choice([2, 4, 17, 18, 22])] = 1
+    extra = 0.28 if region == "Sur" else 0.22  # en el Sur llevan un poco más de cada cosa
+    lineas = []
+    for pid in sorted(elegidos):
+        cant = elegidos[pid] + (1 if rng.random() &lt; extra else 0) + (1 if rng.random() &lt; extra / 3 else 0)
+        lineas.append((pid, cant, precio[pid]))
+    return lineas
+
+
+def generar(carpeta, semilla):
+    rng = random.Random(semilla)
+    crudo = carpeta / "crudo"
+    crudo.mkdir(parents=True, exist_ok=True)
+    precio25 = {p[0]: p[3] for p in PRODUCTOS}
+    precio26 = {k: round(v * 1.06, 2) for k, v in precio25.items()}  # lista de precios de 2026
+    info = {t[0]: t for t in TIENDAS}
+
+    # Clientes del programa de puntos «Club Ejemplo»
+    clientes, pool = [], {t[0]: ([], []) for t in TIENDAS}
+    tid_peso = [t[5] for t in TIENDAS]
+    for cid in range(1001, 7001):
+        nombre = f"{rng.choice(NOMBRES)} {rng.choice(APELLIDOS)}"
+        tienda = rng.choices(TIENDAS, weights=tid_peso)[0][0]
+        if rng.random() &lt; 0.7:
+            alta = dt.date(2021, 1, 1) + dt.timedelta(days=rng.randrange(1461))
+        else:
+            alta = INICIO + dt.timedelta(days=rng.randrange((FIN - INICIO).days))
+        if cid == 2077:  # Gloria Méndez: la clienta que se sigue en el curso
+            nombre, tienda, alta = "Gloria Méndez", "T07", dt.date(2022, 5, 9)
+        nac = dt.date(1950, 1, 1) + dt.timedelta(days=rng.randrange(365 * 55))
+        falta = 0.20 if info[tienda][3] == "express" else 0.09  # faltan más en las express
+        nac_txt = "" if rng.random() &lt; falta and cid != 2077 else nac.isoformat()
+        usuario = nombre.lower().replace(" ", ".").translate(str.maketrans("áéíóúñ", "aeioun"))
+        email = "" if rng.random() &lt; 0.03 and cid != 2077 else f"{usuario}{cid}@ejemplo.com"
+        peso = min(8.0, 0.05 + rng.paretovariate(1.6))  # unos pocos compran mucho
+        if cid == 2077:
+            peso = 14.0
+        clientes.append([cid, nombre, email, nac_txt, tienda, alta.isoformat()])
+        pool[tienda][0].append((cid, alta))
+        pool[tienda][1].append(peso)
+    acum = {t: list(accumulate(p[1])) for t, p in pool.items()}
+
+    # Ventas día por día; cada ticket guarda su canasta (las líneas del detalle)
+    ventas = []
+    dia = INICIO
+    while dia &lt;= FIN:
+        precio = precio25 if dia.year == 2025 else precio26
+        f = dia_factor(dia)
+        del_dia = []
+        for tid, _, region, formato, _, base in TIENDAS:
+            n = max(1, round(base * f * rng.uniform(0.85, 1.15)))
+            for _ in range(n):
+                h = rng.choices(HORAS, cum_weights=CUM_HORA)[0]
+                momento = dt.datetime.combine(dia, dt.time(h, rng.randrange(60)))
+                canasta = armar_canasta(rng, formato, region, precio)
+                cliente = ""
+                if rng.random() &lt; 0.62:
+                    gente, cum = pool[tid][0], acum[tid]
+                    for _ in range(4):
+                        cid, alta = gente[bisect.bisect_left(cum, rng.random() * cum[-1])]
+                        if alta &lt;= dia and not (cid == 2077 and dia &gt;= dt.date(2026, 8, 1)):
+                            cliente = cid
+                            break
+                if tid == "T07" and dia &gt;= OBRAS:  # sin estacionamiento: se van las compras grandes
+                    unidades = sum(c for _, c, _ in canasta)
+                    if rng.random() &lt; (0.62 if unidades &gt;= 7 else 0.22):
+                        continue
+                medio = rng.choices(CANON, cum_weights=(52, 90, 100))[0]
+                del_dia.append([momento, tid, cliente, medio, canasta])
+        del_dia.sort(key=lambda v: (v[0], v[1]))
+        for momento, tid, cliente, medio, canasta in del_dia:
+            ventas.append([100001 + len(ventas), momento, tid, cliente, medio, None, canasta])
+        dia += dt.timedelta(days=1)
+
+    # Compras grandes de verdad (eventos y empresas): atípicas pero correctas
+    grandes = rng.sample([v for v in ventas if v[2] in ("T01", "T04", "T07", "T10")
+                          and v[1].date() &lt; OBRAS], 6)
+    pedido_evento = [(18, 40), (22, 36), (17, 60), (20, 12), (24, 30), (23, 40)]
+    for v in grandes:
+        precio = precio25 if v[1].year == 2025 else precio26
+        ya = {pid for pid, _, _ in v[6]}
+        v[6] += [(pid, c, precio[pid]) for pid, c in pedido_evento[:rng.randint(3, 6)] if pid not in ya]
+    for v in ventas:
+        v[5] = round(sum(c * p for _, c, p in v[6]), 2)
+    detalle = [[v[0], i, pid, c, p] for v in ventas for i, (pid, c, p) in enumerate(v[6], 1)]
+
+    # ---- Suciedad a propósito ----
+    ids_grandes = {g[0] for g in grandes}
+    validos = [v for v in ventas if v[0] not in ids_grandes]
+    # 1. Total multiplicado por 100 (se perdió el punto decimal al digitar)
+    errores = rng.sample([v for v in validos if v[2] not in ("T10", "T11", "T12")], 12)
+    for v in errores:
+        v[5] = round(v[5] * 100, 2)
+    # 2. Totales y medios de pago vacíos
+    for v in ventas:
+        if rng.random() &lt; 0.004:
+            v[5] = None
+        if rng.random() &lt; 0.002:
+            v[4] = None
+    # 3. Clientes que no existen (se digitó un número de más)
+    malos = rng.sample([v for v in ventas if v[3] != ""], 20)
+    for v in malos:
+        v[3] = int(f"{v[3]}{rng.randrange(10)}")
+    # 4. Cada caja escribe el medio de pago a su manera; a veces con espacio al final
+    for v in ventas:
+        if v[4] is None:
+            continue
+        if v[2] in MEDIO_TIENDA:
+            v[4] = MEDIO_TIENDA[v[2]](v[4])
+        if v[2] == "T06" and v[4] == "transferencia":
+            v[4] = "transf."
+        if rng.random() &lt; 0.005:
+            v[4] = v[4] + " "
+
+    # Archivos de ventas: T01-T09 con el sistema nuevo, T10-T12 (Oriente) con el viejo
+    def fila_nueva(v):
+        return [v[0], ts(v[1]), v[2], v[3], v[4] or "", "" if v[5] is None else f"{v[5]:.2f}"]
+
+    def fila_vieja(v):
+        total = "" if v[5] is None else f"{v[5]:.2f}".replace(".", ",")
+        return [v[0], v[1].strftime("%d/%m/%Y %H:%M"), v[2], v[3], v[4] or "", total]
+
+    cab = ["ticket_id", "fecha_hora", "tienda_id", "cliente_id", "medio_pago", "total"]
+    nuevas, viejas, reenvio = [], [], []
+    for v in ventas:
+        if v[2] == "T09" and SIN_ARCHIVO[0] &lt;= v[1].date() &lt;= SIN_ARCHIVO[1]:
+            reenvio.append(fila_nueva(v))       # llega después, en otro archivo
+        elif v[2] in ("T10", "T11", "T12"):
+            viejas.append(fila_vieja(v))
+        else:
+            nuevas.append(fila_nueva(v))
+            if (v[2], v[1].date()) in REENVIOS:  # la caja mandó el lote dos veces
+                nuevas.append(fila_nueva(v))
+    escribir(crudo / "ventas.csv", cab, nuevas)
+    escribir(crudo / "ventas_oriente.csv", cab, viejas, sep=";")
+    escribir(crudo / "ventas_T09_reenvio.csv", cab, reenvio)
+    escribir(crudo / "detalle.csv", ["ticket_id", "linea", "producto_id", "cantidad", "precio_unitario"],
+             [[d[0], d[1], d[2], d[3], f"{d[4]:.2f}"] for d in detalle])
+
+    # Clientes: duplicados exactos, duplicados aproximados y fechas centinela
+    for c in rng.sample([c for c in clientes if c[3] and c[0] != 2077], 30):
+        c[3] = "1900-01-01"
+    salida = list(clientes)
+    for c in rng.sample(clientes, 25):            # la fila se exportó dos veces
+        salida.append(list(c))
+    sig = 7001
+    for c in rng.sample([c for c in clientes if c[2] and c[0] != 2077], 15):  # se inscribió dos veces
+        variante = rng.choice([c[1].upper(), c[1].translate(str.maketrans("áéíóú", "aeiou")),
+                               c[1].replace(" ", "  ")])
+        salida.append([sig, variante, c[2], c[3], c[4], c[5]])
+        sig += 1
+    salida.sort(key=lambda c: c[0])
+    escribir(crudo / "clientes.csv", ["cliente_id", "nombre", "email", "fecha_nacimiento", "tienda_id",
+                                      "fecha_alta"], salida)
+
+    cat_sucia = {5: "Lacteos", 8: "Lacteos", 19: "bebidas"}
+    escribir(crudo / "productos.csv", ["producto_id", "nombre", "categoria", "precio_lista_2025"],
+             [[p[0], p[1], cat_sucia.get(p[0], p[2]), f"{p[3]:.2f}"] for p in PRODUCTOS])
+    escribir(crudo / "tiendas.csv", ["tienda_id", "nombre", "region", "formato", "m2"],
+             [list(t[:5]) for t in TIENDAS])
+
+    # Reseñas
+    resenas, rid = [], 1
+    dia = INICIO
+    while dia &lt;= FIN:
+        for tid, _, region, formato, _, base in TIENDAS:
+            obra = tid == "T07" and dia &gt;= OBRAS
+            dia_gloria = tid == "T07" and dia == dt.date(2026, 8, 20)
+            if rng.random() &gt; base / (55 if obra else 160) and not dia_gloria:  # con obras, más quejas
+                continue
+            if obra and rng.random() &lt; 0.75:
+                estrellas, texto = rng.choice([1, 1, 2, 2, 3]), rng.choice(OBRA).capitalize() + "."
+                if rng.random() &lt; 0.5:
+                    texto += " " + rng.choice(BIEN + MAL).capitalize() + "."
+            elif rng.random() &lt; 0.035:
+                estrellas, texto = rng.choice([1, 1, 2]), rng.choice(IRONIA)
+            else:
+                estrellas = rng.choices([1, 2, 3, 4, 5], [6, 8, 16, 34, 36])[0]
+                buenas = rng.sample(BIEN, 2) if estrellas &gt;= 4 else rng.sample(BIEN, 1)
+                malas = rng.sample(MAL, 2) if estrellas &lt;= 2 else rng.sample(MAL, 1)
+                partes = buenas if estrellas &gt;= 4 else malas if estrellas &lt;= 2 else [buenas[0], malas[0]]
+                texto = ". ".join(p.capitalize() for p in partes) + "."
+                if estrellas == 3:
+                    texto = f"{partes[0].capitalize()}, pero {partes[1]}."
+            cliente = ""
+            if rng.random() &lt; 0.5:
+                cliente = rng.choice(pool[tid][0])[0]
+            if dia_gloria:  # la reseña de Gloria Méndez
+                cliente, estrellas = 2077, 1
+                texto = "Compro aquí hace años, pero cerraron el estacionamiento por las obras y ya no puedo venir."
+            elif cliente == 2077:
+                cliente = ""
+            hora = dt.datetime.combine(dia, dt.time(rng.randrange(8, 23), rng.randrange(60)))
+            resenas.append([rid, ts(hora), tid, cliente, estrellas, texto])
+            rid += 1
+        dia += dt.timedelta(days=1)
+    for r in rng.sample(resenas, 10):
+        r[4] = ""
+    salida = list(resenas)
+    for r in rng.sample(resenas, 18):                 # publicada dos veces
+        salida.append(list(r))
+    salida.sort(key=lambda r: r[0])
+    escribir(crudo / "resenas.csv", ["resena_id", "fecha_hora", "tienda_id", "cliente_id", "estrellas",
+                                     "texto"], salida)
+
+    print(f"Archivos en {crudo} (semilla {semilla})")
+    for nombre in ("ventas.csv", "ventas_oriente.csv", "ventas_T09_reenvio.csv", "detalle.csv",
+                   "clientes.csv", "productos.csv", "tiendas.csv", "resenas.csv"):
+        n = sum(1 for _ in open(crudo / nombre, encoding="utf-8")) - 1
+        print(f"  {nombre:&lt;26}{n:&gt;9,}".replace(",", "."))
+
+
+def escribir(ruta, cabecera, filas, sep=","):
+    with open(ruta, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f, delimiter=sep)
+        w.writerow(cabecera)
+        w.writerows(filas)
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser(description="Datos sintéticos de Almacenes Ejemplo")
+    p.add_argument("--semilla", type=int, default=42)
+    p.add_argument("--carpeta", default=str(Path.home() / "datos-cadena"))
+    a = p.parse_args()
+    generar(Path(a.carpeta).expanduser(), a.semilla)</code></pre><button type="button" class="copiar copiar-todo">Copiar</button></div><ol class="steps" start="2" style="counter-reset:st 1"><li><span>Crea los datos:</span></li></ol><div class="cmds"><div class="cmd-tabs" role="tablist" aria-label="Sistema operativo"><button type="button" role="tab" data-so="win">Windows</button><button type="button" role="tab" data-so="mac linux">macOS y Linux</button></div><div class="cmd-panel" role="tabpanel" data-so="win"><div class="cmd-l"><code>python generar_cadena.py</code><button type="button" class="copiar">Copiar</button></div></div><div class="cmd-panel" role="tabpanel" data-so="mac linux"><div class="cmd-l"><code>python3 generar_cadena.py</code><button type="button" class="copiar">Copiar</button></div></div></div><ol class="steps" start="3" style="counter-reset:st 2"><li><span>Abre la carpeta <code>crudo</code> y mira las primeras líneas de <code>ventas.csv</code> y de <code>ventas_oriente.csv</code> con cualquier editor de texto (el Bloc de notas sirve). Compara cómo se escriben las fechas, los totales y los separadores.</span></li><li><span>Vuelve a correr el generador y comprueba que el número de filas es el mismo. Después prueba con <code>--semilla 7</code> y compara. Para terminar, corre otra vez el generador sin opciones, para volver a los datos del curso.</span></li></ol><p><b>Qué observar:</b> el programa tarda menos de un minuto y escribe ocho archivos en <code>datos-cadena/crudo</code>, con 158.690 filas en <code>ventas.csv</code> y 736.371 en <code>detalle.csv</code>. En <code>ventas.csv</code> la primera fila es <code>100003,2025-01-01 08:15,T01,,tarjeta,5.20</code>: fecha año-mes-día y punto decimal. En <code>ventas_oriente.csv</code> es <code>100001;01/01/2025 08:06;T11;;efectivo;3,20</code>: punto y coma entre columnas, fecha día/mes/año y coma decimal. Las dos comas seguidas son un socio vacío: una compra sin tarjeta del Club. Es el primer problema que resuelve el capítulo 02. Con la misma semilla todo se repite exacto; con la semilla 7 cambian las filas, pero no las historias que esconden.</p></div><div class="ml"><b>En la práctica</b><p><b>La pregunta queda firmada.</b> Lorena confirmó la página de Mariana con un cambio: además de la caída del Sur, quiere saber si se concentra en alguna tienda. Mariana agregó esa línea y anotó qué datos va a necesitar: los tres archivos de ventas, las tiendas y, si la caída se concentra en una tienda, las reseñas. El próximo paso es abrir esos archivos sin romperlos, y eso empieza en el capítulo 02.</p></div></section>
+<section><h2>La idea clave</h2><div class="prose"><p>Un análisis empieza por la decisión que depende de él y por una pregunta medible: qué métrica, de quién, en qué período y contra qué comparación. El tipo de pregunta (descriptiva, exploratoria, inferencial, predictiva o causal) dice qué herramientas hacen falta y hasta dónde se puede concluir: una correlación nunca prueba una causa por sí sola. Con la pregunta clara, el análisis recorre un ciclo de seis pasos (preguntar, obtener, limpiar, explorar, modelar y comunicar) que el curso sigue capítulo a capítulo con los datos de Almacenes Ejemplo.</p></div></section>
+<section><h2>Pruébate</h2><div class="quiz"><h3>Pruébate</h3><details><summary>¿Qué pregunta conviene hacer antes de abrir los datos ante un pedido como «las ventas están mal»?</summary><p>Qué decisión depende de la respuesta. Define qué métrica, qué comparación y cuánta precisión hacen falta, y cuándo termina el análisis.</p></details><details><summary>¿Por qué comparar las ventas de octubre con las de septiembre puede engañar en un supermercado?</summary><p>Porque las ventas tienen estacionalidad: cada mes tiene su ritmo. La comparación interanual (octubre contra octubre del año anterior) cancela el efecto del calendario.</p></details><details><summary>«¿Qué productos se compran juntos?» y «¿Cuánto venderá T07 en diciembre?»: ¿de qué tipo es cada pregunta?</summary><p>La primera es exploratoria (busca patrones que nadie planteó); la segunda es predictiva (pide un valor futuro).</p></details><details><summary>Las tiendas con más reseñas venden más. ¿Por qué no basta para pedir más reseñas?</summary><p>Porque es una correlación: el tamaño de la tienda aumenta a la vez las reseñas y las ventas. Para afirmar una causa haría falta un experimento.</p></details><details><summary>¿Qué diferencia hay entre «ventas» y «ticket promedio» como métricas?</summary><p>Ventas es un total (suma de cantidad por precio); el ticket promedio es un cociente (ventas divididas por tickets) y puede subir aunque vengan menos clientes.</p></details><details><summary>¿En qué paso del ciclo se suele ir más de la mitad del tiempo de un análisis?</summary><p>En limpiar: dejar los datos con tipos correctos, sin duplicados, con los faltantes tratados y las tablas unidas.</p></details></div></section>
+<section><h2>Para investigar</h2><div class="investiga"><h3>Para investigar</h3><p class="hint">Estas preguntas no se responden en el capítulo: búscalas por tu cuenta.</p><ol><li>¿Qué es el «efecto cobra» y qué otros casos famosos hay de metas que empeoraron justo lo que querían mejorar?<small>Pista: busca también «Goodhart's law».</small></li><li>¿Qué es un ensayo aleatorizado controlado y por qué el azar en la asignación es lo que permite hablar de causa?</li><li>¿Qué son las pruebas A/B que hacen las tiendas en línea y en qué se parecen a un ensayo clínico?<small>Pista: busca «A/B testing» y «grupo de control».</small></li><li>¿Qué es el sesgo de supervivencia y qué tiene que ver con los aviones de la Segunda Guerra Mundial?<small>Pista: busca «Abraham Wald».</small></li><li>¿Cuáles son las seis fases de CRISP-DM y qué metodologías la reemplazaron o la extendieron después?<small>Pista: busca «TDSP» y «ASUM-DM».</small></li></ol></div></section>
+<section><h2>Para saber más</h2><div class="vids"><span>Para saber más</span><a class="vid" href="https://bookdown.org/rdpeng/artofdatascience/" target="_blank" rel="noopener">The Art of Data Science <small>libro gratuito de Roger Peng y Elizabeth Matsui: plantear y refinar la pregunta, en inglés</small></a><a class="vid" href="https://r4ds.hadley.nz/intro.html" target="_blank" rel="noopener">R for Data Science: Introduction <small>el ciclo del análisis de Wickham, en inglés</small></a><a class="vid" href="https://science.nasa.gov/mission/mars-climate-orbiter/" target="_blank" rel="noopener">Mars Climate Orbiter <small>la página de la misión en la NASA, en inglés</small></a><a class="vid" href="https://www.tylervigen.com/spurious-correlations" target="_blank" rel="noopener">Spurious Correlations <small>correlaciones absurdas reales, de Tyler Vigen, en inglés</small></a></div></section>
+<label class="got"><input type="checkbox" id="got"> Lo tengo claro</label>
+<nav class="pager" id="pager" aria-label="Capítulo anterior y siguiente"></nav>
+</main>
+</div>
+<footer><span>Curso abierto de aaramirez.github.io.</span><span>Sitio publicado: <a href="https://github.com/aaramirez/ciencia-de-datos" target="_blank" rel="noopener">github.com/aaramirez/ciencia-de-datos</a></span></footer>
+</div>
+<script src="assets/lab.js"></script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="01-lab-1"]');
+  const nf=(n,d=0)=>{const s=Math.abs(n).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'−':'')+s.join(',');};
+  // Ventas (v) y tickets (n) por mes, de enero de 2025 (índice 0) a octubre de 2026 (índice 21). Datos limpios, semilla 42.
+  const D={"Norte":{"v":[39249.05,34540.5,42705.95,40957.25,44781.55,42262.5,43910.6,45280.9,40666.45,45651.8,45124.6,63110.65,45017.27,38029.16,46566.55,46383.9,51089.83,45473.7,48985.29,51968.74,46487.51,51800.3],"n":[2469,2196,2699,2623,2896,2653,2791,2840,2606,2824,2885,3933,2621,2299,2721,2662,3067,2705,2954,3075,2774,3042]},
+   "Centro":{"v":[29669.05,27785.75,32371.7,31223.5,34828.9,33057.95,34771.25,36562.25,31565.25,35603.1,36521.55,47904.3,34611.1,30942.66,35753.64,35782.35,39549.3,36117.84,36858.7,39746.58,36800.76,40087.78],"n":[2134,1897,2323,2225,2456,2301,2428,2509,2297,2463,2565,3412,2286,2000,2330,2355,2643,2419,2507,2587,2418,2624]},
+   "Sur":{"v":[27299.55,25119.05,29845.55,28700.5,33596.7,29972.15,30592.1,32063.95,30544.25,32276.35,31561.9,44487.05,30919.08,28035.2,31794.87,32821.38,35626.03,33304.66,35742.9,25351.51,22867.27,24688.91],"n":[1816,1623,1989,1933,2193,1984,2040,2152,1986,2093,2156,2928,1937,1700,2048,2029,2302,2024,2203,1762,1596,1759]},
+   "Oriente":{"v":[21737.25,19284.1,24945.75,23228.05,25094.5,23446.8,25660.4,26700.4,24366.4,25142.95,26390.35,35574.6,25374.56,21923.9,26397.12,26650.78,30162.46,27327.34,27875.37,28709.53,27636.81,28430.46],"n":[1560,1390,1681,1646,1814,1690,1767,1812,1665,1782,1838,2448,1660,1441,1747,1712,1960,1760,1854,1917,1777,1888]}};
+  const M2={Norte:3600,Centro:2630,Sur:2320,Oriente:2160};
+  const PER={mes:{i:[21,21],txt:'en octubre de 2026',ant:[20,20],antTxt:'septiembre de 2026',ia:'octubre de 2025'},
+             tri:{i:[19,21],txt:'de agosto a octubre de 2026',ant:[16,18],antTxt:'mayo a julio de 2026',ia:'agosto a octubre de 2025'},
+             ytd:{i:[12,21],txt:'de enero a octubre de 2026',ant:null,antTxt:'',ia:'enero a octubre de 2025'}};
+  const MET={v:{n:'las ventas',u:'US$ ',d:2,col:'detalle: cantidad × precio_unitario (o ventas: total limpio)'},
+             n:{n:'el número de tickets',u:'',d:0,col:'ventas: ticket_id (contar únicos)'},
+             t:{n:'el ticket promedio',u:'US$ ',d:2,col:'ventas: total y ticket_id (ventas ÷ tickets)'},
+             m:{n:'las ventas por metro cuadrado',u:'US$ ',d:2,col:'ventas: total; tiendas: m2 (ventas ÷ m² de la región)'}};
+  const st={met:'v',per:'mes',cmp:'ia'};
+  function valor(reg,a,b,met){let v=0,n=0;for(let k=a;k<=b;k++){v+=D[reg].v[k];n+=D[reg].n[k];}
+    return met==='v'?v:met==='n'?n:met==='t'?v/n:v/M2[reg];}
+  function grupo(id,clave){const bs=[...raiz.querySelectorAll('#'+id+' button')];
+    bs.forEach(b=>b.addEventListener('click',()=>{bs.forEach(x=>x.setAttribute('aria-pressed',x===b));st[clave]=b.dataset.v;pintar();}));}
+  grupo('c1l1-met','met');grupo('c1l1-per','per');grupo('c1l1-cmp','cmp');
+  function pintar(){
+    const m=MET[st.met],p=PER[st.per],[a,b]=p.i,yo=valor('Sur',a,b,st.met);
+    let filas=[],compTxt='',ref=null,avisos=[],bien=[];
+    filas.push(['Sur '+(st.per==='mes'?'oct 2026':st.per==='tri'?'ago-oct 2026':'ene-oct 2026'),yo,true]);
+    if(st.cmp==='ant'){
+      if(!p.ant){compTxt='el período anterior';avisos.push('Enero a octubre no tiene un «período anterior» del mismo largo dentro de los datos: la comparación no se puede hacer. Elige otra.');}
+      else{ref=valor('Sur',p.ant[0],p.ant[1],st.met);compTxt=p.antTxt;filas.push(['Sur '+(st.per==='mes'?'sep 2026':'may-jul 2026'),ref,false]);
+        avisos.push('Contra el período anterior se mezcla la caída con la estacionalidad: cada mes tiene su ritmo (diciembre sube, febrero baja). Por eso el comercio compara contra el mismo período del año anterior.');}
+    }else if(st.cmp==='ia'){
+      ref=valor('Sur',a-12,b-12,st.met);compTxt=p.ia;filas.push(['Sur '+(st.per==='mes'?'oct 2025':st.per==='tri'?'ago-oct 2025':'ene-oct 2025'),ref,false]);
+      bien.push('Comparación interanual: mismo período, misma estacionalidad.');
+    }else{
+      ['Norte','Centro','Oriente'].forEach(r=>filas.push([r,valor(r,a,b,st.met),false]));
+      compTxt='las otras tres regiones en el mismo período';
+      if(st.met==='v'||st.met==='n')avisos.push('Comparar totales entre regiones mide sobre todo su tamaño: el Norte tiene dos tiendas grandes y el Sur, una. Para comparar regiones distintas conviene una métrica relativa (por m² o el ticket promedio) o la variación de cada una contra sí misma.');
+      else bien.push('Métrica relativa: se puede comparar entre regiones de distinto tamaño.');
+    }
+    if(st.met==='t')avisos.push('El ticket promedio no dice cuánta gente vino: puede subir aunque vengan menos clientes. Úsalo junto con los tickets.');
+    if(st.per==='mes'&&st.cmp!=='reg')avisos.push('Un solo mes es poca evidencia: un feriado o una lluvia lo mueven. Un trimestre es más estable.');
+    const max=Math.max(...filas.map(f=>f[1]));
+    $('#c1l1-barras').innerHTML=filas.map(f=>'<div class="c1l1-fila"><span>'+f[0]+'</span><div class="c1l1-pista"><i class="'+(f[2]?'yo':'')+'" style="width:'+(f[1]/max*100).toFixed(1)+'%"></i></div><b>'+m.u+nf(f[1],m.d)+'</b></div>').join('');
+    $('#c1l1-preg').textContent='¿Cuánto cambiaron '+m.n+' de la región Sur '+p.txt+' frente a '+compTxt+'?';
+    $('#c1l1-datos').innerHTML=m.col+'<br>ventas: fecha_hora (para el período) · tiendas: region (para el Sur)'+(st.cmp==='reg'?' · las 4 regiones':'')+(st.per!=='ytd'||st.cmp==='ia'?'':'');
+    let res='';
+    if(ref!==null){const pct=(yo/ref-1)*100;
+      res='<span class="big">'+m.u+nf(yo,m.d)+' frente a '+m.u+nf(ref,m.d)+': '+(pct>=0?'+':'')+nf(pct,1)+' %</span>';}
+    else if(st.cmp==='reg'){const otras=['Norte','Centro','Oriente'].map(r=>valor(r,a,b,st.met));const prom=otras.reduce((x,y)=>x+y,0)/3;const pct=(yo/prom-1)*100;
+      res='<span class="big">Sur: '+m.u+nf(yo,m.d)+' · promedio de las otras: '+m.u+nf(prom,m.d)+' ('+(pct>=0?'+':'')+nf(pct,1)+' %)</span>';}
+    else res='<span class="big">Sin comparación posible</span>';
+    $('#c1l1-out').innerHTML=res+bien.map(x=>'<span class="ok">'+x+'</span>').join(' ')+avisos.map(x=>'<span class="warn">'+x+'</span>').join(' ')+
+      '<span>La decisión que depende de esto: si el Sur cae más que las demás regiones, se investiga qué pasó allí (capítulo 10); si cae igual que todas, el problema es de la cadena y no de la región.</span>';
+  }
+  pintar();
+})();
+</script>
+<script>
+(function(){
+  const {$}=window.Lab;
+  const raiz=document.querySelector('[id="01-lab-2"]');
+  const TIPOS=['descriptiva','exploratoria','inferencial','predictiva','causal'];
+  const DATOS={si:'Sí, con los datos que hay',cautela:'Solo con cautela',no:'No: faltan datos'};
+  const Q=[
+    ['¿Cuánto vendió cada región en octubre de 2026?','descriptiva','si','Resume lo que pasó, sin ir más allá de los datos. Basta sumar el total de los tickets por región.'],
+    ['¿Qué productos suelen comprarse juntos?','exploratoria','si','Busca patrones que nadie planteó de antemano. El detalle de cada ticket lo permite (capítulo 07).'],
+    ['¿La diferencia de ticket promedio entre el Norte y el Sur es real o puede ser azar?','inferencial','si','Pregunta si lo que se ve en los datos se sostiene más allá de esta muestra. Se responde con una prueba o un intervalo de confianza (curso de Inferencia).'],
+    ['¿Cuánto venderá la tienda T07 en diciembre de 2026?','predictiva','si','Pide un valor futuro. Hay 22 meses de historia, con un diciembre incluido: alcanza para un pronóstico, con su margen de error.'],
+    ['¿Qué socios del Club dejarán de comprar el próximo trimestre?','predictiva','si','Pide adivinar el comportamiento de cada persona. Con el historial de compras se puede entrenar un modelo (curso de Aprendizaje automático).'],
+    ['¿El cierre del estacionamiento de T07 causó la caída de sus ventas?','causal','cautela','Pregunta por una causa. Los datos son observacionales (nadie hizo un experimento): se puede reunir evidencia fuerte, como la fecha exacta o las reseñas, pero no probarla con certeza.'],
+    ['Si subimos 5 % el precio de la leche, ¿perderemos clientes?','causal','no','Pregunta qué pasaría si cambiamos algo. En los datos nunca cambió solo el precio de la leche: el 6 % de enero subió todo a la vez. Haría falta un experimento.'],
+    ['¿Cuántas personas entran a una tienda y salen sin comprar?','descriptiva','no','Es descriptiva, pero los datos solo registran a quien paga. Haría falta un contador de visitas en la puerta.'],
+    ['¿Qué opinan los clientes del Oriente sobre la competencia?','exploratoria','no','No hay datos de la competencia, y las reseñas hablan de la propia tienda. Haría falta una encuesta.'],
+    ['¿Cuál es la edad promedio de los socios del Club?','descriptiva','cautela','Es descriptiva y está la fecha de nacimiento, pero falta en uno de cada ocho socios y hay fechas falsas de 1900: hay que limpiar antes (capítulo 03).']
+  ];
+  function armar(){
+    $('#c1l2-lista').innerHTML=Q.map((q,i)=>'<div class="c1l2-q" data-i="'+i+'"><p>'+(i+1)+'. '+q[0]+'</p><div class="c1l2-sel">'+
+      '<label><span class="sr-only">Tipo de la pregunta '+(i+1)+'</span><select data-k="t"><option value="">Tipo…</option>'+TIPOS.map(t=>'<option value="'+t+'">'+t[0].toUpperCase()+t.slice(1)+'</option>').join('')+'</select></label>'+
+      '<label><span class="sr-only">Datos para la pregunta '+(i+1)+'</span><select data-k="d"><option value="">¿Se puede responder?</option>'+Object.entries(DATOS).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('')+'</select></label>'+
+      '</div><div class="c1l2-exp" hidden></div></div>').join('');
+  }
+  function revisar(mostrar){
+    let t=0,d=0,vacias=0;
+    raiz.querySelectorAll('.c1l2-q').forEach(el=>{
+      const q=Q[+el.dataset.i],st=el.querySelector('[data-k="t"]'),sd=el.querySelector('[data-k="d"]');
+      if(mostrar){st.value=q[1];sd.value=q[2];}
+      if(!st.value||!sd.value)vacias++;
+      const okT=st.value===q[1],okD=sd.value===q[2];t+=okT;d+=okD;
+      el.classList.toggle('ok',okT&&okD);el.classList.toggle('mal',!(okT&&okD));
+      const ex=el.querySelector('.c1l2-exp');ex.hidden=false;
+      ex.innerHTML='<b class="'+(okT?'si':'no')+'">'+q[1][0].toUpperCase()+q[1].slice(1)+'</b> · <b class="'+(okD?'si':'no')+'">'+DATOS[q[2]]+'.</b> '+q[3];
+    });
+    const no=Q.filter(q=>q[2]!=='si').length;
+    $('#c1l2-out').innerHTML='<span class="big">Tipo: '+t+' de 10 · Datos: '+d+' de 10</span>'+
+      (vacias&&!mostrar?'<span class="warn">Te faltan '+vacias+' preguntas por contestar.</span>':'')+
+      '<span>'+no+' de las 10 preguntas no se pueden responder del todo con las ventas, los clientes y las reseñas: o falta un dato que nadie registra, o piden una causa que solo un experimento probaría. Darse cuenta antes de empezar ahorra semanas de análisis.</span>';
+  }
+  $('#c1l2-rev').addEventListener('click',()=>revisar(false));
+  $('#c1l2-sol').addEventListener('click',()=>revisar(true));
+  $('#c1l2-otra').addEventListener('click',()=>{armar();$('#c1l2-out').innerHTML='<span>Elige el tipo de cada pregunta y si los datos alcanzan. Después pulsa «Revisar».</span>';});
+  armar();
+})();
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@ Del dato crudo a la decisión: hacer buenas preguntas, limpiar, explorar, visual
 
 **Ver en línea:** https://aaramirez.github.io/ciencia-de-datos/
 
-Este repositorio solo tiene el sitio generado. El curso está en preparación: la tabla de contenido ya está publicada para revisión.
+Este repositorio solo tiene el sitio generado. Curso completo: 10 capítulos con laboratorios interactivos (algunos con Python en el navegador), diagramas y prácticas.
 
 | # | Capítulo |
 |---|---|
